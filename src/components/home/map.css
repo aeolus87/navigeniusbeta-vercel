@@ -1,0 +1,14 @@
+.map-container {
+  height: 400px; 
+  width: 96%; 
+  margin-left: 2%; 
+  margin-bottom: 1rem;
+  
+}
+
+@media (max-width: 768px) {
+  .map-container {
+    width: 94%; 
+    margin: 1rem auto; 
+  }
+}
