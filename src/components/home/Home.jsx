@@ -7,7 +7,7 @@ const Home = () => {
     const { currentUser } = useAuth();
     
     return (
-        <div>
+        <div className="mx-0 my-0 px-0 bg-[#2f4b56] overflow-hidden">
             <Fmap />
             <Map />
         </div>

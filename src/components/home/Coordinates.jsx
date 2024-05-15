@@ -6,7 +6,7 @@ const Coordinates = ({ userLocation, companionLocation, distance, markerIcon }) 
 
 
   return (
-    <div class="text-white py-20 bg-[#2f4b56] overflow-hidden h-30 relative top-14">
+    <div class="text-white py-5 bg-[#2f4b56] overflow-hidden h-auto relative top-8">
       <div className="mx-3 mt-2">Device Longitude: <span>{companionLocation?.Longitude || 'Fetching...'}</span></div>
       <div className="mx-3 mt-2">Device Latitude: <span>{companionLocation?.Latitude || 'Fetching...'}</span></div>
       <br />
