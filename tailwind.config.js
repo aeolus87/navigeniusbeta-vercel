@@ -4,7 +4,10 @@ module.exports = {
     './src/**/*.{html,js,jsx}'
   ],
   theme: {
-    extend: {},
+    extend: {backgroundImage: {
+      'map': "url('components/img/map.png')",
+    }
+  },
   },
   plugins: [],
 }

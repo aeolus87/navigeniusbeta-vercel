@@ -102,8 +102,8 @@ function Fmap() {
       <Coordinates
         userLocation={userLocation}
         companionLocation={companionLocation}
-        distance={distance} // Pass distance to Coordinates component
-        error={error} // Pass error to Coordinates component
+        distance={distance} 
+        error={error} 
       />
     </div>
   );
