@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDinVQtDmFkbO90uhKcciMYCs7yq2wJ_1g",
+  apiKey: "API_KEY",
   authDomain: "navigenius-439ed.firebaseapp.com",
   databaseURL: "https://navigenius-439ed-default-rtdb.firebaseio.com",
   projectId: "navigenius-439ed",
