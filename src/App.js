@@ -1,12 +1,12 @@
 import React from "react";
+import { useRoutes } from "react-router-dom";
+
 import Login from "./components/auth/login";
 import Register from "./components/auth/register";
-
 import Header from "./components/header";
 import Home from "./components/home/Home";
-
-import { AuthProvider } from "./contexts/authContext";
-import { useRoutes } from "react-router-dom";
+import { AuthProvider } from "./contexts/authContext"; // Correct import path
+import PrivateRoute from "./contexts/PrivateRoute"; // Correct import path
 
 function App() {
   const routesArray = [
@@ -24,10 +24,16 @@ function App() {
     },
     {
       path: "/home",
-      element: <Home />,
+      element: (
+        <PrivateRoute>
+          <Home />
+        </PrivateRoute>
+      ),
     },
   ];
+  
   let routesElement = useRoutes(routesArray);
+
   return (
     <AuthProvider>
       <Header />

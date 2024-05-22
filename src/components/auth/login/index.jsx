@@ -15,8 +15,16 @@ const Login = () => {
         e.preventDefault()
         if(!isSigningIn) {
             setIsSigningIn(true)
-            await doSignInWithEmailAndPassword(email, password)
-            // doSendEmailVerification()
+            try {
+                await doSignInWithEmailAndPassword(email, password)
+            } catch (error) {
+                if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password") {
+                    setErrorMessage("Invalid email or password.")
+                } else {
+                    setErrorMessage("Account doesn't exist.") 
+                }
+                setIsSigningIn(false)
+            }
         }
     }
 
