@@ -1,19 +1,19 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
+import { getDatabase } from "firebase/database"; // If using Firebase Database
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDinVQtDmFkbO90uhKcciMYCs7yq2wJ_1g",
-  authDomain: "navigenius-439ed.firebaseapp.com",
-  databaseURL: "https://navigenius-439ed-default-rtdb.firebaseio.com",
-  projectId: "navigenius-439ed",
-  storageBucket: "navigenius-439ed.appspot.com",
-  messagingSenderId: "40052314225",
-  appId: "1:40052314225:web:a2163b1cb96d27146e0bd0"
-  };
+  apiKey: `${process.env.REACT_APP_API_KEY}`,
+  authDomain: `${process.env.REACT_APP_AUTH_DOMAIN}`,
+  databaseURL: `${process.env.REACT_APP_DATABASE_URL}`,
+  projectId: `${process.env.REACT_APP_PROJECT_ID}`,
+  storageBucket: `${process.env.REACT_APP_STORAGE_BUCKET}`,
+  messagingSenderId: `${process.env.REACT_APP_MESSAGING_SENDER_ID}`,
+  appId: `${process.env.REACT_APP_APP_ID}`
+};
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app)
+const auth = getAuth(app);
+const database = getDatabase(app); // If using Firebase Database
 
-
-
-export { app, auth };
+export { app, auth, database };
