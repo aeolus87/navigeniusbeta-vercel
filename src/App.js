@@ -7,7 +7,9 @@ import Header from "./components/header";
 import Home from "./components/home/Home";
 import { AuthProvider } from "./contexts/authContext"; // Correct import path
 import PrivateRoute from "./contexts/PrivateRoute"; // Correct import path
-
+import firebase from 'firebase/compat/app'; // Import Firebase
+import firebaseConfig from './firebase/firebase.js'; // Import your Firebase configuration
+firebase.initializeApp(firebaseConfig);
 function App() {
   const routesArray = [
     {
