@@ -16,12 +16,24 @@ const Register = () => {
     const { userLoggedIn } = useAuth()
 
     const onSubmit = async (e) => {
-        e.preventDefault()
-        if(!isRegistering) {
-            setIsRegistering(true)
-            await doCreateUserWithEmailAndPassword(email, password)
+        e.preventDefault();
+        if (!isRegistering) {
+            if (password !== confirmPassword) {
+                setErrorMessage("Passwords do not match");
+                return;
+            }
+            setIsRegistering(true);
+            try {
+                await doCreateUserWithEmailAndPassword(email, password);
+                navigate('/home');
+            } catch (error) {
+           
+                setErrorMessage(error.message);
+                setIsRegistering(false);
+            }
         }
-    }
+    };
+    
 
     return (
         <>
