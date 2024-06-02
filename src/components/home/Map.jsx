@@ -73,7 +73,7 @@ const Map = () => {
         zoom={13} 
         zoomControl={false} 
         ref={mapRef} 
-        className="h-screen w-full sm:h-80 sm:w-[94%] sm:mx-auto"
+        className="h-screen w-full sm:h-80 sm:w-[94%] sm:mx-auto rounded-2xl"
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

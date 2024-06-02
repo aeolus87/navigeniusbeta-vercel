@@ -18,11 +18,18 @@ const Register = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [showOtpField, setShowOtpField] = useState(false);
     const [confirmationResult, setConfirmationResult] = useState(null);
+    const [isPhoneVerified, setIsPhoneVerified] = useState(false);
+    const [recaptchaVerifier, setRecaptchaVerifier] = useState(null);
 
     useEffect(() => {
         const recaptchaContainer = document.createElement('div');
         recaptchaContainer.id = 'recaptcha-container';
         document.body.appendChild(recaptchaContainer);
+
+        const verifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+            'size': 'invisible'
+        });
+        setRecaptchaVerifier(verifier);
 
         return () => {
             document.body.removeChild(recaptchaContainer);
@@ -30,14 +37,20 @@ const Register = () => {
     }, []);
 
     const handleOtpVerification = async () => {
+        if (!email || !password || !confirmPassword || !parentNumber) {
+            setErrorMessage('All fields are required to proceed.');
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            setErrorMessage('Passwords do not match');
+            return;
+        }
+
         try {
-            const appVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-                'size': 'invisible'
-            });
-            const confirmationResult = await firebase.auth().signInWithPhoneNumber(parentNumber, appVerifier);
+            const confirmationResult = await firebase.auth().signInWithPhoneNumber(parentNumber, recaptchaVerifier);
             setConfirmationResult(confirmationResult);
             setShowOtpField(true);
-            setErrorMessage('');
         } catch (error) {
             console.error('Error sending OTP:', error);
             setErrorMessage('Failed to send OTP. Please try again later.');
@@ -47,8 +60,8 @@ const Register = () => {
     const handleVerifyOtp = async () => {
         try {
             await confirmationResult.confirm(otp);
+            setIsPhoneVerified(true);
             setErrorMessage('');
-            alert("Phone number verified successfully");
         } catch (error) {
             console.error('Error verifying OTP:', error);
             setErrorMessage('Failed to verify OTP. Please check the code and try again.');
@@ -61,11 +74,13 @@ const Register = () => {
 
     const onSubmit = async (e) => {
         e.preventDefault();
+
+        if (!isPhoneVerified) {
+            setErrorMessage("Please verify the parent's phone number first.");
+            return;
+        }
+
         if (!isRegistering) {
-            if (password !== confirmPassword) {
-                setErrorMessage("Passwords do not match");
-                return;
-            }
             setIsRegistering(true);
             try {
                 await firebase.auth().createUserWithEmailAndPassword(email, password);
@@ -98,7 +113,7 @@ const Register = () => {
                                 autoComplete='email'
                                 required
                                 value={email} onChange={(e) => { setEmail(e.target.value) }}
-                                className="w-full mt-2 px-3 py-2 text-black-500 bg-transparent outline-none border focus:indigo-600 shadow-sm rounded-lg transition duration-300"
+                                className="w-full mt-2 px-3 py-2 text-black-500 bg-transparent outline-none border focus:border-indigo-600 shadow-sm rounded-lg transition duration-300"
                             />
                         </div>
 
@@ -145,10 +160,7 @@ const Register = () => {
                         </div>
 
                         {showOtpField && (
-                            <div>
-                                <label className="text-sm text-black-600 font-bold">
-                                    OTP Code
-                                </label>
+                            <div className="flex items-center space-x-2">
                                 <input
                                     type="text"
                                     autoComplete='off'
@@ -159,16 +171,16 @@ const Register = () => {
                                 <button
                                     type="button"
                                     onClick={handleVerifyOtp}
-                                    className="mt-2 w-full px-4 py-2 text-white font-medium rounded-lg bg-indigo-600 hover:bg-indigo-700 hover:shadow-xl transition duration-300"
+                                    className="mt-2 px-4 py-2 text-white font-medium rounded-lg bg-indigo-600 hover:bg-indigo-700 hover:shadow-xl transition duration-300 h-10"
                                 >
-                                    Verify Code
+                                    {isPhoneVerified ? '✓' : 'Verify'}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={handleResendCode}
-                                    className="mt-2 w-full px-4 py-2 text-white font-medium rounded-lg bg-gray-600 hover:bg-gray-700 hover:shadow-xl transition duration-300"
+                                    className="mt-2 px-4 py-2 text-white font-medium rounded-lg bg-gray-600 hover:bg-gray-700 hover:shadow-xl transition duration-300 h-10"
                                 >
-                                    Resend Code
+                                    Resend
                                 </button>
                             </div>
                         )}
@@ -177,7 +189,7 @@ const Register = () => {
                             <span className='text-red-600 font-bold'>{errorMessage}</span>
                         )}
 
-                        {!showOtpField ? (
+                        {!showOtpField && (
                             <button
                                 type="button"
                                 onClick={handleOtpVerification}
@@ -185,15 +197,15 @@ const Register = () => {
                             >
                                 Verify Parent's Number
                             </button>
-                        ) : (
-                            <button
-                                type="submit"
-                                disabled={isRegistering}
-                                className={`w-full px-4 py-2 text-white font-medium rounded-lg ${isRegistering ? 'bg-gray-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 hover:shadow-xl transition duration-300'}`}
-                            >
-                                {isRegistering ? 'Signing Up...' : 'Sign Up'}
-                            </button>
                         )}
+
+                        <button
+                            type="submit"
+                            disabled={isRegistering || !isPhoneVerified}
+                            className={`w-full px-4 py-2 text-white font-medium rounded-lg ${isRegistering || !isPhoneVerified ? 'bg-gray-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 hover:shadow-xl transition duration-300'}`}
+                        >
+                            {isRegistering ? 'Signing Up...' : 'Sign Up'}
+                        </button>
 
                         <div className="text-sm text-center">
                             Already have an account? {'   '}

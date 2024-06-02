@@ -18,7 +18,7 @@ const Header = () => {
   };
 
   return (
-    <nav className="flex justify-between items-center z-50 w-full fixed top-0 left-0 h-16 border-b border-gray-300 bg-[#0b2d39] text-white px-4 transition duration-300 ease-in-out">
+    <nav className="flex justify-between items-center z-50 w-full fixed top-0 left-0 h-16  text-white px-4 transition duration-300 ease-in-out">
       <div className="flex items-center">
         <h2 className="m-0 text-2xl">Navigenius</h2>
       </div>
@@ -34,16 +34,16 @@ const Header = () => {
               </svg>
             </button>
             <div
-              className={`absolute top-16 right-0 w-[40%] bg-[#0b2d39] md:static md:w-auto md:flex md:flex-row md:items-center ${menuOpen ? 'block' : 'hidden'} md:block transition duration-600 ease-in-out`}
+              className={`absolute top-16 right-0 w-[40%] bg-[#0b2d3900] md:static md:w-auto md:flex md:flex-row md:items-center ${menuOpen ? 'block' : 'hidden'} md:block transition duration-600 ease-in-out`}
             >
               <button
-                className="w-full text-left text-white bg-[#0b2d39] hover:bg-gray-900 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 md:me-2 md:mb-0"
+                className="w-full text-left text-white hover:bg-gray-900 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 md:me-2 md:mb-0"
               >
                 Profile
               </button>
               <button
                 onClick={handleLogout}
-                className="w-full text-left text-white bg-[#0b2d39] hover:bg-gray-900 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 md:me-2 md:mb-0"
+                className="w-full text-left text-white hover:bg-gray-900 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 md:me-2 md:mb-0"
               >
                 Logout
               </button>
