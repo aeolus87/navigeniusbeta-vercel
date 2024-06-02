@@ -5,6 +5,7 @@ import Login from "./components/auth/login";
 import Register from "./components/auth/register";
 import Header from "./components/header";
 import Home from "./components/home/Home";
+import ForgotPassword from "./components/auth/forgot/";
 import { AuthProvider } from "./contexts/authContext";
 import PrivateRoute from "./contexts/PrivateRoute";
 import firebase from 'firebase/compat/app';
@@ -28,6 +29,10 @@ function App() {
     {
       path: "/register",
       element: <Register />,
+    },
+    {
+      path: "/forgot-password", // Route for the Forgot Password page
+      element: <ForgotPassword />,
     },
     {
       path: "/home",
