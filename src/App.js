@@ -1,20 +1,25 @@
 import React from "react";
-import { useRoutes } from "react-router-dom";
+import { useRoutes, useLocation } from "react-router-dom";
 
 import Login from "./components/auth/login";
 import Register from "./components/auth/register";
 import Header from "./components/header";
 import Home from "./components/home/Home";
-import { AuthProvider } from "./contexts/authContext"; // Correct import path
-import PrivateRoute from "./contexts/PrivateRoute"; // Correct import path
-import firebase from 'firebase/compat/app'; // Import Firebase
-import firebaseConfig from './firebase/firebase.js'; // Import your Firebase configuration
+import { AuthProvider } from "./contexts/authContext";
+import PrivateRoute from "./contexts/PrivateRoute";
+import firebase from 'firebase/compat/app';
+import firebaseConfig from './firebase/firebase.js';
+import Main from "./components/main/main.jsx";
+
 firebase.initializeApp(firebaseConfig);
+
 function App() {
+  const location = useLocation();
+
   const routesArray = [
     {
-      path: "*",
-      element: <Login />,
+      path: "/*",
+      element: <Main />,
     },
     {
       path: "/login",
@@ -33,13 +38,15 @@ function App() {
       ),
     },
   ];
-  
+
+  const isMainPage = location.pathname === "/" || location.pathname === "/main";
+
   let routesElement = useRoutes(routesArray);
 
   return (
     <AuthProvider>
-      <Header />
-      <div className="h-screen flex flex-col mx-0 my-0 bg-map bg-cover bg-center backdrop-blur-sm">{routesElement}</div>
+      {isMainPage ? null : <Header />}
+      <div className="h-screen flex flex-col mx-0 my-0 bg-main bg-cover bg-center backdrop-blur-sm">{routesElement}</div>
     </AuthProvider>
   );
 }

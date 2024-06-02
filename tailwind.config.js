@@ -6,6 +6,8 @@ module.exports = {
   theme: {
     extend: {backgroundImage: {
       'map': "url('components/img/map.png')",
+      'main': "url('components/img/main.png')",
+      'phone': "url('components/img/phone.png')",
     }
   },
   },
