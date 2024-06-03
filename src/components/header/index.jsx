@@ -4,7 +4,7 @@ import { useAuth } from '../../contexts/authContext';
 import { doSignOut } from '../../firebase/auth';
 
 const Header = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Import useNavigate hook
   const { userLoggedIn } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -15,6 +15,10 @@ const Header = () => {
     } catch (error) {
       console.error('Error signing out:', error);
     }
+  };
+
+  const handleProfileClick = () => {
+    navigate('/profile'); // Navigate to the profile page
   };
 
   return (
@@ -37,6 +41,7 @@ const Header = () => {
               className={`absolute top-16 right-0 w-[40%] bg-[#0b2d3900] md:static md:w-auto md:flex md:flex-row md:items-center ${menuOpen ? 'block' : 'hidden'} md:block transition duration-600 ease-in-out`}
             >
               <button
+                onClick={handleProfileClick} // Update onClick to navigate to the profile page
                 className="w-full text-left text-white hover:bg-gray-900 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 md:me-2 md:mb-0"
               >
                 Profile

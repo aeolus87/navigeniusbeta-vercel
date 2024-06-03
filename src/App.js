@@ -11,6 +11,7 @@ import PrivateRoute from "./contexts/PrivateRoute";
 import firebase from 'firebase/compat/app';
 import firebaseConfig from './firebase/firebase.js';
 import Main from "./components/main/main.jsx";
+import Profile from "./components/profile";
 
 firebase.initializeApp(firebaseConfig);
 
@@ -31,8 +32,12 @@ function App() {
       element: <Register />,
     },
     {
-      path: "/forgot-password", // Route for the Forgot Password page
+      path: "/forgot-password", 
       element: <ForgotPassword />,
+    },
+    {
+      path: "/profile", 
+      element: <Profile />,
     },
     {
       path: "/home",
