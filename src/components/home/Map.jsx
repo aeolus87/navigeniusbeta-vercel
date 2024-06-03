@@ -65,8 +65,8 @@ const Map = () => {
   }, [userLocation]);
 
   return (
-    <div className="fixed top-20 right-20 z-10">
-      <div className="rounded-xl overflow-hidden w-[90vw] max-w-[1100px] h-[80vh]">
+    <div className="lg:fixed top-20 right-20 z-10 max-w-[1100px] lg:w-[90vw] w-[90vw] ml-4">
+      <div className="rounded-xl overflow-hidden lg:h-[80vh] h-[55vh]">
         <MapContainer
           center={userLocation}
           zoom={13}
