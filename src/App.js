@@ -56,9 +56,7 @@ function App() {
   return (
     <AuthProvider>
       {isMainPage ? null : <Header />}
-      <div className="h-full flex flex-col mx-0 my-0 bg-main bg-cover bg-center backdrop-blur-sm">
-        {routesElement}
-      </div>
+      <div className="h-screen flex flex-col mx-0 my-0 bg-main bg-cover bg-center backdrop-blur-sm">{routesElement}</div>
     </AuthProvider>
   );
 }
