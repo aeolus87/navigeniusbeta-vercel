@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import L from 'leaflet'; 
+import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-
 import iconUrl from 'leaflet/dist/images/marker-icon.png';
 import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
 import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
@@ -29,14 +28,14 @@ const Map = () => {
       return parseFloat(value) || 0;
     };
 
-    const center = [getCoordinates("c_lat"), getCoordinates("c_long")];
+    const center = [getCoordinates('c_lat'), getCoordinates('c_long')];
     if (!center[0] || !center[1]) {
-      console.warn("Unable to retrieve valid location data from localStorage. Using default center.");
+      console.warn('Unable to retrieve valid location data from localStorage. Using default center.');
     } else {
       setUserLocation(center);
     }
 
-    const navigeniusCoords = [getCoordinates("lat_val"), getCoordinates("long_val")];
+    const navigeniusCoords = [getCoordinates('lat_val'), getCoordinates('long_val')];
     setNavigeniusLocation(navigeniusCoords);
 
     const watchUserLocation = () => {
@@ -45,7 +44,7 @@ const Map = () => {
           setUserLocation([position.coords.latitude, position.coords.longitude]);
         });
       } else {
-        console.warn("Geolocation not supported by browser.");
+        console.warn('Geolocation not supported by browser.');
       }
     };
 
@@ -59,7 +58,6 @@ const Map = () => {
   }, []);
 
   const mapRef = useRef(null);
-
   useEffect(() => {
     if (mapRef.current && userLocation) {
       mapRef.current.flyTo(userLocation, 13);
@@ -67,25 +65,27 @@ const Map = () => {
   }, [userLocation]);
 
   return (
-    <div className="relative mt-16">
-      <MapContainer 
-        center={userLocation} 
-        zoom={13} 
-        zoomControl={false} 
-        ref={mapRef} 
-        className="h-screen w-full sm:h-80 sm:w-[94%] sm:mx-auto rounded-2xl"
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        <Marker position={userLocation} icon={defaultIcon}>
-          <Popup>You are here!</Popup>
-        </Marker>
-        <Marker position={navigeniusLocation} icon={defaultIcon}>
-          <Popup>Navigenius is here!</Popup>
-        </Marker>
-      </MapContainer>
+    <div className="fixed top-20 right-20 z-10">
+      <div className="rounded-xl overflow-hidden w-[90vw] max-w-[1100px] h-[80vh]">
+        <MapContainer
+          center={userLocation}
+          zoom={13}
+          zoomControl={false}
+          ref={mapRef}
+          className="w-full h-full"
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <Marker position={userLocation} icon={defaultIcon}>
+            <Popup>You are here!</Popup>
+          </Marker>
+          <Marker position={navigeniusLocation} icon={defaultIcon}>
+            <Popup>Navigenius is here!</Popup>
+          </Marker>
+        </MapContainer>
+      </div>
     </div>
   );
 };
