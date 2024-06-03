@@ -42,13 +42,13 @@ const Header = () => {
             >
               <button
                 onClick={handleProfileClick} // Update onClick to navigate to the profile page
-                className="w-full text-left text-white hover:bg-gray-900 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 md:me-2 md:mb-0"
+                className="w-full text-left text-white hover:bg-[#1a1a4e6a] focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 md:me-2 md:mb-0"
               >
                 Profile
               </button>
               <button
                 onClick={handleLogout}
-                className="w-full text-left text-white hover:bg-gray-900 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 md:me-2 md:mb-0"
+                className="w-full text-left text-white hover:bg-[#1a1a4e6a] focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 md:me-2 md:mb-0"
               >
                 Logout
               </button>
