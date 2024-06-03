@@ -114,33 +114,30 @@ const ProfilePage = () => {
 
   return (
     <div className="flex justify-center items-center h-screen">
-      <div className="border-blue-950 rounded-md p-6 w-11/12 max-w-screen-lg h-4/5 max-h-screen-md bg-[#1B274A] shadow-xl relative">
+      <div className="relative border-blue-950 rounded-md p-6 w-11/12 max-w-screen-lg h-4/5 max-h-screen-md bg-[#0c2734] shadow-xl">
         {/* Side Navbar */}
-        <div className="absolute left-0 top-0 bottom-0 w-1/4 bg-[#394771] rounded-l-md flex flex-col justify-center">
-          {/* Information button */}
+        <div className="absolute left-0 top-0 bottom-0 w-1/4 bg-[#184e64] rounded-l-md flex flex-col justify-center z-10">
           <button
-            className={`flex text-xl items-center text-white p-4 hover:bg-blue-700 ${activeTab === "Information" ? "bg-blue-700" : ""}`}
+            className={`flex text-xl items-center text-white p-4 m-2 hover:bg-blue-700 rounded-lg ${activeTab === "Information" ? "bg-[#0c2734]" : ""}`}
             onClick={() => handleTabChange("Information")}
           >
             <FiInfo className="mr-2" /> Information
           </button>
-          {/* Phone Number button */}
           <button
-            className={`flex text-xl items-center text-white p-4 hover:bg-blue-700 ${activeTab === "Phone Number" ? "bg-blue-700" : ""}`}
+            className={`flex text-xl items-center text-white p-4 m-2 hover:bg-blue-700 rounded-lg ${activeTab === "Phone Number" ? "bg-[#0c2734]" : ""}`}
             onClick={() => handleTabChange("Phone Number")}
           >
             <FiPhone className="mr-2" /> Phone Number
           </button>
-          {/* Change Password button */}
-          <button className={`flex text-xl items-center text-white p-4 hover:bg-blue-700 ${activeTab === "Change Password" ? "bg-blue-700" : ""}`}
+          <button
+            className={`flex text-xl items-center text-white p-4 m-2 hover:bg-blue-700 rounded-lg ${activeTab === "Change Password" ? "bg-[#0c2734]" : ""}`}
             onClick={() => handleTabChange("Change Password")}
           >
             <FiLock className="mr-2" /> Change Password
           </button>
         </div>
         {/* Profile Content */}
-        <div className="ml-1/4 flex flex-col items-center relative">
-          {/* Adjust margin to avoid overlapping */}
+        <div className="ml-1/4 flex flex-col items-center relative z-0">
           {activeTab === "Information" && (
             <div className="absolute left-[20rem] flex items-center justify-center my-4">
               <div className="relative flex items-center">
@@ -172,21 +169,23 @@ const ProfilePage = () => {
               </div>
             </div>
           )}
-          {/* Render ChangePassword component if activeTab is "Change Password" */}
           {activeTab === "Change Password" && (
             <div className="text-white lg:ml-[25%] lg:mt-14 shadow-2xl">
               <ChangePassword />
             </div>
           )}
-          {/* Your additional profile content goes here */}
         </div>
       </div>
-      {/* Modal */}
-      <Modal isVisible={isModalVisible} onClose={handleCloseModal} onViewImage={handleViewImage} onChangeProfilePic={handleChangeProfilePic} showImage={showImage} profileImage={profileImage} />
+      <Modal
+        isVisible={isModalVisible}
+        onClose={handleCloseModal}
+        onViewImage={handleViewImage}
+        onChangeProfilePic={handleChangeProfilePic}
+        showImage={showImage}
+        profileImage={profileImage}
+      />
     </div>
   );
 };
 
 export default ProfilePage;
-
-           
