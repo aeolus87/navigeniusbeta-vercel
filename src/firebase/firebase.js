@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getDatabase } from "firebase/database"; // If using Firebase Database
+import { getMessaging } from "firebase/messaging";
 
 const firebaseConfig = {
   apiKey: `${process.env.REACT_APP_API_KEY}`,
@@ -15,6 +16,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const database = getDatabase(app); // If using Firebase Database
+const messaging = getMessaging(app);
+
 
 export default firebaseConfig; // Export firebaseConfig as default
 export { app, auth, database };

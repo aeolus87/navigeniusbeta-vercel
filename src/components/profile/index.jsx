@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { FiInfo, FiLock, FiEdit, FiPhone } from "react-icons/fi";
+import { FiInfo, FiLock, FiEdit, FiPhone, FiArrowLeft } from "react-icons/fi";
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
@@ -20,7 +20,7 @@ const Modal = ({ isVisible, onClose, onViewImage, onChangeProfilePic, showImage,
      <div className="bg-white rounded-lg p-6 shadow-lg">
        {showImage ? (
          <div className="flex flex-col items-center space-y-4">
-           <img src={profileImage} alt="Profile" className="rounded-full w-48 h-48" />
+           <img src={profileImage} alt="Profile" className="rounded-full lg:size-72 size-48" />
            <button className="bg-red-500 text-white text-lg py-2 px-4 rounded hover:bg-red-600 transition duration-300" onClick={onClose}>Close</button>
          </div>
        ) : (
@@ -122,9 +122,19 @@ const ProfilePage = () => {
    }
  };
 
+ const handleBack = () => {
+   // Add your navigation or close logic here
+   console.log("Back button clicked");
+ };
+
  return (
    <div className="flex justify-center items-center h-screen">
      <div className="relative border-blue-950 rounded-md p-6 w-11/12 max-w-screen lg:h-4/5 h-[63%] max-h-screen-md bg-[#0c2734] shadow-xl">
+       <div className="absolute top-4 right-4">
+         <button className="text-[#fafafa] hover:text-blue-600 text-2xl" onClick={handleBack}>
+           <FiArrowLeft />
+         </button>
+       </div>
        <div className="absolute left-0 top-0 bottom-0 w-1/4 bg-[#184e64] rounded-l-md flex flex-col justify-center z-10">
          <button className={`flex flex-col items-center text-white p-4 m-2 hover:bg-blue-700 rounded-lg ${activeTab === "Information" ? "bg-[#0c2734]" : ""}`} onClick={() => handleTabChange("Information")}>
            <FiInfo className="text-2xl" />
@@ -143,7 +153,7 @@ const ProfilePage = () => {
          {activeTab === "Information" && (
            <div className="absolute lg:left-[30rem] left-[30%] flex items-center justify-center my-4">
              <div className="relative flex items-center">
-               <div className="relative w-24 h-24 rounded-full bg-white flex items-center justify-center cursor-pointer" onClick={handleProfilePicClick}>
+               <div className="relative lg:size-48 size-24 rounded-full bg-white flex items-center justify-center cursor-pointer" onClick={handleProfilePicClick}>
                  {profileImage ? (
                    <img src={profileImage} alt="Profile" className="rounded-full w-full h-full" />
                  ) : (
@@ -157,15 +167,15 @@ const ProfilePage = () => {
                  </div>
                ) : (
                  <div className="ml-4 flex items-center lg:ml-8">
-                   <p className="text-white text-lg font-bold">{name}</p>
-                   <FiEdit className="ml-2 cursor-pointer text-blue-500 text-2xl lg:mb-5 lg:ml-4" onClick={handleEditName} />
+                   <p className="text-white text-lg lg:text-4xl font-bold">{name}</p>
+                   <FiEdit className="ml-2 cursor-pointer text-blue-500 text-2xl lg:mb-5 mb-3 lg:ml-4" onClick={handleEditName} />
                  </div>
                )}
              </div>
            </div>
          )}
          {activeTab === "Change Password" && (
-           <div className="lg:mx-auto lg:ml-[40%] lg:mt-11 ml-24 h-[28rem] p-6 bg-[#0c2734] rounded-lg shadow-md">
+           <div className="lg:mx-auto lg:ml-[40%] lg:mt-11 ml-24 h-[28rem] p-6 bg-[#  0c2734] rounded-lg shadow-md">
              <h2 className="text-2xl font-semibold text-white mb-4">Change Password</h2>
              {error && <div className="text-red-500 mb-4">{error}</div>}
              {success && <div className="text-green-500 mb-4">{success}</div>}
