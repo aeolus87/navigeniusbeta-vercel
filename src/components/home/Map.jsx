@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import iconUrl from 'leaflet/dist/images/marker-icon.png';
@@ -64,6 +64,16 @@ const Map = () => {
     }
   }, [userLocation]);
 
+  const [isCircleClicked, setIsCircleClicked] = useState(false);
+
+  const handleCircleClick = () => {
+    setIsCircleClicked(true);
+  };
+
+  const handleClosePopup = () => {
+    setIsCircleClicked(false);
+  };
+
   return (
     <div className="lg:fixed top-20 right-20 z-10 max-w-[1100px] lg:w-[90vw] w-[90vw] ml-4">
       <div className="rounded-xl overflow-hidden lg:h-[80vh] h-[55vh]">
@@ -84,6 +94,19 @@ const Map = () => {
           <Marker position={navigeniusLocation} icon={defaultIcon}>
             <Popup>Navigenius is here!</Popup>
           </Marker>
+          <Circle
+            center={[14.6497, 120.9943]}
+            radius={300}
+            fillColor="blue"
+            fillOpacity={0.2}
+            eventHandlers={{ click: () => handleCircleClick() }}
+          >
+            {isCircleClicked && (
+              <Popup position={[14.6497, 120.9943]} onClose={handleClosePopup}>
+                <div>300 meter Radius of Barangay 102</div>
+              </Popup>
+            )}
+          </Circle>
         </MapContainer>
       </div>
     </div>
