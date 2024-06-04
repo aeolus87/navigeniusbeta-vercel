@@ -3,6 +3,7 @@ import { FiInfo, FiLock, FiEdit, FiPhone, FiArrowLeft } from "react-icons/fi";
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
 
 const Modal = ({ isVisible, onClose, onViewImage, onChangeProfilePic, showImage, profileImage }) => {
  const inputFileRef = useRef(null);
@@ -51,6 +52,7 @@ const ProfilePage = () => {
  const [currentUserEmail, setCurrentUserEmail] = useState('');
 
  const inputFileRef = useRef(null);
+ const navigate = useNavigate();
 
  const handleProfilePicClick = () => {
    setIsModalVisible(true);
@@ -123,15 +125,14 @@ const ProfilePage = () => {
  };
 
  const handleBack = () => {
-   // Add your navigation or close logic here
-   console.log("Back button clicked");
+   navigate('/home');
  };
 
  return (
    <div className="flex justify-center items-center h-screen">
      <div className="relative border-blue-950 rounded-md p-6 w-11/12 max-w-screen lg:h-4/5 h-[63%] max-h-screen-md bg-[#0c2734] shadow-xl">
        <div className="absolute top-4 right-4">
-         <button className="text-[#fafafa] hover:text-blue-600 text-2xl" onClick={handleBack}>
+       <button className="text-[#e4f3ff] text-2xl hover:text-[#184e64]" onClick={handleBack}>
            <FiArrowLeft />
          </button>
        </div>
