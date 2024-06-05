@@ -7,10 +7,26 @@ import {
   updatePassword,
   signInWithPopup,
   GoogleAuthProvider,
+  signOut
 } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "./firebase"; // Import the Firestore database instance
 
-export const doCreateUserWithEmailAndPassword = async (email, password) => {
-  return createUserWithEmailAndPassword(auth, email, password);
+export const doCreateUserWithEmailAndPassword = async (email, password, fullname) => {
+  try {
+    const { user } = await createUserWithEmailAndPassword(auth, email, password);
+
+    // Create a new document in the "users" collection with the user's information
+    await setDoc(doc(db, "users", user.uid), {
+      uid: user.uid,
+      email: user.email,
+      fullname: fullname
+    });
+
+    return user;
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const doSignInWithEmailAndPassword = (email, password) => {
@@ -20,11 +36,10 @@ export const doSignInWithEmailAndPassword = (email, password) => {
 export const doSignInWithGoogle = async () => {
   const provider = new GoogleAuthProvider();
   await signInWithPopup(auth, provider);
-
 };
 
 export const doSignOut = () => {
-  return auth.signOut();
+  return signOut(auth);
 };
 
 export const doPasswordReset = (email) => {
