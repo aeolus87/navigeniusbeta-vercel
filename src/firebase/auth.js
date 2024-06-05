@@ -20,14 +20,16 @@ export const doCreateUserWithEmailAndPassword = async (email, password, fullname
     await setDoc(doc(db, "users", user.uid), {
       uid: user.uid,
       email: user.email,
-      fullname: fullname
+      fullname: fullname // Make sure "fullname" matches the field name in Firestore
     });
 
     return user;
   } catch (error) {
+    console.error("Error creating user document:", error); // Log any errors
     throw error;
   }
 };
+
 
 export const doSignInWithEmailAndPassword = (email, password) => {
   return signInWithEmailAndPassword(auth, email, password);

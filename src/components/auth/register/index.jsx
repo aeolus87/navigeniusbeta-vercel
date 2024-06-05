@@ -21,7 +21,7 @@ const Register = () => {
         if(!isRegistering && password === confirmPassword) {
             setIsRegistering(true)
             try {
-                await doCreateUserWithEmailAndPassword(email, password)
+                await doCreateUserWithEmailAndPassword(email, password, fullName)
             } catch (error) {
                 if (error.code === 'auth/email-already-in-use') {
                     setEmailErrorMessage('This email is already used')
