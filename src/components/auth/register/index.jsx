@@ -1,25 +1,24 @@
 import React, { useState } from 'react'
-import { Navigate, Link, useNavigate } from 'react-router-dom'
+import { Navigate, Link } from 'react-router-dom'
 import { useAuth } from '../../../contexts/authContext'
 import { doCreateUserWithEmailAndPassword } from '../../../firebase/auth'
 
 const Register = () => {
 
-    const navigate = useNavigate()
-
+    const [fullName, setFullName] = useState('') // State for full name
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
     const [isRegistering, setIsRegistering] = useState(false)
     const [emailErrorMessage, setEmailErrorMessage] = useState('')
     const [passwordErrorMessage, setPasswordErrorMessage] = useState('')
-    const [confirmPasswordTouched, setConfirmPasswordTouched] = useState(false) // Added state to track if confirm password field has been touched
+    const [confirmPasswordTouched, setConfirmPasswordTouched] = useState(false)
 
     const { userLoggedIn } = useAuth()
 
     const onSubmit = async (e) => {
         e.preventDefault()
-        if(!isRegistering && password === confirmPassword) { // Check if not registering and passwords match
+        if(!isRegistering && password === confirmPassword) {
             setIsRegistering(true)
             try {
                 await doCreateUserWithEmailAndPassword(email, password)
@@ -36,7 +35,7 @@ const Register = () => {
 
     const handlePasswordChange = (e) => {
         setPassword(e.target.value)
-        if (confirmPasswordTouched && e.target.value !== confirmPassword) { // Check if confirm password has been touched
+        if (confirmPasswordTouched && e.target.value !== confirmPassword) {
             setPasswordErrorMessage('Passwords do not match')
         } else {
             setPasswordErrorMessage('')
@@ -50,7 +49,7 @@ const Register = () => {
         } else {
             setPasswordErrorMessage('')
         }
-        setConfirmPasswordTouched(true) // Set confirm password as touched
+        setConfirmPasswordTouched(true)
     }
 
     return (
@@ -71,16 +70,29 @@ const Register = () => {
                     >
                         <div>
                             <label className="text-sm text-gray-600 font-bold">
+                                Full Name
+                            </label>
+                            <input
+                                type="text"
+                                autoComplete='name'
+                                required
+                                value={fullName} onChange={(e) => setFullName(e.target.value)}
+                                className="w-full mt-2 px-3 py-2 text-gray-500 bg-transparent outline-none border focus:indigo-600 shadow-sm rounded-lg transition duration-300"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="text-sm text-gray-600 font-bold">
                                 Email
                             </label>
                             <input
                                 type="email"
                                 autoComplete='email'
                                 required
-                                value={email} onChange={(e) => { setEmail(e.target.value); setEmailErrorMessage('') }} // Clear error message when email changes
+                                value={email} onChange={(e) => { setEmail(e.target.value); setEmailErrorMessage('') }}
                                 className="w-full mt-2 px-3 py-2 text-gray-500 bg-transparent outline-none border focus:indigo-600 shadow-sm rounded-lg transition duration-300"
                             />
-                            {emailErrorMessage && ( // Display email error message
+                            {emailErrorMessage && (
                                 <span className='text-red-600 text-sm lg:ml-2'>{emailErrorMessage}</span>
                             )}
                         </div>
@@ -94,7 +106,7 @@ const Register = () => {
                                 type="password"
                                 autoComplete='new-password'
                                 required
-                                value={password} onChange={handlePasswordChange} // Changed onChange handler
+                                value={password} onChange={handlePasswordChange}
                                 className="w-full mt-2 px-3 py-2 text-gray-500 bg-transparent outline-none border focus:border-indigo-600 shadow-sm rounded-lg transition duration-300"
                             />
                         </div>
@@ -108,22 +120,22 @@ const Register = () => {
                                 type="password"
                                 autoComplete='off'
                                 required
-                                value={confirmPassword} onChange={handleConfirmPasswordChange} // Changed onChange handler
+                                value={confirmPassword} onChange={handleConfirmPasswordChange}
                                 className="w-full mt-2 px-3 py-2 text-gray-500 bg-transparent outline-none border focus:border-indigo-600 shadow-sm rounded-lg transition duration-300"
                             />
                         </div>
 
-                        {passwordErrorMessage && confirmPasswordTouched && ( // Display password error message only if confirm password has been touched
+                        {passwordErrorMessage && confirmPasswordTouched && (
                             <span className='text-red-600'>{passwordErrorMessage}</span>
                         )}
 
-                        {passwordErrorMessage && !confirmPasswordTouched && ( // Display password error message only if confirm password has been touched
+                        {passwordErrorMessage && !confirmPasswordTouched && (
                             <span className='text-red-600'>Please confirm your password</span>
                         )}
 
                         <button
                             type="submit"
-                            disabled={isRegistering || emailErrorMessage !== '' || passwordErrorMessage !== ''} // Disable button if registering or there's an error message
+                            disabled={isRegistering || emailErrorMessage !== '' || passwordErrorMessage !== ''}
                             className={`w-full px-4 py-2 text-white font-medium rounded-lg ${isRegistering ? 'bg-gray-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 hover:shadow-xl transition duration-300'}`}
                         >
                             {isRegistering ? 'Signing Up...' : 'Sign Up'}
