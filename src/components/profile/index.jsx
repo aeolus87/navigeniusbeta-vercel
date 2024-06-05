@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FiInfo, FiLock, FiEdit, FiPhone, FiArrowLeft } from "react-icons/fi";
+import { FiInfo, FiLock, FiPhone, FiArrowLeft } from "react-icons/fi";
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
@@ -61,10 +61,10 @@ const ProfilePage = () => {
       if (user) {
         const userDocRef = doc(db, "users", user.uid);
         const userDocSnapshot = await getDoc(userDocRef);
-
+  
         if (userDocSnapshot.exists()) {
           const userData = userDocSnapshot.data();
-          setName(userData.fullname);
+          setName(userData.fullname); // Make sure "fullname" matches the field name in Firestore
         } else {
           console.log("User document not found");
         }
@@ -72,7 +72,7 @@ const ProfilePage = () => {
         console.log("User is not authenticated");
       }
     };
-
+  
     fetchUserData();
   }, [user]);
 
@@ -96,10 +96,6 @@ const ProfilePage = () => {
 
   const handleCloseModal = () => {
     setIsModalVisible(false);
-  };
-
-  const handleEditName = () => {
-    setIsNameEditable(true);
   };
 
   const handleNameChange = (event) => {
@@ -190,7 +186,6 @@ const ProfilePage = () => {
        ) : (
          <div className="ml-4 flex items-center lg:ml-8">
            <p className="text-white text-lg lg:text-4xl font-bold">{name}</p>
-           <FiEdit className="ml-2 cursor-pointer text-blue-500 text-2xl lg:mb-5 mb-3 lg:ml-4" onClick={handleEditName} />
          </div>
        )}
      </div>
