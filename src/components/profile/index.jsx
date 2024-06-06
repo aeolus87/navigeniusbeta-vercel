@@ -1,43 +1,13 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { FiInfo, FiLock, FiPhone, FiArrowLeft } from "react-icons/fi";
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../../firebase/firebase";
-
-const Modal = ({ isVisible, onClose, onViewImage, onChangeProfilePic, showImage, profileImage }) => {
-  const inputFileRef = useRef(null);
-
-  if (!isVisible) return null;
-
-  const handleFileInputChange = (event) => {
-    const file = event.target.files[0];
-    onChangeProfilePic(file);
-    onClose();
-  };
-
-  return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white rounded-lg p-6 shadow-lg">
-        {showImage ? (
-          <div className="flex flex-col items-center space-y-4">
-            <img src={profileImage} alt="Profile" className="rounded-full lg:size-72 size-48" />
-            <button className="bg-red-500 text-white text-lg py-2 px-4 rounded hover:bg-red-600 transition duration-300" onClick={onClose}>Close</button>
-          </div>
-        ) : (
-          <div className="flex flex-col space-y-4">
-            <button className="bg-blue-500 text-white text-lg py-2 px-4 rounded hover:bg-blue-600 transition duration-300" onClick={() => onViewImage()}>View Image</button>
-            <button className="bg-green-500 text-white text-lg py-2 px-4 rounded hover:bg-green-600 transition duration-300" onClick={() => inputFileRef.current.click()}>Change Profile Picture</button>
-            <input type="file" accept="image/*" ref={inputFileRef} style={{ display: "none" }} onChange={handleFileInputChange} />
-            <button className="bg-red-500 text-white text-lg py-2 px-4 rounded hover:bg-red-600 transition duration-300" onClick={onClose}>Cancel</button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
+import { doc, getDoc, updateDoc } from "firebase/firestore"; // Import updateDoc
+import { db, storage } from "../../firebase/firebase"; // Ensure you have initialized Firebase Storage
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import Modal from './modal/Modal';
 
 const ProfilePage = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -51,6 +21,7 @@ const ProfilePage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const navigate = useNavigate();
   const auth = getAuth();
@@ -64,7 +35,8 @@ const ProfilePage = () => {
   
         if (userDocSnapshot.exists()) {
           const userData = userDocSnapshot.data();
-          setName(userData.fullname); // Make sure "fullname" matches the field name in Firestore
+          setName(userData.fullname); 
+          setProfileImage(userData.profileImage);
         } else {
           console.log("User document not found");
         }
@@ -89,13 +61,28 @@ const ProfilePage = () => {
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       setProfileImage(imageUrl);
+      setSelectedFile(file);
       setShowImage(true);
-      setIsModalVisible(false);
     }
   };
 
   const handleCloseModal = () => {
     setIsModalVisible(false);
+  };
+
+  const handleUpload = async () => {
+    if (selectedFile && user) {
+      const storageRef = ref(storage, `profilePictures/${user.uid}`);
+      await uploadBytes(storageRef, selectedFile);
+      const downloadURL = await getDownloadURL(storageRef);
+      setProfileImage(downloadURL);
+
+      // Save the URL to the user's Firestore document
+      const userDocRef = doc(db, "users", user.uid);
+      await updateDoc(userDocRef, { profileImage: downloadURL });
+
+      setIsModalVisible(false);
+    }
   };
 
   const handleNameChange = (event) => {
@@ -213,8 +200,7 @@ const ProfilePage = () => {
  )}
 </div>
 </div>
-<Modal isVisible={isModalVisible} onClose={handleCloseModal} onViewImage={handleViewImage} onChangeProfilePic={handleChangeProfilePic} showImage={showImage} profileImage={profileImage} />
-</div>
+<Modal isVisible={isModalVisible} onClose={handleCloseModal} onViewImage={handleViewImage} onChangeProfilePic={handleChangeProfilePic} showImage={showImage} profileImage={profileImage} onUpload={handleUpload} /></div>
 );
 };
 
