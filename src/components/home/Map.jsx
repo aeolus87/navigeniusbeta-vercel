@@ -13,6 +13,7 @@ const Map = () => {
   const defaultCenter = [0, 0];
   const [userLocation, setUserLocation] = useState(defaultCenter);
   const [navigeniusLocation, setNavigeniusLocation] = useState(defaultCenter);
+  const [hasShownAlert, setHasShownAlert] = useState(false); // Moved useState inside the component
   const watchIdRef = useRef(null);
   const defaultIcon = L.icon({
     iconUrl,
@@ -24,6 +25,16 @@ const Map = () => {
     tooltipAnchor: [16, -28],
     shadowSize: [41, 41],
   });
+
+  const [isCircleClicked, setIsCircleClicked] = useState(false);
+
+  const handleCircleClick = () => {
+    setIsCircleClicked(true);
+  };
+
+  const handleClosePopup = () => {
+    setIsCircleClicked(false);
+  };
 
   useEffect(() => {
     const getCoordinates = (key) => {
@@ -68,28 +79,17 @@ const Map = () => {
     };
   }, []);
 
-  const mapRef = useRef(null);
   useEffect(() => {
-    if (mapRef.current && userLocation) {
+    if (userLocation && mapRef.current) {
       mapRef.current.flyTo(userLocation, 13);
     }
   }, [userLocation]);
-
-  const [isCircleClicked, setIsCircleClicked] = useState(false);
-
-  const handleCircleClick = () => {
-    setIsCircleClicked(true);
-  };
-
-  const handleClosePopup = () => {
-    setIsCircleClicked(false);
-  };
 
   useEffect(() => {
     const checkGeofence = () => {
       const geofenceCenter = [14.6497, 120.9943]; // Replace with your desired geofence center
       const distance = L.latLng(navigeniusLocation).distanceTo(L.latLng(geofenceCenter));
-      if (distance > 100) {
+      if (distance > 100 && !hasShownAlert) { // Check if alert has not been shown
         toast.error('Your child is outside the area!', {
           position: 'top-right',
           autoClose: 3000,
@@ -99,6 +99,7 @@ const Map = () => {
           draggable: true,
           progress: undefined,
         });
+        setHasShownAlert(true);
       }
     };
     checkGeofence();
@@ -106,7 +107,9 @@ const Map = () => {
     return () => {
       // Clean up if needed
     };
-  }, [navigeniusLocation, userLocation]);
+  }, [navigeniusLocation, userLocation, hasShownAlert]);
+
+  const mapRef = useRef(null);
 
   return (
     <div className="lg:fixed top-20 lg:right-20 z-10 max-w-[1100px] lg:w-[90vw] w-[93vw] ml-4">
