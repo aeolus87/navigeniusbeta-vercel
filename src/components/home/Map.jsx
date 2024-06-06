@@ -7,6 +7,8 @@ import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
 import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
 
 const Map = () => {
+  const initialCenter = [12.8797, 121.774];
+  const initialZoom = 6;
   const defaultCenter = [0, 0];
   const [userLocation, setUserLocation] = useState(defaultCenter);
   const [navigeniusLocation, setNavigeniusLocation] = useState(defaultCenter);
@@ -78,8 +80,8 @@ const Map = () => {
     <div className="lg:fixed top-20 lg:right-20 z-10 max-w-[1100px] lg:w-[90vw] w-[93vw] ml-4">
       <div className="rounded-xl overflow-hidden lg:h-[80vh] h-[55vh]">
         <MapContainer
-          center={userLocation}
-          zoom={13}
+          center={initialCenter}
+          zoom={initialZoom}
           zoomControl={false}
           ref={mapRef}
           className="w-full h-full"
