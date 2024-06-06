@@ -5,10 +5,11 @@ import 'leaflet/dist/leaflet.css';
 import iconUrl from 'leaflet/dist/images/marker-icon.png';
 import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
 import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Map = () => {
-  const initialCenter = [12.8797, 121.774];
-  const initialZoom = 6;
+  const initialCenter = [14.6497, 120.9943];
   const defaultCenter = [0, 0];
   const [userLocation, setUserLocation] = useState(defaultCenter);
   const [navigeniusLocation, setNavigeniusLocation] = useState(defaultCenter);
@@ -52,7 +53,15 @@ const Map = () => {
 
     watchUserLocation();
 
+    const refreshLocations = setInterval(() => {
+      navigator.geolocation.getCurrentPosition((position) => {
+        setUserLocation([position.coords.latitude, position.coords.longitude]);
+      });
+      // Update the location of navigeniusLocation using your logic
+    }, 1000);
+
     return () => {
+      clearInterval(refreshLocations);
       if (watchIdRef.current) {
         navigator.geolocation.clearWatch(watchIdRef.current);
       }
@@ -76,12 +85,35 @@ const Map = () => {
     setIsCircleClicked(false);
   };
 
+  useEffect(() => {
+    const checkGeofence = () => {
+      const geofenceCenter = [14.6497, 120.9943]; // Replace with your desired geofence center
+      const distance = L.latLng(navigeniusLocation).distanceTo(L.latLng(geofenceCenter));
+      if (distance > 100) {
+        toast.error('Your child is outside the area!', {
+          position: 'top-right',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: true,
+          progress: undefined,
+        });
+      }
+    };
+    checkGeofence();
+
+    return () => {
+      // Clean up if needed
+    };
+  }, [navigeniusLocation, userLocation]);
+
   return (
     <div className="lg:fixed top-20 lg:right-20 z-10 max-w-[1100px] lg:w-[90vw] w-[93vw] ml-4">
       <div className="rounded-xl overflow-hidden lg:h-[80vh] h-[55vh]">
         <MapContainer
           center={initialCenter}
-          zoom={initialZoom}
+          zoom={6}
           zoomControl={false}
           ref={mapRef}
           className="w-full h-full"
@@ -98,14 +130,14 @@ const Map = () => {
           </Marker>
           <Circle
             center={[14.6497, 120.9943]}
-            radius={300}
+            radius={100}
             fillColor="blue"
             fillOpacity={0.2}
             eventHandlers={{ click: () => handleCircleClick() }}
           >
             {isCircleClicked && (
               <Popup position={[14.6497, 120.9943]} onClose={handleClosePopup}>
-                <div>300 meter Radius of Barangay 102</div>
+                <div>100 meter Radius of Barangay 102</div>
               </Popup>
             )}
           </Circle>

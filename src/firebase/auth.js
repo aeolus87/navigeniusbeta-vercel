@@ -25,7 +25,7 @@ export const doCreateUserWithEmailAndPassword = async (email, password, fullname
 
     return user;
   } catch (error) {
-    console.error("Error creating user document:", error); // Log any errors
+    console.error("Error creating user document:", error);
     throw error;
   }
 };

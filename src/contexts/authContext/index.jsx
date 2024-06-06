@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { auth } from "../../firebase/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
 
 const AuthContext = React.createContext();
 
@@ -16,12 +17,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, initializeUser);
-    return unsubscribe;
-  }, []);
-
-  async function initializeUser(user) {
+  const initializeUser = useCallback(async (user) => {
     try {
       if (user) {
         setCurrentUser({ ...user });
@@ -30,6 +26,7 @@ export function AuthProvider({ children }) {
         );
         setIsEmailUser(isEmail);
         setUserLoggedIn(true);
+        notify("Logged In");
       } else {
         setCurrentUser(null);
         setUserLoggedIn(false);
@@ -39,15 +36,33 @@ export function AuthProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, initializeUser);
+    return unsubscribe;
+  }, [initializeUser]);
 
   const logout = async () => {
     try {
       await signOut(auth);
       navigate("/login");
+      notify("Logged Out");
     } catch (error) {
       console.error("Error logging out:", error);
     }
+  };
+
+  const notify = (message) => {
+    toast.dark(message, {
+      position: "top-right",
+      autoClose: 1500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: true,
+      progress: undefined,
+    });
   };
 
   const value = {
