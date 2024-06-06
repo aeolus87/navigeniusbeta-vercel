@@ -8,6 +8,8 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db, storage } from "../../firebase/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Modal from './modal/Modal';
+import { toast } from 'react-toastify'; // Import toast
+
 
 const ProfilePage = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -91,6 +93,7 @@ const ProfilePage = () => {
         updateDoc(userDocRef, { phone_number: phoneNumber })
           .then(() => {
             console.log('Phone number updated in Firestore database');
+            toast.success('Your number is verified successfully!');
           })
           .catch((error) => {
             console.error('Error updating phone number in Firestore:', error);
