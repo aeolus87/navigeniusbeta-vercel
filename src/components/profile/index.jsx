@@ -207,7 +207,7 @@ const ProfilePage = () => {
             <span className="hidden md:block mt-2 text-xl">Change Password</span>
           </button>
         </div>
-        <div className="lg:ml-1/4 flex flex-col items-center relative z-0">
+        <div className="lg:ml-1/4 flex flex-col items-center relative z-0 lg:size-full size-full lg:mt-4 mt-8">
           {activeTab === "Information" && (
             <div className="absolute lg:left-[30rem] left-[30%] flex items-center justify-center my-4">
               <div className="relative flex items-center">
@@ -251,7 +251,7 @@ const ProfilePage = () => {
             </div>
           )}
           {activeTab === "Change Password" && (
-            <div className="lg:mx-auto lg:ml-[40%] lg:mt-11 ml-24 h-[28rem] p-6 bg-[#0c2734] rounded-lg shadow-md">
+            <div className="lg:mx-auto lg:ml-[40%] lg:mt-4 ml-24 h-[28rem] p-6 bg-[#0c2734] rounded-lg shadow-md">
               <h2 className="text-2xl font-semibold text-white mb-4">
                 Change Password
               </h2>
@@ -311,7 +311,7 @@ const ProfilePage = () => {
             </div>
           )}
           {activeTab === "Phone Number" && (
-            <div className="lg:mx-auto lg:ml-[40%] lg:mt-11 ml-24 h-[28rem] p-6 bg-[#0c2734] rounded-lg shadow-md">
+            <div className="lg:mx-auto lg:ml-[40%] lg:mt-8 ml-24 h-[28rem] p-6 bg-[#0c2734] rounded-lg shadow-md">
               <h2 className="text-2xl font-semibold text-white mb-4">
                 Update Phone Number
               </h2>
@@ -331,9 +331,9 @@ const ProfilePage = () => {
                 />
                 <button
                   onClick={handleSendVerificationCode}
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded mt-2"
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold lg:px-4 lg:py-2 px-2 py-2 rounded lg:mt-2 mt-4"
                 >
-                  Send Verification Code
+                  Send Code
                 </button>
               </div>
               <div id="recaptcha-container"></div>
@@ -353,7 +353,7 @@ const ProfilePage = () => {
                 />
                 <button
                   onClick={handleVerifyPhoneNumber}
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded mt-2"
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded lg:mt-2 mt-4"
                 >
                   Verify
                 </button>
