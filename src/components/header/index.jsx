@@ -18,12 +18,7 @@ const Header = () => {
     } catch (error) {
       console.error('Error signing out:', error);
     }
-  };
 
-  const handleLogin = () => {
-    // Assuming you have a login function that sets userLoggedIn to true upon successful login
-    // You would trigger the toast notification here
-    notify("Logged In");
   };
 
   const handleProfileClick = () => {

@@ -1,23 +1,26 @@
-import React, { useState, useEffect } from "react";
-import { FiInfo, FiLock, FiPhone, FiArrowLeft } from "react-icons/fi";
+import React, { useState, useEffect } from 'react';
+import { FiInfo, FiLock, FiPhone, FiArrowLeft } from 'react-icons/fi';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
-import { getAuth, signInWithEmailAndPassword, signInWithPhoneNumber } from 'firebase/auth';
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  signInWithPhoneNumber,
+} from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { db, storage } from "../../firebase/firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { db, storage } from '../../firebase/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import Modal from './modal/Modal';
-import { toast } from 'react-toastify'; // Import toast
-
+import { toast } from 'react-toastify';
 
 const ProfilePage = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [showImage, setShowImage] = useState(false);
-  const [profileImage, setProfileImage] = useState("");
-  const [name, setName] = useState("");
+  const [profileImage, setProfileImage] = useState('');
+  const [name, setName] = useState('');
   const [isNameEditable, setIsNameEditable] = useState(false);
-  const [activeTab, setActiveTab] = useState("Information");
+  const [activeTab, setActiveTab] = useState('Information');
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -27,6 +30,7 @@ const ProfilePage = () => {
   const [phoneNumber, setPhoneNumber] = useState('+63');
   const [verificationCode, setVerificationCode] = useState('');
   const [verificationId, setVerificationId] = useState(null);
+  const [verifiedPhoneNumber, setVerifiedPhoneNumber] = useState('');
 
   const navigate = useNavigate();
   const auth = getAuth();
@@ -35,21 +39,23 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       if (user) {
-        const userDocRef = doc(db, "users", user.uid);
+        const userDocRef = doc(db, 'users', user.uid);
         const userDocSnapshot = await getDoc(userDocRef);
-  
+
         if (userDocSnapshot.exists()) {
           const userData = userDocSnapshot.data();
-          setName(userData.fullname); 
+          setName(userData.fullname);
           setProfileImage(userData.profileImage);
+          // Set verifiedPhoneNumber if user's phone number is already verified
+          setVerifiedPhoneNumber(userData.phone_number || '');
         } else {
-          console.log("User document not found");
+          console.log('User document not found');
         }
       } else {
-        console.log("User is not authenticated");
+        console.log('User is not authenticated');
       }
     };
-  
+
     fetchUserData();
   }, [user]);
 
@@ -58,9 +64,12 @@ const ProfilePage = () => {
   };
 
   const handleSendVerificationCode = () => {
-    const appVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-      'size': 'invisible',
-    });
+    const appVerifier = new firebase.auth.RecaptchaVerifier(
+      'recaptcha-container',
+      {
+        size: 'invisible',
+      },
+    );
 
     signInWithPhoneNumber(auth, phoneNumber, appVerifier)
       .then((confirmationResult) => {
@@ -80,20 +89,24 @@ const ProfilePage = () => {
       console.error('Verification ID or code is missing.');
       return;
     }
-  
-    const credential = firebase.auth.PhoneAuthProvider.credential(verificationId, verificationCode);
-  
-    firebase.auth().currentUser.linkWithCredential(credential)
+
+    const credential = firebase.auth.PhoneAuthProvider.credential(
+      verificationId,
+      verificationCode,
+    );
+
+    firebase
+      .auth()
+      .currentUser.linkWithCredential(credential)
       .then((userCredential) => {
-        // Phone number successfully linked to the user
         const user = userCredential.user;
-  
-        // Update the phone number in the Firestore database
-        const userDocRef = doc(db, "users", user.uid);
+
+        const userDocRef = doc(db, 'users', user.uid);
         updateDoc(userDocRef, { phone_number: phoneNumber })
           .then(() => {
             console.log('Phone number updated in Firestore database');
             toast.success('Your number is verified successfully!');
+            setVerifiedPhoneNumber(phoneNumber); // Update the verifiedPhoneNumber state
           })
           .catch((error) => {
             console.error('Error updating phone number in Firestore:', error);
@@ -133,8 +146,7 @@ const ProfilePage = () => {
       const downloadURL = await getDownloadURL(storageRef);
       setProfileImage(downloadURL);
 
-      // Save the URL to the user's Firestore document
-      const userDocRef = doc(db, "users", user.uid);
+      const userDocRef = doc(db, 'users', user.uid);
       await updateDoc(userDocRef, { profileImage: downloadURL });
 
       setIsModalVisible(false);
@@ -166,7 +178,10 @@ const ProfilePage = () => {
       await signInWithEmailAndPassword(auth, user.email, oldPassword);
 
       try {
-        const credential = firebase.auth.EmailAuthProvider.credential(user.email, oldPassword);
+        const credential = firebase.auth.EmailAuthProvider.credential(
+          user.email,
+          oldPassword,
+        );
         await user.reauthenticateWithCredential(credential);
         await user.updatePassword(newPassword);
         setSuccess('Password changed successfully');
@@ -189,27 +204,41 @@ const ProfilePage = () => {
     <div className="flex justify-center items-center h-screen">
       <div className="relative border-blue-950 rounded-md p-6 w-11/12 max-w-screen lg:h-4/5 h-[63%] max-h-screen-md bg-[#0c2734] shadow-xl">
         <div className="absolute top-4 right-4">
-          <button className="text-[#e4f3ff] text-2xl hover:text-[#184e64]" onClick={handleBack}>
+          <button
+            className="text-[#e4f3ff] text-2xl hover:text-[#184e64]"
+            onClick={handleBack}
+          >
             <FiArrowLeft />
           </button>
         </div>
         <div className="absolute left-0 top-0 bottom-0 w-1/4 bg-[#184e64] rounded-l-md flex flex-col justify-center z-10">
-          <button className={`flex flex-col items-center text-white p-4 m-2 hover:bg-blue-700 rounded-lg ${activeTab === "Information" ? "bg-[#0c2734]" : ""}`} onClick={() => handleTabChange("Information")}>
+          <button
+            className={`flex flex-col items-center text-white p-4 m-2 hover:bg-blue-700 rounded-lg ${activeTab === 'Information' ? 'bg-[#0c2734]' : ''}`}
+            onClick={() => handleTabChange('Information')}
+          >
             <FiInfo className="text-2xl" />
             <span className="hidden md:block mt-2 text-xl">Information</span>
           </button>
-          <button className={`flex flex-col items-center text-white p-4 m-2 hover:bg-blue-700 rounded-lg ${activeTab === "Phone Number" ? "bg-[#0c2734]" : ""}`} onClick={() => handleTabChange("Phone Number")}>
+          <button
+            className={`flex flex-col items-center text-white p-4 m-2 hover:bg-blue-700 rounded-lg ${activeTab === 'Phone Number' ? 'bg-[#0c2734]' : ''}`}
+            onClick={() => handleTabChange('Phone Number')}
+          >
             <FiPhone className="text-2xl" />
             <span className="hidden md:block mt-2 text-xl">Phone Number</span>
           </button>
-          <button className={`flex flex-col items-center text-white p-4 m-2 hover:bg-blue-700 rounded-lg ${activeTab === "Change Password" ? "bg-[#0c2734]" : ""}`} onClick={() => handleTabChange("Change Password")}>
+          <button
+            className={`flex flex-col items-center text-white p-4 m-2 hover:bg-blue-700 rounded-lg ${activeTab === 'Change Password' ? 'bg-[#0c2734]' : ''}`}
+            onClick={() => handleTabChange('Change Password')}
+          >
             <FiLock className="text-2xl" />
-            <span className="hidden md:block mt-2 text-xl">Change Password</span>
+            <span className="hidden md:block mt-2 text-xl">
+              Change Password
+            </span>
           </button>
         </div>
         <div className="lg:ml-1/4 flex flex-col items-center relative z-0 lg:size-full size-full lg:mt-4 mt-8">
-          {activeTab === "Information" && (
-            <div className="absolute lg:left-[30rem] left-[30%] flex items-center justify-center my-4">
+          {activeTab === 'Information' && (
+            <div className="absolute lg:left-[30rem] left-[30%] flex flex-col items-center justify-center my-4">
               <div className="relative flex items-center">
                 <div
                   className="relative lg:size-48 size-24 rounded-full bg-white flex items-center justify-center cursor-pointer"
@@ -248,9 +277,14 @@ const ProfilePage = () => {
                   </div>
                 )}
               </div>
+              {verifiedPhoneNumber && (
+                <p className="text-white text-lg lg:text-xl mt-16 mr-32">
+                  Contact Number: {verifiedPhoneNumber}
+                </p>
+              )}
             </div>
           )}
-          {activeTab === "Change Password" && (
+          {activeTab === 'Change Password' && (
             <div className="lg:mx-auto lg:ml-[40%] lg:mt-4 ml-24 h-[28rem] p-6 bg-[#0c2734] rounded-lg shadow-md">
               <h2 className="text-2xl font-semibold text-white mb-4">
                 Change Password
@@ -284,7 +318,7 @@ const ProfilePage = () => {
                   id="newPassword"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:shadow-outline bg-[#33435D] placeholder-gray-400"
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:shadow-outline bg-[#33435D] placeholder-gray -400"
                 />
               </div>
               <div className="mb-4">
@@ -310,7 +344,7 @@ const ProfilePage = () => {
               </button>
             </div>
           )}
-          {activeTab === "Phone Number" && (
+          {activeTab === 'Phone Number' && (
             <div className="lg:mx-auto lg:ml-[40%] lg:mt-8 ml-24 h-[28rem] p-6 bg-[#0c2734] rounded-lg shadow-md">
               <h2 className="text-2xl font-semibold text-white mb-4">
                 Update Phone Number
@@ -376,4 +410,3 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
-
