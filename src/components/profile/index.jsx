@@ -236,56 +236,60 @@ const ProfilePage = () => {
             </span>
           </button>
         </div>
-        <div className="lg:ml-1/4 flex flex-col items-center relative z-0 lg:size-full size-full lg:mt-4 mt-8">
+        <div className="lg:ml-1/4 flex flex-col items-center relative z-0 w-full lg:h-screen ml-6 lg:mt-2 mt-36 h-full">
           {activeTab === 'Information' && (
-            <div className="absolute lg:left-[30rem] left-[30%] flex flex-col items-center justify-center my-4">
-              <div className="relative flex items-center">
-                <div
-                  className="relative lg:size-48 size-24 rounded-full bg-white flex items-center justify-center cursor-pointer"
-                  onClick={handleProfilePicClick}
-                >
-                  {profileImage ? (
-                    <img
-                      src={profileImage}
-                      alt="Profile"
-                      className="rounded-full w-full h-full"
-                    />
-                  ) : (
-                    <span className="text-gray-500 text-4xl">👤</span>
-                  )}
-                </div>
-                {isNameEditable ? (
-                  <div className="ml-4 flex items-center">
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={handleNameChange}
-                      className="border-b border-gray-400 bg-transparent text-white focus:outline-none focus:border-blue-500"
-                    />
-                    <button
-                      onClick={handleSaveName}
-                      className="ml-2 text-blue-500 font-bold"
-                    >
-                      Save
-                    </button>
-                  </div>
+            <div className="flex justify-end w-[80%] lg:ml-[10%] mt-6 h-4/6">
+              {/* Profile Container */}
+              <div
+                className="relative lg:size-48 size-24 rounded-full bg-white cursor-pointer lg:mt-4 lg:mr-10 "
+                onClick={handleProfilePicClick}
+              >
+                {profileImage ? (
+                  <img
+                    src={profileImage}
+                    alt="Profile"
+                    className="rounded-full size-48"
+                  />
                 ) : (
-                  <div className="ml-4 flex items-center lg:ml-8">
-                    <p className="text-white text-lg lg:text-4xl font-bold">
-                      {name}
-                    </p>
-                  </div>
+                  <span className="text-gray-500 text-4xl"></span>
                 )}
               </div>
-              {verifiedPhoneNumber && (
-                <p className="text-white text-lg lg:text-xl mt-16 mr-32">
-                  Contact Number: {verifiedPhoneNumber}
-                </p>
-              )}
+              <div className="flex flex-col lg:my-6 bg-[#0c2734] rounded-2xl shadow-xl lg:w-[60%] lg:ml-4 ml-16 lg:h-[90%] h-[80%]">
+                <div className="relative flex items-center">
+                  {isNameEditable ? (
+                    <div className="ml-4 flex justify-start">
+                      <input
+                        type="text"
+                        value={name}
+                        onChange={handleNameChange}
+                        className="border-b border-gray-400 bg-transparent text-white focus:outline-none focus:border-blue-500"
+                      />
+                      <button
+                        onClick={handleSaveName}
+                        className="ml-2 text-blue-500 font-bold"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="mx-5 my-1">
+                      <p className="text-[#f4f4f4] text-lg lg:text-3xl font-bold">
+                        {name}
+                      </p>
+                    </div>
+                  )}
+                </div>
+                {verifiedPhoneNumber && (
+                  <p className="text-[#f4f4f4] text-md lg:text-xl mx-5 my-1">
+                    Contact Number: {verifiedPhoneNumber}
+                  </p>
+                )}
+              </div>
             </div>
           )}
+
           {activeTab === 'Change Password' && (
-            <div className="lg:mx-auto lg:ml-[40%] lg:mt-4 ml-24 h-[28rem] p-6 bg-[#0c2734] rounded-lg shadow-md">
+            <div className="lg:mx-auto lg:ml-[42%] mt-4 ml-20 h-[28rem] p-6 bg-[#0c2734] rounded-lg shadow-md">
               <h2 className="text-2xl font-semibold text-white mb-4">
                 Change Password
               </h2>
@@ -345,7 +349,7 @@ const ProfilePage = () => {
             </div>
           )}
           {activeTab === 'Phone Number' && (
-            <div className="lg:mx-auto lg:ml-[40%] lg:mt-8 ml-24 h-[28rem] p-6 bg-[#0c2734] rounded-lg shadow-md">
+            <div className="lg:mx-auto lg:ml-[48%] mt-8 ml-20 h-[28rem] p-6 bg-[#0c2734] rounded-lg shadow-md">
               <h2 className="text-2xl font-semibold text-white mb-4">
                 Update Phone Number
               </h2>
