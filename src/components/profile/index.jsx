@@ -19,7 +19,6 @@ const ProfilePage = () => {
   const [showImage, setShowImage] = useState(false);
   const [profileImage, setProfileImage] = useState('');
   const [name, setName] = useState('');
-  const [isNameEditable, setIsNameEditable] = useState(false);
   const [activeTab, setActiveTab] = useState('Information');
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -153,14 +152,6 @@ const ProfilePage = () => {
     }
   };
 
-  const handleNameChange = (event) => {
-    setName(event.target.value);
-  };
-
-  const handleSaveName = () => {
-    setIsNameEditable(false);
-  };
-
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
@@ -201,7 +192,7 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen">
+    <div className="flex justify-center items-center h-screen overflow-hidden">
       <div className="relative border-blue-950 rounded-md p-6 w-11/12 max-w-screen lg:h-4/5 h-[63%] max-h-screen-md bg-[#0c2734] shadow-xl">
         <div className="absolute top-4 right-4">
           <button
@@ -236,60 +227,37 @@ const ProfilePage = () => {
             </span>
           </button>
         </div>
-        <div className="lg:ml-1/4 flex flex-col items-center relative z-0 w-full lg:h-screen ml-6 lg:mt-2 mt-36 h-full">
+        <div className="lg:ml-1/4 flex flex-col items-center relative z-0 lg:w-full h-screen mt-2 ml-4">
           {activeTab === 'Information' && (
-            <div className="flex justify-end w-[80%] lg:ml-[10%] mt-6 h-4/6">
-              {/* Profile Container */}
-              <div
-                className="relative lg:size-48 size-24 rounded-full bg-white cursor-pointer lg:mt-4 lg:mr-10 "
-                onClick={handleProfilePicClick}
-              >
-                {profileImage ? (
-                  <img
-                    src={profileImage}
-                    alt="Profile"
-                    className="rounded-full size-48"
-                  />
-                ) : (
-                  <span className="text-gray-500 text-4xl"></span>
-                )}
-              </div>
-              <div className="flex flex-col lg:my-6 bg-[#0c2734] rounded-2xl shadow-xl lg:w-[60%] lg:ml-4 ml-16 lg:h-[90%] h-[80%]">
-                <div className="relative flex items-center">
-                  {isNameEditable ? (
-                    <div className="ml-4 flex justify-start">
-                      <input
-                        type="text"
-                        value={name}
-                        onChange={handleNameChange}
-                        className="border-b border-gray-400 bg-transparent text-white focus:outline-none focus:border-blue-500"
-                      />
-                      <button
-                        onClick={handleSaveName}
-                        className="ml-2 text-blue-500 font-bold"
-                      >
-                        Save
-                      </button>
-                    </div>
+            <div className="flex flex-col items-center justify-center w-full h-full">
+              <div className="flex flex-col lg:flex-row items-center justify-center w-full lg:ml-64 ml-[5rem]">
+                <div className="relative w-32 h-32 lg:w-48 lg:h-48 rounded-full bg-white cursor-pointer flex items-center justify-center lg:mb-[30rem] lg:mr-8">
+                  {profileImage ? (
+                    <img
+                      src={profileImage}
+                      alt="Profile"
+                      className="rounded-full w-28 h-28 lg:w-44 lg:h-44"
+                      onClick={handleProfilePicClick}
+                    />
                   ) : (
-                    <div className="mx-5 my-1">
-                      <p className="text-[#f4f4f4] text-lg lg:text-3xl font-bold">
-                        {name}
-                      </p>
-                    </div>
+                    <span className="text-gray-500">No Image</span>
                   )}
                 </div>
-                {verifiedPhoneNumber && (
-                  <p className="text-[#f4f4f4] text-md lg:text-xl mx-5 my-1">
-                    Contact Number: {verifiedPhoneNumber}
+                <div className="flex flex-col bg-[#0c2734] rounded-2xl shadow-xl p-6 lg:w-[45rem] w-[15rem] lg:h-[30rem] h-[25rem] lg:mb-[14rem] mb-[24rem] ">
+                  <p className="text-[#f4f4f4] text-lg lg:text-3xl font-bold">
+                    {name}
                   </p>
-                )}
+                  {verifiedPhoneNumber && (
+                    <p className="text-[#f4f4f4] text-md lg:text-xl mt-2">
+                      Contact Number: {verifiedPhoneNumber}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           )}
-
           {activeTab === 'Change Password' && (
-            <div className="lg:mx-auto lg:ml-[42%] mt-4 ml-20 h-[28rem] p-6 bg-[#0c2734] rounded-lg shadow-md">
+            <div className="lg:mx-auto py-2 lg:ml-[42%] mt-6 ml-[4.5rem] lg:h-[28rem] p-6 bg-[#0c2734] rounded-lg shadow-md">
               <h2 className="text-2xl font-semibold text-white mb-4">
                 Change Password
               </h2>
@@ -349,11 +317,11 @@ const ProfilePage = () => {
             </div>
           )}
           {activeTab === 'Phone Number' && (
-            <div className="lg:mx-auto lg:ml-[48%] mt-8 ml-20 h-[28rem] p-6 bg-[#0c2734] rounded-lg shadow-md">
-              <h2 className="text-2xl font-semibold text-white mb-4">
+            <div className="lg:mx-auto lg:ml-[48%] mt-4 ml-[4.5rem] h-[26rem] p-6 bg-[#0c2734] rounded-lg shadow-md">
+              <h2 className="text-2xl font-semibold text-white mb-2">
                 Update Phone Number
               </h2>
-              <div className="mb-4">
+              <div className="mb-2">
                 <label
                   htmlFor="phoneNumber"
                   className="block text-white font-semibold mb-2"
@@ -365,7 +333,7 @@ const ProfilePage = () => {
                   id="phoneNumber"
                   value={phoneNumber}
                   onChange={handlePhoneNumberChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:shadow-outline bg-[#33435D] placeholder-gray-400"
+                  className="shadow appearance-none border rounded w-full text-sm py-2 px-3 text-white leading-tight focus:outline-none focus:shadow-outline bg-[#33435D] placeholder-gray-400"
                 />
                 <button
                   onClick={handleSendVerificationCode}

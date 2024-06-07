@@ -16,14 +16,12 @@ export const doCreateUserWithEmailAndPassword = async (
   email,
   password,
   fullname,
-  phone_number,
 ) => {
   try {
     const { user } = await createUserWithEmailAndPassword(
       auth,
       email,
       password,
-      phone_number,
     );
 
     // Create a new document in the "users" collection with the user's information
@@ -31,7 +29,6 @@ export const doCreateUserWithEmailAndPassword = async (
       uid: user.uid,
       email: user.email,
       fullname: fullname,
-      phone_number: phone_number, // Make sure "fullname" matches the field name in Firestore
     });
 
     return user;
