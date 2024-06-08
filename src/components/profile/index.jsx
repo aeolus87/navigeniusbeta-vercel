@@ -130,7 +130,9 @@ const ProfilePage = () => {
       const imageUrl = URL.createObjectURL(file);
       setProfileImage(imageUrl);
       setSelectedFile(file);
-      setShowImage(true);
+      if (isModalVisible) {
+        setShowImage(true);
+      }
     }
   };
 
@@ -231,12 +233,12 @@ const ProfilePage = () => {
           {activeTab === 'Information' && (
             <div className="flex flex-col items-center justify-center w-full h-full">
               <div className="flex flex-col lg:flex-row items-center justify-center w-full lg:ml-64 ml-[5rem]">
-                <div className="relative w-32 h-32 lg:w-48 lg:h-48 rounded-full bg-white cursor-pointer flex items-center justify-center lg:mb-[30rem] lg:mr-8">
+                <div className="relative size-24 lg:w-48 lg:h-48 rounded-full bg-white cursor-pointer flex items-center justify-center lg:mb-[30rem] lg:mr-8">
                   {profileImage ? (
                     <img
                       src={profileImage}
                       alt="Profile"
-                      className="rounded-full w-28 h-28 lg:w-44 lg:h-44"
+                      className="rounded-full size-20 lg:w-44 lg:h-44"
                       onClick={handleProfilePicClick}
                     />
                   ) : (
