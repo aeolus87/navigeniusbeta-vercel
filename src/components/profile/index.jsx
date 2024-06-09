@@ -4,8 +4,10 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import {
   getAuth,
-  signInWithEmailAndPassword,
   signInWithPhoneNumber,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword,
 } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -170,37 +172,23 @@ const ProfilePage = () => {
     }
 
     try {
-      await signInWithEmailAndPassword(auth, user.email, oldPassword);
-
-      try {
-        const credential = firebase.auth.EmailAuthProvider.credential(
-          user.email,
-          oldPassword,
-        );
-        await user.reauthenticateWithCredential(credential);
-        await user
-          .updatePassword(newPassword)
-          .then(() => {
-            setSuccess('Password changed successfully');
-            setOldPassword('');
-            setNewPassword('');
-            setConfirmPassword('');
-          })
-          .catch((error) => {
-            setError(
-              'An error occurred while changing the password: ' + error.message,
-            );
-          });
-      } catch (error) {
+      const credential = EmailAuthProvider.credential(user.email, oldPassword);
+      await reauthenticateWithCredential(user, credential);
+      await updatePassword(user, newPassword);
+      setSuccess('Password changed successfully');
+      setOldPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error) {
+      if (error.code === 'auth/wrong-password') {
+        setError('The old password is incorrect');
+      } else {
         setError(
-          'An error occurred while changing the password: ' + error.message,
+          `An error occurred while changing the password: ${error.message}`,
         );
       }
-    } catch (error) {
-      setError('The old password is incorrect');
     }
   };
-
   const handleBack = () => {
     navigate('/home');
   };
