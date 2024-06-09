@@ -4,32 +4,56 @@ import { useAuth } from '../../../contexts/authContext';
 import { doCreateUserWithEmailAndPassword } from '../../../firebase/auth';
 
 const Register = () => {
-  const [fullName, setFullName] = useState(
-    localStorage.getItem('fullName') || '',
-  ); // Load from localStorage
-  const [email, setEmail] = useState(localStorage.getItem('email') || '');
-  const [password, setPassword] = useState(
-    localStorage.getItem('password') || '',
-  );
-  const [confirmPassword, setConfirmPassword] = useState(
-    localStorage.getItem('confirmPassword') || '',
-  );
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = useState('');
   const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
   const [confirmPasswordTouched, setConfirmPasswordTouched] = useState(false);
-  const [agreedToTerms, setAgreedToTerms] = useState(
-    localStorage.getItem('agreedToTerms') === 'true',
-  );
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const { userLoggedIn } = useAuth();
 
   useEffect(() => {
-    localStorage.setItem('fullName', fullName);
-    localStorage.setItem('email', email);
-    localStorage.setItem('password', password);
-    localStorage.setItem('confirmPassword', confirmPassword);
-    localStorage.setItem('agreedToTerms', agreedToTerms);
+    // Load agreedToTerms from localStorage on component mount
+    const storedAgreed = localStorage.getItem('agreedToTerms');
+    if (storedAgreed === 'true') {
+      setAgreedToTerms(true);
+    }
+  }, []);
+  useEffect(() => {
+    // Generate a session ID and store it in sessionStorage
+    const sessionId = generateSessionId();
+    sessionStorage.setItem('registrationSessionId', sessionId);
+
+    // Load form data from sessionStorage if available
+    const savedFormData = sessionStorage.getItem('registerFormData');
+    if (savedFormData) {
+      const formData = JSON.parse(savedFormData);
+      setFullName(formData.fullName);
+      setEmail(formData.email);
+      setPassword(formData.password);
+      setConfirmPassword(formData.confirmPassword);
+      setAgreedToTerms(formData.agreedToTerms);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Save form data to sessionStorage when the component unmounts
+    return () => {
+      sessionStorage.setItem(
+        'registerFormData',
+        JSON.stringify({
+          fullName,
+          email,
+          password,
+          confirmPassword,
+          agreedToTerms,
+        }),
+      );
+    };
   }, [fullName, email, password, confirmPassword, agreedToTerms]);
 
   const onSubmit = async (e) => {
@@ -66,6 +90,11 @@ const Register = () => {
       setPasswordErrorMessage('');
     }
     setConfirmPasswordTouched(true);
+  };
+
+  const generateSessionId = () => {
+    // Generate a random session ID
+    return Math.random().toString(36).substring(2, 15);
   };
 
   return (
@@ -151,8 +180,8 @@ const Register = () => {
                 type="checkbox"
                 id="termsCheckbox"
                 className="mr-2 h-5 w-5"
-                checked={agreedToTerms} // Use the agreedToTerms state
-                onChange={() => setAgreedToTerms(!agreedToTerms)} // Update state on change
+                checked={agreedToTerms}
+                onChange={() => setAgreedToTerms(!agreedToTerms)}
                 required
               />
               <label htmlFor="termsCheckbox">

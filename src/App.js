@@ -1,5 +1,5 @@
 import React from 'react';
-import { useRoutes, useLocation } from 'react-router-dom';
+import { useRoutes, useLocation, Navigate } from 'react-router-dom';
 import './index.css';
 import Login from './components/auth/login';
 import Register from './components/auth/register';
@@ -21,8 +21,12 @@ function App() {
 
   const routesArray = [
     {
-      path: '/*',
+      path: '/',
       element: <Main />,
+    },
+    {
+      path: '/main', // Handle the /main route
+      element: <Navigate to="/" replace />,
     },
     {
       path: '/login',
@@ -42,7 +46,11 @@ function App() {
     },
     {
       path: '/profile',
-      element: <Profile />,
+      element: (
+        <PrivateRoute>
+          <Profile />
+        </PrivateRoute>
+      ),
     },
     {
       path: '/home',
