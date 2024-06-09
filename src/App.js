@@ -18,6 +18,7 @@ firebase.initializeApp(firebaseConfig);
 
 function App() {
   const location = useLocation();
+
   const routesArray = [
     {
       path: '/*',
@@ -32,31 +33,23 @@ function App() {
       element: <Register />,
     },
     {
+      path: '/terms',
+      element: <TermsAndConditions />,
+    },
+    {
       path: '/forgot-password',
       element: <ForgotPassword />,
     },
     {
       path: '/profile',
-      element: (
-        <>
-          <Header />
-          <Profile />
-        </>
-      ),
-    },
-    {
-      path: '/terms',
-      element: <TermsAndConditions />,
+      element: <Profile />,
     },
     {
       path: '/home',
       element: (
-        <>
-          <Header />
-          <PrivateRoute>
-            <Home />
-          </PrivateRoute>
-        </>
+        <PrivateRoute>
+          <Home />
+        </PrivateRoute>
       ),
     },
   ];
@@ -70,7 +63,7 @@ function App() {
     <AuthProvider>
       {!isTermsPage && !isMainPage && <Header />}
       <div
-        className={`h-screen flex flex-col mx-0 my-0 ${isTermsPage ? 'bg-white' : 'bg-main bg-cover bg-center backdrop-blur-sm'}`}
+        className={`h-screen flex flex-col mx-0 my-0${isTermsPage ? ' bg-white' : ' bg-main bg-cover bg-center backdrop-blur-sm'}`}
       >
         {routesElement}
       </div>
