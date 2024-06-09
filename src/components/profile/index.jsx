@@ -178,13 +178,23 @@ const ProfilePage = () => {
           oldPassword,
         );
         await user.reauthenticateWithCredential(credential);
-        await user.updatePassword(newPassword);
-        setSuccess('Password changed successfully');
-        setOldPassword('');
-        setNewPassword('');
-        setConfirmPassword('');
+        await user
+          .updatePassword(newPassword)
+          .then(() => {
+            setSuccess('Password changed successfully');
+            setOldPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
+          })
+          .catch((error) => {
+            setError(
+              'An error occurred while changing the password: ' + error.message,
+            );
+          });
       } catch (error) {
-        setError('An error occurred while changing the password');
+        setError(
+          'An error occurred while changing the password: ' + error.message,
+        );
       }
     } catch (error) {
       setError('The old password is incorrect');
