@@ -1,62 +1,79 @@
-import React from "react";
-import { useRoutes, useLocation } from "react-router-dom";
-import "./index.css";
-import Login from "./components/auth/login";
-import Register from "./components/auth/register";
-import Header from "./components/header";
-import Home from "./components/home/Home";
-import ForgotPassword from "./components/auth/forgot/";
-import { AuthProvider } from "./contexts/authContext";
-import PrivateRoute from "./contexts/PrivateRoute";
+import React from 'react';
+import { useRoutes, useLocation } from 'react-router-dom';
+import './index.css';
+import Login from './components/auth/login';
+import Register from './components/auth/register';
+import Header from './components/header';
+import Home from './components/home/Home';
+import ForgotPassword from './components/auth/forgot/';
+import { AuthProvider } from './contexts/authContext';
+import PrivateRoute from './contexts/PrivateRoute';
 import firebase from 'firebase/compat/app';
 import firebaseConfig from './firebase/firebase.js';
-import Main from "./components/main/main.jsx";
-import Profile from "./components/profile";
+import Main from './components/main/main.jsx';
+import Profile from './components/profile';
+import TermsAndConditions from './components/auth/terms/TermsConditions.jsx';
 
 firebase.initializeApp(firebaseConfig);
 
 function App() {
   const location = useLocation();
-
   const routesArray = [
     {
-      path: "/*",
+      path: '/*',
       element: <Main />,
     },
     {
-      path: "/login",
+      path: '/login',
       element: <Login />,
     },
     {
-      path: "/register",
+      path: '/register',
       element: <Register />,
     },
     {
-      path: "/forgot-password", 
+      path: '/forgot-password',
       element: <ForgotPassword />,
     },
     {
-      path: "/profile", 
-      element: <Profile />,
+      path: '/profile',
+      element: (
+        <>
+          <Header />
+          <Profile />
+        </>
+      ),
     },
     {
-      path: "/home",
+      path: '/terms',
+      element: <TermsAndConditions />,
+    },
+    {
+      path: '/home',
       element: (
-        <PrivateRoute>
-          <Home />
-        </PrivateRoute>
+        <>
+          <Header />
+          <PrivateRoute>
+            <Home />
+          </PrivateRoute>
+        </>
       ),
     },
   ];
 
-  const isMainPage = location.pathname === "/" || location.pathname === "/main";
+  const isTermsPage = location.pathname === '/terms';
+  const isMainPage = location.pathname === '/';
 
   let routesElement = useRoutes(routesArray);
 
   return (
     <AuthProvider>
-      {isMainPage ? null : <Header />}
-      <div className="h-screen flex flex-col mx-0 my-0 bg-main bg-cover bg-center backdrop-blur-sm">{routesElement}</div>
+      {!isTermsPage && !isMainPage && <Header />}
+      <div
+        className={`h-screen flex flex-col mx-0 my-0 ${isTermsPage ? 'bg-white' : 'bg-main bg-cover bg-center backdrop-blur-sm'}`}
+      >
+        {routesElement}
+      </div>
     </AuthProvider>
   );
 }

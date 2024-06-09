@@ -254,6 +254,14 @@ const ProfilePage = () => {
                       Contact Number: {verifiedPhoneNumber}
                     </p>
                   )}
+                  <p className="text-[#f4f4f4] text-md lg:text-xl mt-2">
+                    Child's Name or Nickname
+                  </p>
+                  <input
+                    type="text"
+                    placeholder="Enter here"
+                    className="mt-2 px-4 py-2 rounded-md bg-[#184e64] text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                 </div>
               </div>
             </div>
