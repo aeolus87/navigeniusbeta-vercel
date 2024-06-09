@@ -249,18 +249,21 @@ const ProfilePage = () => {
           {activeTab === 'Information' && (
             <div className="flex flex-col items-center justify-center w-full h-full">
               <div className="flex flex-col lg:flex-row items-center justify-center w-full lg:ml-64 ml-[5rem]">
-                <div className="relative size-24 lg:w-48 lg:h-48 rounded-full bg-white cursor-pointer flex items-center justify-center lg:mb-[30rem] lg:mr-8">
+                <div
+                  className="relative size-24 lg:w-48 lg:h-48 rounded-full bg-white cursor-pointer flex items-center justify-center lg:mb-[30rem] lg:mr-8"
+                  onClick={handleProfilePicClick}
+                >
                   {profileImage ? (
                     <img
                       src={profileImage}
                       alt="Profile"
                       className="rounded-full size-20 lg:w-44 lg:h-44"
-                      onClick={handleProfilePicClick}
                     />
                   ) : (
                     <span className="text-gray-500">No Image</span>
                   )}
                 </div>
+
                 <div className="flex flex-col bg-[#0c2734] rounded-2xl shadow-xl p-6 lg:w-[45rem] w-[15rem] lg:h-[30rem] h-[25rem] lg:mb-[14rem] mb-[24rem] ">
                   <p className="text-[#f4f4f4] text-lg lg:text-3xl font-bold">
                     {name}
