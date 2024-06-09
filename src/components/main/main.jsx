@@ -5,7 +5,9 @@ const Main = () => {
     <div className="flex items-center h-full bg-main bg-cover bg-center w-screen relative">
       {/* Big text in the top left corner */}
       <div className="absolute top-0 left-0 mt-8 ml-4 sm:ml-8">
-        <h1 className="text-white text-xl lg:text-3xl font-bold lg:ml-28 mt-4">NAVIGENIUS</h1>
+        <h1 className="text-white text-xl lg:text-3xl font-bold lg:ml-28 mt-4">
+          NAVIGENIUS
+        </h1>
       </div>
 
       {/* Center text */}
@@ -32,10 +34,14 @@ const Main = () => {
       {/* Buttons */}
       <div className="flex space-x-4 sm:space-x-8 absolute lg:bottom-24 bottom-[40%] left-8 lg:left-auto lg:ml-36">
         <a href="/login">
-          <button className="bg-red-500 text-white font-medium py-2 px-4 rounded-lg">Login</button>
+          <button className="bg-red-500 text-white font-medium py-2 px-4 rounded-lg">
+            Login
+          </button>
         </a>
         <a href="/register">
-          <button className="bg-red-500 text-white font-medium py-2 px-4 rounded-lg">Sign Up</button>
+          <button className="bg-red-500 text-white font-medium py-2 px-4 rounded-lg">
+            Sign Up
+          </button>
         </a>
       </div>
 

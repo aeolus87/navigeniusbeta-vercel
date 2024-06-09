@@ -10,7 +10,7 @@ import {
   signOut,
 } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
-import { db } from './firebase'; // Import the Firestore database instance
+import { db } from './firebase';
 
 export const doCreateUserWithEmailAndPassword = async (
   email,
@@ -48,7 +48,14 @@ export const doSignInWithGoogle = async () => {
 };
 
 export const doSignOut = () => {
-  return signOut(auth);
+  return signOut(auth)
+    .then(() => {
+      // Replace the current URL with the root path after successful logout
+      window.location.replace('/');
+    })
+    .catch((error) => {
+      console.error('Error signing out:', error);
+    });
 };
 
 export const doPasswordReset = (email) => {
