@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiInfo, FiLock, FiPhone, FiArrowLeft } from 'react-icons/fi';
+import { FiInfo, FiLock, FiPhone, FiArrowLeft, FiEdit } from 'react-icons/fi';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import {
@@ -30,6 +30,8 @@ const ProfilePage = () => {
   const [verificationCode, setVerificationCode] = useState('');
   const [verificationId, setVerificationId] = useState(null);
   const [verifiedPhoneNumber, setVerifiedPhoneNumber] = useState('');
+  const [childName, setChildName] = useState('');
+  const [isEditing, setIsEditing] = useState(false); // declare new state variable
 
   const navigate = useNavigate();
   const auth = getAuth();
@@ -45,8 +47,8 @@ const ProfilePage = () => {
           const userData = userDocSnapshot.data();
           setName(userData.fullname);
           setProfileImage(userData.profileImage);
-          // Set verifiedPhoneNumber if user's phone number is already verified
           setVerifiedPhoneNumber(userData.phone_number || '');
+          setChildName(userData.childName || '');
         } else {
           console.log('User document not found');
         }
@@ -105,7 +107,7 @@ const ProfilePage = () => {
           .then(() => {
             console.log('Phone number updated in Firestore database');
             toast.success('Your number is verified successfully!');
-            setVerifiedPhoneNumber(phoneNumber); // Update the verifiedPhoneNumber state
+            setVerifiedPhoneNumber(phoneNumber);
           })
           .catch((error) => {
             console.error('Error updating phone number in Firestore:', error);
@@ -193,6 +195,14 @@ const ProfilePage = () => {
     navigate('/home');
   };
 
+  const handleSaveChildName = async () => {
+    if (user) {
+      const userDocRef = doc(db, 'users', user.uid);
+      await updateDoc(userDocRef, { childName });
+      console.log('Child name saved successfully');
+    }
+  };
+
   return (
     <div className="flex justify-center items-center h-screen overflow-hidden">
       <div className="relative border-blue-950 rounded-md p-6 w-11/12 max-w-screen lg:h-4/5 h-[63%] max-h-screen-md bg-[#0c2734] shadow-xl">
@@ -206,21 +216,27 @@ const ProfilePage = () => {
         </div>
         <div className="absolute left-0 top-0 bottom-0 w-1/4 bg-[#184e64] rounded-l-md flex flex-col justify-center z-10">
           <button
-            className={`flex flex-col items-center text-white p-4 m-2 hover:bg-blue-700 rounded-lg ${activeTab === 'Information' ? 'bg-[#0c2734]' : ''}`}
+            className={`flex flex-col items-center text-white p-4 m-2 hover:bg-blue-700 rounded-lg ${
+              activeTab === 'Information' ? 'bg-[#0c2734]' : ''
+            }`}
             onClick={() => handleTabChange('Information')}
           >
             <FiInfo className="text-2xl" />
             <span className="hidden md:block mt-2 text-xl">Information</span>
           </button>
           <button
-            className={`flex flex-col items-center text-white p-4 m-2 hover:bg-blue-700 rounded-lg ${activeTab === 'Phone Number' ? 'bg-[#0c2734]' : ''}`}
+            className={`flex flex-col items-center text-white p-4 m-2 hover:bg-blue-700 rounded-lg ${
+              activeTab === 'Phone Number' ? 'bg-[#0c2734]' : ''
+            }`}
             onClick={() => handleTabChange('Phone Number')}
           >
             <FiPhone className="text-2xl" />
             <span className="hidden md:block mt-2 text-xl">Phone Number</span>
           </button>
           <button
-            className={`flex flex-col items-center text-white p-4 m-2 hover:bg-blue-700 rounded-lg ${activeTab === 'Change Password' ? 'bg-[#0c2734]' : ''}`}
+            className={`flex flex-col items-center text-white p-4 m-2 hover:bg-blue-700 rounded-lg ${
+              activeTab === 'Change Password' ? 'bg-[#0c2734]' : ''
+            }`}
             onClick={() => handleTabChange('Change Password')}
           >
             <FiLock className="text-2xl" />
@@ -233,15 +249,13 @@ const ProfilePage = () => {
           {activeTab === 'Information' && (
             <div className="flex flex-col items-center justify-center w-full h-full">
               <div className="flex flex-col lg:flex-row items-center justify-center w-full lg:ml-64 ml-[5rem]">
-                <div
-                  className="relative size-24 lg:w-48 lg:h-48 rounded-full bg-white cursor-pointer flex items-center justify-center lg:mb-[30rem] lg:mr-8"
-                  onClick={handleProfilePicClick}
-                >
+                <div className="relative size-24 lg:w-48 lg:h-48 rounded-full bg-white cursor-pointer flex items-center justify-center lg:mb-[30rem] lg:mr-8">
                   {profileImage ? (
                     <img
                       src={profileImage}
                       alt="Profile"
                       className="rounded-full size-20 lg:w-44 lg:h-44"
+                      onClick={handleProfilePicClick}
                     />
                   ) : (
                     <span className="text-gray-500">No Image</span>
@@ -257,13 +271,42 @@ const ProfilePage = () => {
                     </p>
                   )}
                   <p className="text-[#f4f4f4] text-md lg:text-xl mt-2">
-                    Child's Name or Nickname
+                    Child's First Name or Nickname
                   </p>
-                  <input
-                    type="text"
-                    placeholder="Enter here"
-                    className="mt-2 px-4 py-2 rounded-md bg-[#184e64] text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                  <div className="flex flex-col lg:flex-row">
+                    {!isEditing ? (
+                      <div className="flex">
+                        <p className="lg:mt-2 lg:max-w-xs rounded-md bg-[#0c2734] text-white lg:text-xl lg:ml-0 justify-start">
+                          {childName}
+                        </p>
+                        <button
+                          onClick={() => setIsEditing(true)}
+                          className="ml-2 mb-2 [#0c2734] hover:bg-blue-700 text-white font-bold px-2 py-2 rounded"
+                        >
+                          <FiEdit className="lg:text-2xl" />
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <input
+                          type="text"
+                          placeholder="Enter here"
+                          value={childName}
+                          onChange={(e) => setChildName(e.target.value)}
+                          className="mt-2 px-4 py-2 lg:max-w-xs rounded-md bg-[#184e64] text-white focus:outline-none focus:ring-2 focus:ring-blue-500 lg:mr-2 lg:text-lg"
+                        />
+                        <button
+                          onClick={() => {
+                            handleSaveChildName();
+                            setIsEditing(false);
+                          }}
+                          className="bg-[#0c2734] hover:bg-blue-700 text-white font-bold px-4 py-2 rounded mt-2 max-w-xs lg:mt-0"
+                        >
+                          Save
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
