@@ -175,7 +175,7 @@ const ProfilePage = () => {
       const credential = EmailAuthProvider.credential(user.email, oldPassword);
       await reauthenticateWithCredential(user, credential);
       await updatePassword(user, newPassword);
-      setSuccess('Password changed successfully');
+      toast('Password changed successfully');
       setOldPassword('');
       setNewPassword('');
       setConfirmPassword('');
