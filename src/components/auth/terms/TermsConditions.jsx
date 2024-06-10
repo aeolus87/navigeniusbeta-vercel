@@ -5,7 +5,7 @@ const TermsAndConditions = () => {
   const navigate = useNavigate();
 
   const handleBack = () => {
-    navigate('/register');
+    navigate(-1);
   };
 
   return (
