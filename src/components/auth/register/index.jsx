@@ -17,18 +17,9 @@ const Register = () => {
   const { userLoggedIn } = useAuth();
 
   useEffect(() => {
-    // Load agreedToTerms from localStorage on component mount
-    const storedAgreed = localStorage.getItem('agreedToTerms');
-    if (storedAgreed === 'true') {
-      setAgreedToTerms(true);
-    }
-  }, []);
-  useEffect(() => {
-    // Generate a session ID and store it in sessionStorage
     const sessionId = generateSessionId();
     sessionStorage.setItem('registrationSessionId', sessionId);
 
-    // Load form data from sessionStorage if available
     const savedFormData = sessionStorage.getItem('registerFormData');
     if (savedFormData) {
       const formData = JSON.parse(savedFormData);
@@ -41,7 +32,6 @@ const Register = () => {
   }, []);
 
   useEffect(() => {
-    // Save form data to sessionStorage when the component unmounts
     return () => {
       sessionStorage.setItem(
         'registerFormData',
