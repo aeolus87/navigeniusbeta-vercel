@@ -4,8 +4,7 @@ import { useNavigate } from 'react-router-dom';
 const TermsAndConditions = () => {
   const navigate = useNavigate();
 
-  const handleAgree = () => {
-    localStorage.setItem('agreedToTerms', 'true');
+  const handleBack = () => {
     navigate('/register');
   };
 
@@ -166,10 +165,10 @@ const TermsAndConditions = () => {
 
       <section className="mb-6 flex justify-center">
         <button
-          onClick={handleAgree}
+          onClick={handleBack}
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold mt-4 py-2 px-4 rounded"
         >
-          Agree
+          Back
         </button>
       </section>
     </div>
