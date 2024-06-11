@@ -15,6 +15,7 @@ import { db, storage } from '../../firebase/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import Modal from './modal/Modal';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 const ProfilePage = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -34,10 +35,21 @@ const ProfilePage = () => {
   const [verifiedPhoneNumber, setVerifiedPhoneNumber] = useState('');
   const [childName, setChildName] = useState('');
   const [isEditing, setIsEditing] = useState(false); // declare new state variable
+  const [loginActivities, setLoginActivities] = useState([]);
 
   const navigate = useNavigate();
   const auth = getAuth();
   const user = auth.currentUser;
+
+  useEffect(() => {
+    // Fetch login activities from the backend
+    axios
+      .get('http://localhost:5000/api/login-activities')
+      .then((response) => setLoginActivities(response.data))
+      .catch((error) =>
+        console.error('Error fetching login activities:', error),
+      );
+  }, []);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -308,10 +320,41 @@ const ProfilePage = () => {
                       </>
                     )}
                   </div>
+
+                  <p className="text-[#f4f4f4] text-md lg:text-xl mt-4">
+                    Account Login Activity
+                  </p>
+                  <div className="mt-4 overflow-x-auto">
+                    <table className="min-w-full bg-[#184e64] text-white rounded-md">
+                      <thead>
+                        <tr>
+                          <th className="px-4 py-2 text-left">Device</th>
+                          <th className="px-4 py-2 text-left">Location</th>
+                          <th className="px-4 py-2 text-left">Date</th>
+                          <th className="px-4 py-2 text-left">Time</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Array.isArray(loginActivities) &&
+                          loginActivities.map((activity, index) => (
+                            <tr
+                              key={index}
+                              className="border-t border-gray-700"
+                            >
+                              <td className="px-4 py-2">{activity.device}</td>
+                              <td className="px-4 py-2">{activity.location}</td>
+                              <td className="px-4 py-2">{activity.date}</td>
+                              <td className="px-4 py-2">{activity.time}</td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
           )}
+
           {activeTab === 'Change Password' && (
             <div className="lg:mx-auto py-2 lg:ml-[42%] mt-6 ml-[4.5rem] lg:h-[28rem] p-6 bg-[#0c2734] rounded-lg shadow-md">
               <h2 className="text-2xl font-semibold text-white mb-4">
