@@ -1,42 +1,27 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const twilio = require('twilio'); // Example: Using Twilio for sending SMS
+const cors = require('cors');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const port = 5000;
 
 app.use(bodyParser.json());
+app.use(cors());
 
-// Example: Set up Twilio client
-const twilioClient = twilio('TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN');
+let loginActivities = [];
 
-// Example: Route handler for sending OTP
-app.post('/api/send-otp', async (req, res) => {
-    const { phoneNumber } = req.body;
-
-    try {
-        // Generate OTP code
-        const otpCode = generateOTP();
-
-        // Send OTP code via SMS using Twilio
-        await twilioClient.messages.create({
-            body: `Your OTP code is: ${otpCode}`,
-            to: phoneNumber,
-            from: 'YOUR_TWILIO_PHONE_NUMBER'
-        });
-
-        res.status(200).json({ message: 'OTP sent successfully' });
-    } catch (error) {
-        console.error('Error sending OTP:', error);
-        res.status(500).json({ message: 'Failed to send OTP' });
-    }
+// API endpoint to get login activities
+app.get('/api/login-activities', (req, res) => {
+  res.json(loginActivities);
 });
 
-// Example: Function to generate random OTP
-function generateOTP() {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-}
+// API endpoint to add login activity
+app.post('/api/login-activities', (req, res) => {
+  const { device, location, date, time } = req.body;
+  loginActivities.push({ device, location, date, time });
+  res.status(201).send('Login activity recorded');
+});
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+app.listen(port, () => {
+  console.log(`Server running on http://localhost:${port}`);
 });
