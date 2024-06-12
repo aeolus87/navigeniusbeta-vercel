@@ -19,7 +19,7 @@ const Login = () => {
   const fetchLocation = async () => {
     try {
       const response = await axios.get(
-        `https://api.ipgeolocation.io/ipgeo?apiKey=YOUR_API_KEY`,
+        `https://api.ipgeolocation.io/ipgeo?apiKey=8362eae6c92f49fc829922a56425f748`,
       );
       return `${response.data.city}, ${response.data.country_name}`;
     } catch (error) {
