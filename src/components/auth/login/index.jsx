@@ -28,18 +28,21 @@ const Login = () => {
     }
   };
 
-  const logLoginActivity = async (device, location) => {
+  const logLoginActivity = async (userId, device, location) => {
     const date = new Date().toLocaleDateString();
     const time = new Date().toLocaleTimeString();
 
-    await axios.post('http://localhost:5000/api/login-activities', {
-      device,
-      location,
-      date,
-      time,
-    });
+    await axios.post(
+      'https://navigeniusbeta-vercel.vercel.app/api/login-activities',
+      {
+        userId,
+        device,
+        location,
+        date,
+        time,
+      },
+    );
   };
-
   const getOS = () => {
     const { userAgent } = navigator;
     if (userAgent.indexOf('Windows NT 10.0') !== -1) {
@@ -62,11 +65,11 @@ const Login = () => {
       setErrorMessage('');
 
       try {
-        await doSignInWithEmailAndPassword(email, password);
+        const { user } = await doSignInWithEmailAndPassword(email, password);
 
         const deviceInfo = `${platform.name} on ${getOS()}`;
         const location = await fetchLocation();
-        await logLoginActivity(deviceInfo, location);
+        await logLoginActivity(user.uid, deviceInfo, location);
       } catch (error) {
         console.error('Sign-in error:', error);
         if (error.code === 'auth/user-not-found') {
@@ -84,11 +87,16 @@ const Login = () => {
     if (!isSigningIn) {
       setIsSigningIn(true);
       try {
-        await doSignInWithGoogle();
+        const userCredential = await doSignInWithGoogle();
+        const user = userCredential.user;
 
-        const deviceInfo = `${platform.name} on ${getOS()}`;
-        const location = await fetchLocation();
-        await logLoginActivity(deviceInfo, location);
+        if (user) {
+          const deviceInfo = `${platform.name} on ${getOS()}`;
+          const location = await fetchLocation();
+          await logLoginActivity(user.uid, deviceInfo, location);
+        } else {
+          console.error('Google sign-in error: User not found');
+        }
       } catch (error) {
         console.error('Google sign-in error:', error);
         setIsSigningIn(false);

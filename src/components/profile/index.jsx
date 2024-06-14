@@ -42,13 +42,19 @@ const ProfilePage = () => {
   const user = auth.currentUser;
 
   useEffect(() => {
-    // Fetch login activities from the backend
-    axios
-      .get('http://localhost:5000/api/login-activities')
-      .then((response) => setLoginActivities(response.data))
-      .catch((error) =>
-        console.error('Error fetching login activities:', error),
-      );
+    const fetchLoginActivities = async () => {
+      try {
+        const userId = firebase.auth().currentUser?.uid;
+        const response = await axios.get(
+          `https://navigeniusbeta-vercel.vercel.app/api/login-activities?userId=${userId}`,
+        );
+        setLoginActivities(response.data);
+      } catch (error) {
+        console.error('Error fetching login activities:', error);
+      }
+    };
+
+    fetchLoginActivities();
   }, []);
 
   useEffect(() => {
