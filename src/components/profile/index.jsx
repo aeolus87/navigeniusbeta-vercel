@@ -42,7 +42,6 @@ const ProfilePage = () => {
   const user = auth.currentUser;
 
   useEffect(() => {
-<<<<<<< HEAD
     const fetchLoginActivities = async () => {
       try {
         const userId = firebase.auth().currentUser?.uid;
@@ -56,15 +55,6 @@ const ProfilePage = () => {
     };
 
     fetchLoginActivities();
-=======
-    // Fetch login activities from the backend
-    axios
-      .get('http://localhost:5000/api/login-activities')
-      .then((response) => setLoginActivities(response.data))
-      .catch((error) =>
-        console.error('Error fetching login activities:', error),
-      );
->>>>>>> c8b7fa12ed83303bef38358a3b5a96c01e2fc7ef
   }, []);
 
   useEffect(() => {

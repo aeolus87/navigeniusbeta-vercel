@@ -37,11 +37,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-<<<<<<< HEAD
     "start": "nodemon server.js",
-=======
-    "start": "react-scripts start",
->>>>>>> c8b7fa12ed83303bef38358a3b5a96c01e2fc7ef
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

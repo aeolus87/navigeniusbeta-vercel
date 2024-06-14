@@ -19,11 +19,7 @@ const Login = () => {
   const fetchLocation = async () => {
     try {
       const response = await axios.get(
-<<<<<<< HEAD
         `https://api.ipgeolocation.io/ipgeo?apiKey=8362eae6c92f49fc829922a56425f748`,
-=======
-        `https://api.ipgeolocation.io/ipgeo?apiKey=YOUR_API_KEY`,
->>>>>>> c8b7fa12ed83303bef38358a3b5a96c01e2fc7ef
       );
       return `${response.data.city}, ${response.data.country_name}`;
     } catch (error) {
@@ -32,7 +28,6 @@ const Login = () => {
     }
   };
 
-<<<<<<< HEAD
   const logLoginActivity = async (userId, device, location) => {
     const date = new Date().toLocaleDateString();
     const time = new Date().toLocaleTimeString();
@@ -48,20 +43,6 @@ const Login = () => {
       },
     );
   };
-=======
-  const logLoginActivity = async (device, location) => {
-    const date = new Date().toLocaleDateString();
-    const time = new Date().toLocaleTimeString();
-
-    await axios.post('http://localhost:5000/api/login-activities', {
-      device,
-      location,
-      date,
-      time,
-    });
-  };
-
->>>>>>> c8b7fa12ed83303bef38358a3b5a96c01e2fc7ef
   const getOS = () => {
     const { userAgent } = navigator;
     if (userAgent.indexOf('Windows NT 10.0') !== -1) {
@@ -84,19 +65,11 @@ const Login = () => {
       setErrorMessage('');
 
       try {
-<<<<<<< HEAD
         const { user } = await doSignInWithEmailAndPassword(email, password);
 
         const deviceInfo = `${platform.name} on ${getOS()}`;
         const location = await fetchLocation();
         await logLoginActivity(user.uid, deviceInfo, location);
-=======
-        await doSignInWithEmailAndPassword(email, password);
-
-        const deviceInfo = `${platform.name} on ${getOS()}`;
-        const location = await fetchLocation();
-        await logLoginActivity(deviceInfo, location);
->>>>>>> c8b7fa12ed83303bef38358a3b5a96c01e2fc7ef
       } catch (error) {
         console.error('Sign-in error:', error);
         if (error.code === 'auth/user-not-found') {
@@ -114,7 +87,6 @@ const Login = () => {
     if (!isSigningIn) {
       setIsSigningIn(true);
       try {
-<<<<<<< HEAD
         const userCredential = await doSignInWithGoogle();
         const user = userCredential.user;
 
@@ -125,13 +97,6 @@ const Login = () => {
         } else {
           console.error('Google sign-in error: User not found');
         }
-=======
-        await doSignInWithGoogle();
-
-        const deviceInfo = `${platform.name} on ${getOS()}`;
-        const location = await fetchLocation();
-        await logLoginActivity(deviceInfo, location);
->>>>>>> c8b7fa12ed83303bef38358a3b5a96c01e2fc7ef
       } catch (error) {
         console.error('Google sign-in error:', error);
         setIsSigningIn(false);
