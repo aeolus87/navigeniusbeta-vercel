@@ -45,7 +45,7 @@ const loginActivitySchema = new mongoose.Schema({
 const LoginActivity = mongoose.model('LoginActivity', loginActivitySchema);
 
 // API endpoint to get login activities
-app.get('/api/login-activities', async (req, res) => {
+app.get('/api/test', async (req, res) => {
   try {
     const userId = req.query.userId;
     const activities = await LoginActivity.find({ userId });
@@ -56,7 +56,7 @@ app.get('/api/login-activities', async (req, res) => {
 });
 
 // API endpoint to add login activity
-app.post('/api/login-activities', async (req, res) => {
+app.post('/api/login-test', async (req, res) => {
   const { userId, device, location, date, time } = req.body;
 
   if (!userId || !device || !location || !date || !time) {

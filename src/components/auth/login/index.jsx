@@ -32,16 +32,13 @@ const Login = () => {
     const date = new Date().toLocaleDateString();
     const time = new Date().toLocaleTimeString();
 
-    await axios.post(
-      'https://navigeniusbeta-vercel.vercel.app/api/login-activities',
-      {
-        userId,
-        device,
-        location,
-        date,
-        time,
-      },
-    );
+    await axios.post('https://navigeniusbeta-vercel.vercel.app/api/test', {
+      userId,
+      device,
+      location,
+      date,
+      time,
+    });
   };
   const getOS = () => {
     const { userAgent } = navigator;
