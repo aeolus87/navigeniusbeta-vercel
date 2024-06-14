@@ -42,6 +42,18 @@ const Login = () => {
   };
   const getOS = () => {
     const { userAgent } = navigator;
+
+    // Check for iOS devices
+    if (/iPad|iPhone|iPod/.test(userAgent)) {
+      return 'iOS';
+    }
+
+    // Check for Android devices
+    if (/Android/.test(userAgent)) {
+      return 'Android';
+    }
+
+    // Check for Windows devices
     if (userAgent.indexOf('Windows NT 10.0') !== -1) {
       if (
         userAgent.indexOf('Win64') !== -1 ||
@@ -51,10 +63,20 @@ const Login = () => {
       }
       return 'Windows 10';
     }
-    // Add other OS detections as needed
+
+    // Check for macOS devices
+    if (/Mac OS/.test(userAgent)) {
+      return 'macOS';
+    }
+
+    // Check for Linux devices
+    if (/Linux/.test(userAgent)) {
+      return 'Linux';
+    }
+
+    // If none of the above conditions are met, return the platform.os.family
     return platform.os.family || 'Unknown OS';
   };
-
   const onSubmit = async (e) => {
     e.preventDefault();
     if (!isSigningIn) {
