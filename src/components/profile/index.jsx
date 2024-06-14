@@ -46,7 +46,7 @@ const ProfilePage = () => {
       try {
         const userId = firebase.auth().currentUser?.uid;
         const response = await axios.get(
-          `https://navigeniusbeta-vercel.vercel.app/api/login-activities?userId=${userId}`,
+          `http://localhost:5000/api/login-activities?userId=${userId}`,
         );
         setLoginActivities(response.data);
       } catch (error) {

@@ -32,7 +32,7 @@ const Login = () => {
     const date = new Date().toLocaleDateString();
     const time = new Date().toLocaleTimeString();
 
-    await axios.post('https://navigeniusbeta-vercel.vercel.app/api/test', {
+    await axios.post('http://localhost:5000/api/login-activities', {
       userId,
       device,
       location,
