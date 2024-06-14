@@ -51,7 +51,7 @@ app.get('/api/login-activities', async (req, res) => {
     const activities = await LoginActivity.find({ userId });
     res.json(activities);
   } catch (error) {
-    res.status(500).send('Error fetching login activities');
+    res.status(500).send('Error fetching login activitiesss');
   }
 });
 
