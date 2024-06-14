@@ -7,7 +7,6 @@ import {
 import { useAuth } from '../../../contexts/authContext';
 import axios from 'axios';
 import platform from 'platform';
-import MobileDetect from 'mobile-detect';
 
 const Login = () => {
   const { userLoggedIn } = useAuth();
@@ -43,27 +42,44 @@ const Login = () => {
   };
 
   const getOS = () => {
-    const { os } = platform;
-    if (os.family === 'Windows') {
-      if (os.version === '10.0' && navigator.userAgent.includes('Win64')) {
+    const { userAgent } = navigator;
+
+    // Mobile device detection
+    if (/Android/i.test(userAgent)) {
+      const match = userAgent.match(/Android\s([0-9.]+)/);
+      const version = match ? match[1] : '';
+      const brand = userAgent
+        .match(/\((.+?)\)/)[1]
+        .split(';')[0]
+        .trim();
+      const model =
+        userAgent
+          .match(/\((.+?)\)/)[1]
+          .split(';')[2]
+          ?.trim() || 'Unknown Model';
+      return `Android ${version} (${brand} ${model})`;
+    }
+
+    if (/iPhone|iPad|iPod/i.test(userAgent)) {
+      const match = userAgent.match(/OS\s([0-9_]+)/);
+      const version = match ? match[1].replace(/_/g, '.') : '';
+      const device = userAgent.match(/\(([^;]+)/)[1];
+      return `iOS ${version} (${device})`;
+    }
+
+    // Desktop OS detection
+    if (userAgent.indexOf('Windows NT 10.0') !== -1) {
+      if (
+        userAgent.indexOf('Win64') !== -1 ||
+        userAgent.indexOf('WOW64') !== -1
+      ) {
         return 'Windows 11';
       }
       return 'Windows 10';
     }
-    if (os.family === 'iOS' || os.family === 'Android') {
-      return os.family;
-    }
-    return os.family || 'Unknown OS';
-  };
 
-  const getDeviceInfo = () => {
-    const md = new MobileDetect(window.navigator.userAgent);
-    const device = md.mobile() || md.tablet() || 'Desktop';
-    const os = getOS();
-    const browser = `${platform.name} ${platform.version}`;
-    const deviceModel = md.phone() || md.tablet() || 'Unknown Model';
-
-    return `${deviceModel} (${device}) on ${os} with ${browser}`;
+    // Add other OS detections as needed
+    return platform.os.family || 'Unknown OS';
   };
 
   const onSubmit = async (e) => {
@@ -75,7 +91,7 @@ const Login = () => {
       try {
         const { user } = await doSignInWithEmailAndPassword(email, password);
 
-        const deviceInfo = getDeviceInfo();
+        const deviceInfo = `${platform.name} on ${getOS()}`;
         const location = await fetchLocation();
         await logLoginActivity(user.uid, deviceInfo, location);
       } catch (error) {
@@ -99,7 +115,7 @@ const Login = () => {
         const user = userCredential.user;
 
         if (user) {
-          const deviceInfo = getDeviceInfo();
+          const deviceInfo = `${platform.name} on ${getOS()}`;
           const location = await fetchLocation();
           await logLoginActivity(user.uid, deviceInfo, location);
         } else {
@@ -111,10 +127,6 @@ const Login = () => {
       }
     }
   };
-
-  if (userLoggedIn) {
-    return <Navigate to="/" />;
-  }
 
   return (
     <div>
