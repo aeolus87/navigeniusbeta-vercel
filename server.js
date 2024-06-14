@@ -13,7 +13,10 @@ const mongourl = process.env.REACT_APP_MONGO_URL;
 app.use(bodyParser.json());
 
 // Configure CORS
-const allowedOrigins = ['https://navigeniusbeta-vercel.vercel.app'];
+const allowedOrigins = [
+  'https://navigeniusbeta-vercel.vercel.app',
+  'http://localhost:3000',
+];
 
 app.use(
   cors({
@@ -45,18 +48,18 @@ const loginActivitySchema = new mongoose.Schema({
 const LoginActivity = mongoose.model('LoginActivity', loginActivitySchema);
 
 // API endpoint to get login activities
-app.get('/api/test', async (req, res) => {
+app.get('/api/login-activities', async (req, res) => {
   try {
     const userId = req.query.userId;
     const activities = await LoginActivity.find({ userId });
     res.json(activities);
   } catch (error) {
-    res.status(500).send('Error fetching login activitiesss');
+    res.status(500).send('Error fetching login activities');
   }
 });
 
 // API endpoint to add login activity
-app.post('/api/login-test', async (req, res) => {
+app.post('/api/login-activities', async (req, res) => {
   const { userId, device, location, date, time } = req.body;
 
   if (!userId || !device || !location || !date || !time) {
@@ -77,6 +80,12 @@ app.post('/api/login-test', async (req, res) => {
     res.status(500).send('Error recording login activity');
   }
 });
+
+// Sample test endpoint
+app.post('/api/test', (req, res) => {
+  res.send('Test endpoint working');
+});
+
 // Connect to MongoDB
 mongoose
   .connect(mongourl)
