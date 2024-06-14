@@ -77,7 +77,6 @@ app.post('/api/login-activities', async (req, res) => {
     res.status(500).send('Error recording login activity');
   }
 });
-
 // Connect to MongoDB
 mongoose
   .connect(mongourl)
