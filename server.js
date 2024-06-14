@@ -56,6 +56,7 @@ app.get('/api/login-activities', async (req, res) => {
 });
 
 // API endpoint to add login activity
+// API endpoint to add login activity
 app.post('/api/login-activities', async (req, res) => {
   const { userId, device, location, date, time } = req.body;
 
