@@ -8,6 +8,9 @@ import { useAuth } from '../../../contexts/authContext';
 import axios from 'axios';
 import platform from 'platform';
 
+const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+
 const Login = () => {
   const { userLoggedIn } = useAuth();
 
@@ -32,17 +35,26 @@ const Login = () => {
     const date = new Date().toLocaleDateString();
     const time = new Date().toLocaleTimeString();
 
-    await axios.post('http://localhost:5000/api/login-activities', {
-      userId,
-      device,
-      location,
-      date,
-      time,
-    });
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/api/login-activities`,
+        {
+          userId,
+          device,
+          location,
+          date,
+          time,
+        },
+      );
+      console.log('Login activity logged:', response.data);
+    } catch (error) {
+      console.error('Error logging login activity:', error);
+    }
   };
 
   const getOS = () => {
     const { userAgent } = navigator;
+    console.log('User Agent:', userAgent);
 
     // Mobile device detection
     if (/Android/i.test(userAgent)) {
@@ -57,14 +69,18 @@ const Login = () => {
           .match(/\((.+?)\)/)[1]
           .split(';')[2]
           ?.trim() || 'Unknown Model';
-      return `Android ${version} (${brand} ${model})`;
+      const result = `Android ${version} (${brand} ${model})`;
+      console.log('Detected OS:', result);
+      return result;
     }
 
     if (/iPhone|iPad|iPod/i.test(userAgent)) {
       const match = userAgent.match(/OS\s([0-9_]+)/);
       const version = match ? match[1].replace(/_/g, '.') : '';
       const device = userAgent.match(/\(([^;]+)/)[1];
-      return `iOS ${version} (${device})`;
+      const result = `iOS ${version} (${device})`;
+      console.log('Detected OS:', result);
+      return result;
     }
 
     // Desktop OS detection
@@ -93,6 +109,11 @@ const Login = () => {
 
         const deviceInfo = `${platform.name} on ${getOS()}`;
         const location = await fetchLocation();
+        console.log('Logging activity:', {
+          userId: user.uid,
+          deviceInfo,
+          location,
+        });
         await logLoginActivity(user.uid, deviceInfo, location);
       } catch (error) {
         console.error('Sign-in error:', error);
@@ -117,6 +138,11 @@ const Login = () => {
         if (user) {
           const deviceInfo = `${platform.name} on ${getOS()}`;
           const location = await fetchLocation();
+          console.log('Logging activity:', {
+            userId: user.uid,
+            deviceInfo,
+            location,
+          });
           await logLoginActivity(user.uid, deviceInfo, location);
         } else {
           console.error('Google sign-in error: User not found');

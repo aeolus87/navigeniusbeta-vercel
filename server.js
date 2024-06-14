@@ -11,7 +11,13 @@ const port = process.env.REACT_APP_PORT || 5000;
 const mongourl = process.env.REACT_APP_MONGO_URL;
 
 app.use(bodyParser.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: '*', // Be cautious with this in production
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  }),
+);
 
 // Define a schema for login activities
 const loginActivitySchema = new mongoose.Schema({
@@ -29,8 +35,10 @@ app.get('/api/login-activities', async (req, res) => {
   try {
     const userId = req.query.userId;
     const activities = await LoginActivity.find({ userId });
+    console.log(`Fetched ${activities.length} activities for user ${userId}`);
     res.json(activities);
   } catch (error) {
+    console.error('Error fetching login activities:', error);
     res.status(500).send('Error fetching login activities');
   }
 });
@@ -52,8 +60,10 @@ app.post('/api/login-activities', async (req, res) => {
       time,
     });
     await newActivity.save();
+    console.log('New login activity recorded:', newActivity);
     res.status(201).send('Login activity recorded');
   } catch (error) {
+    console.error('Error recording login activity:', error);
     res.status(500).send('Error recording login activity');
   }
 });
