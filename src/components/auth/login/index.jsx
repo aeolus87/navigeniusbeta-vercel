@@ -7,6 +7,7 @@ import {
 import { useAuth } from '../../../contexts/authContext';
 import axios from 'axios';
 import platform from 'platform';
+import MobileDetect from 'mobile-detect';
 
 const Login = () => {
   const { userLoggedIn } = useAuth();
@@ -40,43 +41,31 @@ const Login = () => {
       time,
     });
   };
+
   const getOS = () => {
-    const { userAgent } = navigator;
-
-    // Check for iOS devices
-    if (/iPad|iPhone|iPod/.test(userAgent)) {
-      return 'iOS';
-    }
-
-    // Check for Android devices
-    if (/Android/.test(userAgent)) {
-      return 'Android';
-    }
-
-    // Check for Windows devices
-    if (userAgent.indexOf('Windows NT 10.0') !== -1) {
-      if (
-        userAgent.indexOf('Win64') !== -1 ||
-        userAgent.indexOf('WOW64') !== -1
-      ) {
+    const { os } = platform;
+    if (os.family === 'Windows') {
+      if (os.version === '10.0' && navigator.userAgent.includes('Win64')) {
         return 'Windows 11';
       }
       return 'Windows 10';
     }
-
-    // Check for macOS devices
-    if (/Mac OS/.test(userAgent)) {
-      return 'macOS';
+    if (os.family === 'iOS' || os.family === 'Android') {
+      return os.family;
     }
-
-    // Check for Linux devices
-    if (/Linux/.test(userAgent)) {
-      return 'Linux';
-    }
-
-    // If none of the above conditions are met, return the platform.os.family
-    return platform.os.family || 'Unknown OS';
+    return os.family || 'Unknown OS';
   };
+
+  const getDeviceInfo = () => {
+    const md = new MobileDetect(window.navigator.userAgent);
+    const device = md.mobile() || md.tablet() || 'Desktop';
+    const os = getOS();
+    const browser = `${platform.name} ${platform.version}`;
+    const deviceModel = md.phone() || md.tablet() || 'Unknown Model';
+
+    return `${deviceModel} (${device}) on ${os} with ${browser}`;
+  };
+
   const onSubmit = async (e) => {
     e.preventDefault();
     if (!isSigningIn) {
@@ -86,7 +75,7 @@ const Login = () => {
       try {
         const { user } = await doSignInWithEmailAndPassword(email, password);
 
-        const deviceInfo = `${platform.name} on ${getOS()}`;
+        const deviceInfo = getDeviceInfo();
         const location = await fetchLocation();
         await logLoginActivity(user.uid, deviceInfo, location);
       } catch (error) {
@@ -110,7 +99,7 @@ const Login = () => {
         const user = userCredential.user;
 
         if (user) {
-          const deviceInfo = `${platform.name} on ${getOS()}`;
+          const deviceInfo = getDeviceInfo();
           const location = await fetchLocation();
           await logLoginActivity(user.uid, deviceInfo, location);
         } else {
@@ -122,6 +111,10 @@ const Login = () => {
       }
     }
   };
+
+  if (userLoggedIn) {
+    return <Navigate to="/" />;
+  }
 
   return (
     <div>
