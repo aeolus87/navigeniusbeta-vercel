@@ -4,6 +4,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const compression = require('compression');
+const path = require('path');
 
 require('dotenv').config({ path: './.env.local' });
 
@@ -24,7 +25,6 @@ const allowedOrigins = [
 // Configure CORS to allow requests from specified origins
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
 
     if (allowedOrigins.indexOf(origin) === -1) {
@@ -94,8 +94,20 @@ mongoose
   .connect(mongourl)
   .then(() => {
     console.log('Database is connected successfully.');
+
+    // Serve the React app
+    if (process.env.NODE_ENV === 'production') {
+      app.use(express.static(path.join(__dirname, '../src/build')));
+
+      app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, '../src/build', 'index.html'));
+      });
+    }
+
     app.listen(port, () => {
       console.log(`Server running on port ${port}`);
     });
   })
   .catch((error) => console.error('Database connection error:', error));
+
+module.exports = app;
