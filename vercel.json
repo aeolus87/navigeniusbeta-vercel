@@ -12,6 +12,12 @@
   "routes": [
     { "src": "/api/(.*)", "dest": "backend/server.js" },
     { "src": "^/static/(.*)", "dest": "/src/static/$1" },
-    { "src": ".*", "dest": "/src/index.html" }
+    { "src": "^/components/(.*)", "dest": "/src/components/$1" },
+    { "src": "^/contexts/(.*)", "dest": "/src/contexts/$1" },
+    { "src": "^/firebase/(.*)", "dest": "/src/firebase/$1" },
+    { "src": "^/App.js", "dest": "/src/App.js" },
+    { "src": "^/index.js", "dest": "/src/index.js" },
+    { "src": "^/index.html", "dest": "/public/index.html" },
+    { "src": ".*", "dest": "/public/index.html" }
   ]
 }
