@@ -1,7 +1,7 @@
 {
   "builds": [
     {
-      "src": "./package.json",
+      "src": "./src/package.json",
       "use": "@vercel/static-build",
       "config": {
         "distDir": "build"
@@ -19,7 +19,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/"
+      "dest": "src/build/$1"
     }
   ]
 }
