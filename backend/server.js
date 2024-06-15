@@ -39,7 +39,6 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Define a schema for login activities
 const loginActivitySchema = new mongoose.Schema({
   userId: String,
   device: String,
