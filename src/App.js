@@ -1,17 +1,17 @@
 import React from 'react';
 import { useRoutes, useLocation, Navigate } from 'react-router-dom';
 import './index.css';
-import Login from './components/auth/login';
-import Register from './components/auth/register';
-import Header from './components/header';
-import Home from './components/home/Home';
-import ForgotPassword from './components/auth/forgot/';
-import { AuthProvider } from './contexts/authContext';
-import PrivateRoute from './contexts/PrivateRoute';
+import Login from './components/auth/login/index.jsx';
+import Register from './components/auth/register/index.jsx';
+import Header from './components/header/index.jsx';
+import Home from './components/home/Home.jsx';
+import ForgotPassword from './components/auth/forgot/index.jsx';
+import { AuthProvider } from './contexts/authContext/index.jsx';
+import PrivateRoute from './contexts/PrivateRoute.js';
 import firebase from 'firebase/compat/app';
 import firebaseConfig from './firebase/firebase.js';
 import Main from './components/main/main.jsx';
-import Profile from './components/profile';
+import Profile from './components/profile/index.jsx';
 import TermsAndConditions from './components/auth/terms/TermsConditions.jsx';
 
 firebase.initializeApp(firebaseConfig);
