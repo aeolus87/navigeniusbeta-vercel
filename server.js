@@ -1,19 +1,28 @@
-const dotenv = require('dotenv');
-dotenv.config({ path: './.env.local' });
+require('dotenv').config({ path: './.env.local' });
 
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const helmet = require('helmet');
+const compression = require('compression');
 
 const app = express();
-const port = process.env.REACT_APP_PORT || 5000;
-const mongourl = process.env.REACT_APP_MONGO_URL;
+const port = process.env.PORT || 5000;
+const mongourl = process.env.MONGO_URL;
+
+process.env.NODE_ENV = 'production';
 
 app.use(bodyParser.json());
+app.use(helmet());
+app.use(compression());
+
 app.use(
   cors({
-    origin: '*', // Be cautious with this in production
+    origin: [
+      'https://navigeniusbeta-vercel.vercel.app',
+      'http://localhost:3000',
+    ],
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   }),
@@ -39,7 +48,7 @@ app.get('/api/login-activities', async (req, res) => {
     res.json(activities);
   } catch (error) {
     console.error('Error fetching login activities:', error);
-    res.status(500).send('Error fetching login activities');
+    res.status(500).json({ error: 'Error fetching login activities' });
   }
 });
 
@@ -48,7 +57,7 @@ app.post('/api/login-activities', async (req, res) => {
   const { userId, device, location, date, time } = req.body;
 
   if (!userId || !device || !location || !date || !time) {
-    return res.status(400).send('All fields are required');
+    return res.status(400).json({ error: 'All fields are required' });
   }
 
   try {
@@ -61,10 +70,10 @@ app.post('/api/login-activities', async (req, res) => {
     });
     await newActivity.save();
     console.log('New login activity recorded:', newActivity);
-    res.status(201).send('Login activity recorded');
+    res.status(201).json({ message: 'Login activity recorded' });
   } catch (error) {
     console.error('Error recording login activity:', error);
-    res.status(500).send('Error recording login activity');
+    res.status(500).json({ error: 'Error recording login activity' });
   }
 });
 
@@ -74,7 +83,7 @@ mongoose
   .then(() => {
     console.log('Database is connected successfully.');
     app.listen(port, () => {
-      console.log(`Server running on http://localhost:${port}`);
+      console.log(`Server running on port ${port}`);
     });
   })
-  .catch((error) => console.log(error));
+  .catch((error) => console.error('Database connection error:', error));
