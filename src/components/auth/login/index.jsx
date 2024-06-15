@@ -7,6 +7,7 @@ import {
 import { useAuth } from '../../../contexts/authContext';
 import axios from 'axios';
 import platform from 'platform';
+require('dotenv').config();
 
 const GEOLOCATION_API_KEY = process.env.REACT_APP_GEOLOCATION_API_KEY;
 const API_BASE_URL =
