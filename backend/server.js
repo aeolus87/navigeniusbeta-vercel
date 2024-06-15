@@ -69,7 +69,7 @@ app.post('/api/login-activities', async (req, res) => {
   const { userId, device, location, date, time } = req.body;
 
   if (!userId || !device || !location || !date || !time) {
-    return res.status(400).json({ error: 'All fields are required' });
+    return res.status(400).json({ error: 'All fields are required!' });
   }
 
   try {
