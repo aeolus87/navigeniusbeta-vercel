@@ -8,6 +8,7 @@ import { useAuth } from '../../../contexts/authContext';
 import axios from 'axios';
 import platform from 'platform';
 
+const GEOLOCATION_API_KEY = process.env.REACT_APP_GEOLOCATION_API_KEY;
 const API_BASE_URL =
   process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
 
@@ -22,7 +23,7 @@ const Login = () => {
   const fetchLocation = async () => {
     try {
       const response = await axios.get(
-        `https://api.ipgeolocation.io/ipgeo?apiKey=8362eae6c92f49fc829922a56425f748`,
+        `https://api.ipgeolocation.io/ipgeo?apiKey=${GEOLOCATION_API_KEY}`,
       );
       return `${response.data.city}, ${response.data.country_name}`;
     } catch (error) {
@@ -56,7 +57,6 @@ const Login = () => {
     const { userAgent } = navigator;
     console.log('User Agent:', userAgent);
 
-    // Mobile device detection
     if (/Android/i.test(userAgent)) {
       const match = userAgent.match(/Android\s([0-9.]+)/);
       const version = match ? match[1] : '';
@@ -83,7 +83,6 @@ const Login = () => {
       return result;
     }
 
-    // Desktop OS detection
     if (userAgent.indexOf('Windows NT 10.0') !== -1) {
       if (
         userAgent.indexOf('Win64') !== -1 ||
@@ -94,7 +93,6 @@ const Login = () => {
       return 'Windows 10';
     }
 
-    // Add other OS detections as needed
     return platform.os.family || 'Unknown OS';
   };
 
@@ -115,6 +113,7 @@ const Login = () => {
           location,
         });
         await logLoginActivity(user.uid, deviceInfo, location);
+        userLoggedIn(user);
       } catch (error) {
         console.error('Sign-in error:', error);
         if (error.code === 'auth/user-not-found') {
@@ -144,6 +143,7 @@ const Login = () => {
             location,
           });
           await logLoginActivity(user.uid, deviceInfo, location);
+          userLoggedIn(user);
         } else {
           console.error('Google sign-in error: User not found');
         }

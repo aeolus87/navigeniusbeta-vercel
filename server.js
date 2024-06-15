@@ -1,5 +1,3 @@
-require('dotenv').config({ path: './.env.local' });
-
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -7,26 +5,39 @@ const mongoose = require('mongoose');
 const helmet = require('helmet');
 const compression = require('compression');
 
+require('dotenv').config({ path: './.env.local' });
+
 const app = express();
 const port = process.env.PORT || 5000;
 const mongourl = process.env.MONGO_URL;
-
-process.env.NODE_ENV = 'production';
 
 app.use(bodyParser.json());
 app.use(helmet());
 app.use(compression());
 
-app.use(
-  cors({
-    origin: [
-      'https://navigeniusbeta-vercel.vercel.app',
-      'http://localhost:3000',
-    ],
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  }),
-);
+// Define CORS configuration
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://navigeniusbeta-vercel.vercel.app',
+];
+
+// Configure CORS to allow requests from specified origins
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
 
 // Define a schema for login activities
 const loginActivitySchema = new mongoose.Schema({
