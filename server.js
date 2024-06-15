@@ -9,7 +9,7 @@ require('dotenv').config({ path: './.env.local' });
 
 const app = express();
 const port = process.env.PORT || 5000;
-const mongourl = process.env.MONGO_URL;
+const mongourl = process.env.MONGO_URI;
 
 app.use(bodyParser.json());
 app.use(helmet());
