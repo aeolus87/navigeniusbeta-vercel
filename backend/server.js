@@ -16,7 +16,6 @@ app.use(bodyParser.json());
 app.use(helmet());
 app.use(compression());
 
-// Define CORS configuration
 const allowedOrigins = [
   'http://localhost:3000',
   'https://navigeniusbeta-vercel.vercel.app',
