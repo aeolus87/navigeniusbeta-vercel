@@ -276,7 +276,9 @@ const ProfilePage = () => {
                       className="rounded-full size-20 lg:w-44 lg:h-44"
                     />
                   ) : (
-                    <span className="text-gray-500">No Image</span>
+                    <span className="text-gray-500">
+                      Choose Profile Picture
+                    </span>
                   )}
                 </div>
 
@@ -284,11 +286,10 @@ const ProfilePage = () => {
                   <p className="text-[#f4f4f4] text-lg lg:text-3xl font-bold">
                     {name}
                   </p>
-                  {verifiedPhoneNumber && (
-                    <p className="text-[#f4f4f4] text-md lg:text-xl mt-2">
-                      Contact Number: {verifiedPhoneNumber}
-                    </p>
-                  )}
+                  <p className="text-[#f4f4f4] text-md lg:text-xl mt-2">
+                    Contact Number:{' '}
+                    {verifiedPhoneNumber ? verifiedPhoneNumber : 'Not verified'}
+                  </p>
                   <p className="text-[#f4f4f4] text-md lg:text-xl mt-2">
                     Child's First Name or Nickname
                   </p>
