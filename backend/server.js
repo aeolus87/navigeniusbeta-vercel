@@ -88,13 +88,9 @@ app.post('/api/login-activities', async (req, res) => {
 });
 
 mongoose
-
   .connect(mongourl, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    useCreateIndex: true,
-    useFindAndModify: false,
-    dbName: 'test', // Replace with your actual database name
   })
   .then(() => {
     console.log('Database is connected successfully.');
