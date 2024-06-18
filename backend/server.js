@@ -86,17 +86,28 @@ app.post('/api/login-activities', async (req, res) => {
   }
 });
 
-// Connect to MongoDB
 mongoose
+
   .connect(mongourl, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+    useCreateIndex: true,
+    useFindAndModify: false,
+    dbName: 'test', // Replace with your actual database name
   })
   .then(() => {
     console.log('Database is connected successfully.');
-    app.listen(port, () => {
+    app.listen(port, '0.0.0.0', () => {
       console.log(`Server running on port ${port}`);
     });
   })
-  .catch((error) => console.error('Database connection error:', error));
+  .catch((error) => {
+    console.error('Database connection error:', error);
+    // Start the server even if database connection fails
+    app.listen(port, '0.0.0.0', () => {
+      console.log(
+        `Server running on port ${port} (without database connection)`,
+      );
+    });
+  });
 module.exports = app;
