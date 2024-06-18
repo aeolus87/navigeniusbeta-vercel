@@ -9,9 +9,7 @@ require('dotenv').config({ path: './.env.backend' });
 
 const app = express();
 const port = process.env.PORT || 5000;
-const mongourl =
-  process.env.MONGODB_URI ||
-  'mongodb+srv://vercel-admin-user:Wowgrabekana2024@cluster0.332unha.mongodb.net/test';
+const mongourl = process.env.MONGODB_URI;
 console.log('MongoDB URI:', mongourl);
 app.use(bodyParser.json());
 app.use(helmet());
