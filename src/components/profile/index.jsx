@@ -35,7 +35,7 @@ const ProfilePage = () => {
   const [verifiedPhoneNumber, setVerifiedPhoneNumber] = useState('');
   const [childName, setChildName] = useState('');
   const [isEditing, setIsEditing] = useState(false); // declare new state variable
-  const [loginActivities, setLoginActivities] = useState([]);
+  const [sortedLoginActivities, setSortedLoginActivities] = useState([]);
 
   const navigate = useNavigate();
   const auth = getAuth();
@@ -48,7 +48,12 @@ const ProfilePage = () => {
         const response = await axios.get(
           `https://navigeniusbeta-vercel-backend.onrender.com/api/login-activities?userId=${userId}`,
         );
-        setLoginActivities(response.data);
+        const sortedActivities = response.data.sort((a, b) => {
+          const dateA = new Date(`${a.date} ${a.time}`);
+          const dateB = new Date(`${b.date} ${b.time}`);
+          return dateB - dateA; // Sort in descending order (latest first)
+        });
+        setSortedLoginActivities(sortedActivities);
       } catch (error) {
         console.error('Error fetching login activities:', error);
       }
@@ -286,7 +291,7 @@ const ProfilePage = () => {
                   <p className="text-[#f4f4f4] text-lg lg:text-3xl font-bold">
                     {name}
                   </p>
-                  <p className="text-[#f4f4f4] text-md lg:text-xl mt-2">
+                  <p className="text-[#f4f4f4] text-md lg:text-xl lg:mt-2">
                     Contact Number:{' '}
                     {verifiedPhoneNumber ? verifiedPhoneNumber : 'Not verified'}
                   </p>
@@ -328,11 +333,11 @@ const ProfilePage = () => {
                     )}
                   </div>
 
-                  <p className="text-[#f4f4f4] text-md lg:text-xl mt-4">
+                  <p className="text-[#f4f4f4] text-md lg:text-xl">
                     Account Login Activity
                   </p>
-                  <div className="mt-4 overflow-x-auto">
-                    <table className="min-w-full bg-[#184e64] text-white rounded-md">
+                  <div className="overflow-x-auto rounded-md lg:mt-3">
+                    <table className="lg:min-w-full  bg-[#184e64] text-white rounded-md">
                       <thead>
                         <tr>
                           <th className="px-4 py-2 text-left">Device</th>
@@ -342,16 +347,24 @@ const ProfilePage = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {Array.isArray(loginActivities) &&
-                          loginActivities.map((activity, index) => (
+                        {Array.isArray(sortedLoginActivities) &&
+                          sortedLoginActivities.map((activity, index) => (
                             <tr
                               key={index}
                               className="border-t border-gray-700"
                             >
-                              <td className="px-4 py-2">{activity.device}</td>
-                              <td className="px-4 py-2">{activity.location}</td>
-                              <td className="px-4 py-2">{activity.date}</td>
-                              <td className="px-4 py-2">{activity.time}</td>
+                              <td className="px-2 py-2 whitespace-nowrap">
+                                {activity.device}
+                              </td>
+                              <td className="px-2 py-2 whitespace-nowrap">
+                                {activity.location}
+                              </td>
+                              <td className="px-2 py-2 whitespace-nowrap">
+                                {activity.date}
+                              </td>
+                              <td className="px-2 py-2 whitespace-nowrap">
+                                {activity.time}
+                              </td>
                             </tr>
                           ))}
                       </tbody>
