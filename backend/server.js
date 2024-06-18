@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const helmet = require('helmet');
 const compression = require('compression');
 
-require('dotenv').config({ path: './.env' });
+require('dotenv').config({ path: './.env.backend' });
 
 const app = express();
 const port = process.env.PORT || 5000;
