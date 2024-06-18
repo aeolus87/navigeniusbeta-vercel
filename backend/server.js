@@ -6,7 +6,7 @@ const helmet = require('helmet');
 const compression = require('compression');
 const path = require('path');
 
-require('dotenv').config({ path: './.env.local' });
+require('dotenv').config({ path: './.env' });
 
 const app = express();
 const port = process.env.PORT || 5000;
