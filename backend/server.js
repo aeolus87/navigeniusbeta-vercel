@@ -4,7 +4,6 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const compression = require('compression');
-const path = require('path');
 
 require('dotenv').config({ path: './.env' });
 
@@ -92,15 +91,6 @@ mongoose
   .connect(mongourl)
   .then(() => {
     console.log('Database is connected successfully.');
-
-    // Serve the React app
-    if (process.env.NODE_ENV === 'production') {
-      app.use(express.static(path.join(__dirname, '../src/build')));
-
-      app.get('*', (req, res) => {
-        res.sendFile(path.join(__dirname, '../src/build', 'index.html'));
-      });
-    }
 
     app.listen(port, () => {
       console.log(`Server running on port ${port}`);
