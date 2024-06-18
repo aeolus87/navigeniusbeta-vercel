@@ -88,10 +88,7 @@ app.post('/api/login-activities', async (req, res) => {
 });
 
 mongoose
-  .connect(mongourl, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(mongourl)
   .then(() => {
     console.log('Database is connected successfully.');
     app.listen(port, '0.0.0.0', () => {
