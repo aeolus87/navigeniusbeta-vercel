@@ -20,7 +20,6 @@ const allowedOrigins = [
   'https://navigeniusbeta-vercel.vercel.app',
 ];
 
-// Configure CORS to allow requests from specified origins
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
