@@ -9,8 +9,7 @@ import axios from 'axios';
 import platform from 'platform';
 
 const GEOLOCATION_API_KEY = process.env.REACT_APP_GEOLOCATION_API_KEY;
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+const API_BASE_URL = 'https://navigeniusbeta-vercel-backend.onrender.com';
 
 const Login = () => {
   const { userLoggedIn } = useAuth();
