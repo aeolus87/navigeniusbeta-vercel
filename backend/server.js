@@ -88,14 +88,15 @@ app.post('/api/login-activities', async (req, res) => {
 
 // Connect to MongoDB
 mongoose
-  .connect(mongourl)
+  .connect(mongourl, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
     console.log('Database is connected successfully.');
-
     app.listen(port, () => {
       console.log(`Server running on port ${port}`);
     });
   })
   .catch((error) => console.error('Database connection error:', error));
-
 module.exports = app;
