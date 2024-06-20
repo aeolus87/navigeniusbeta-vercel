@@ -333,11 +333,12 @@ const ProfilePage = () => {
                     )}
                   </div>
 
-                  <p className="text-[#f4f4f4] text-md lg:text-xl">
+                  <p className="text-[#f4f4f4] text-md lg:text-xl mt-2">
                     Account Login Activity
                   </p>
                   <div className="overflow-x-auto rounded-md lg:mt-3">
-                    <table className="lg:min-w-full  bg-[#184e64] text-white rounded-md">
+                    {/* Render the table for large screens */}
+                    <table className="lg:min-w-full bg-[#184e64] text-white rounded-md lg:block hidden">
                       <thead>
                         <tr>
                           <th className="px-4 py-2 text-left">Device</th>
@@ -369,6 +370,14 @@ const ProfilePage = () => {
                           ))}
                       </tbody>
                     </table>
+                    <button
+                      className="lg:hidden block bg-[#184e64] hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2 w-full"
+                      onClick={() => {
+                        // Open a modal or navigate to a new page to show the login activities
+                      }}
+                    >
+                      Where you're logged in
+                    </button>
                   </div>
                 </div>
               </div>
