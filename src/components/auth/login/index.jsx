@@ -55,17 +55,11 @@ const Login = () => {
   const getOS = () => {
     const { userAgent } = navigator;
     if (/Android/i.test(userAgent)) {
-      const match = userAgent.match(/\((.*?)\)/);
+      const match = userAgent.match(/(?:;\s*(.+?)\s*Build)/);
       if (match) {
-        const details = match[1].split(';').map((detail) => detail.trim());
-        const brand = details[0];
-        let model = 'Unknown Model';
-        if (details.length > 2) {
-          model = details[2];
-        }
-        const result = `${brand} ${model}`;
-        console.log('Detected Device:', result);
-        return result;
+        const deviceName = match[1];
+        console.log('Detected Device:', deviceName);
+        return deviceName;
       }
     }
     if (/iPhone|iPad|iPod/i.test(userAgent)) {
