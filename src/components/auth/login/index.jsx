@@ -55,21 +55,25 @@ const Login = () => {
   const getOS = () => {
     const { userAgent } = navigator;
     if (/Android/i.test(userAgent)) {
-      const match = userAgent.match(/\((.+?)\)/);
-      if (match) {
-        const details = match[1].split(';');
-        const deviceName = details[details.length - 1].trim();
-        console.log('Detected Device:', deviceName);
-        return deviceName;
-      }
+      console.log('Detected Device:', 'Android');
+      return 'Android';
     }
     if (/iPhone|iPad|iPod/i.test(userAgent)) {
-      const device = userAgent
-        .match(/\((.*?)\)/)[1]
-        .split(';')[0]
-        .trim();
-      console.log('Detected Device:', device);
-      return device;
+      if (
+        /iPhone/i.test(userAgent) ||
+        /CriOS/i.test(userAgent) ||
+        /FxiOS/i.test(userAgent)
+      ) {
+        console.log('Detected Device:', 'iPhone');
+        return 'iPhone';
+      } else {
+        const device = userAgent
+          .match(/\((.*?)\)/)[1]
+          .split(';')[0]
+          .trim();
+        console.log('Detected Device:', device);
+        return device;
+      }
     }
     if (userAgent.indexOf('Windows NT 10.0') !== -1) {
       if (
