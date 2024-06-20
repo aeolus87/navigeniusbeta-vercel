@@ -54,34 +54,28 @@ const Login = () => {
 
   const getOS = () => {
     const { userAgent } = navigator;
-    console.log('User Agent:', userAgent);
-
     if (/Android/i.test(userAgent)) {
-      const match = userAgent.match(/Android\s([0-9.]+)/);
-      const version = match ? match[1] : '';
-      const brand = userAgent
-        .match(/\((.+?)\)/)[1]
+      const match = userAgent.match(/\((.*?)\)/);
+      if (match) {
+        const details = match[1].split(';').map((detail) => detail.trim());
+        const brand = details[0];
+        let model = 'Unknown Model';
+        if (details.length > 2) {
+          model = details[2];
+        }
+        const result = `${brand} ${model}`;
+        console.log('Detected Device:', result);
+        return result;
+      }
+    }
+    if (/iPhone|iPad|iPod/i.test(userAgent)) {
+      const device = userAgent
+        .match(/\((.*?)\)/)[1]
         .split(';')[0]
         .trim();
-      const model =
-        userAgent
-          .match(/\((.+?)\)/)[1]
-          .split(';')[2]
-          ?.trim() || 'Unknown Model';
-      const result = `Android ${version} (${brand} ${model})`;
-      console.log('Detected OS:', result);
-      return result;
+      console.log('Detected Device:', device);
+      return device;
     }
-
-    if (/iPhone|iPad|iPod/i.test(userAgent)) {
-      const match = userAgent.match(/OS\s([0-9_]+)/);
-      const version = match ? match[1].replace(/_/g, '.') : '';
-      const device = userAgent.match(/\(([^;]+)/)[1];
-      const result = `iOS ${version} (${device})`;
-      console.log('Detected OS:', result);
-      return result;
-    }
-
     if (userAgent.indexOf('Windows NT 10.0') !== -1) {
       if (
         userAgent.indexOf('Win64') !== -1 ||
@@ -91,8 +85,7 @@ const Login = () => {
       }
       return 'Windows 10';
     }
-
-    return platform.os.family || 'Unknown OS';
+    return 'Unknown OS';
   };
 
   if (GEOLOCATION_API_KEY) {
