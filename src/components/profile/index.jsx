@@ -279,10 +279,10 @@ const ProfilePage = () => {
             </span>
           </button>
         </div>
-        <div className="lg:ml-1/4 flex flex-col items-center relative z-0 lg:w-full h-screen mt-20 ml-4">
+        <div className="lg:ml-1/4 flex flex-col items-center relative z-0 lg:w-full h-screen lg:mt-6 mt-20 ml-4">
           {activeTab === 'Information' && (
             <div className="flex flex-col items-center justify-center w-full h-full">
-              <div className="flex flex-col lg:flex-row items-center justify-center w-full lg:ml-64 ml-[5rem]">
+              <div className="flex flex-col lg:flex-row items-center justify-center w-full h-full lg:ml-64 ml-[5rem]">
                 <div
                   className="relative size-24 lg:w-48 lg:h-48 rounded-full bg-white cursor-pointer flex items-center justify-center lg:mb-[30rem] lg:mr-8"
                   onClick={handleProfilePicClick}
@@ -345,7 +345,6 @@ const ProfilePage = () => {
                       </>
                     )}
                   </div>
-
                   <p className="text-[#f4f4f4] text-md lg:text-xl mt-2">
                     Account Login Activity
                   </p>
@@ -391,20 +390,26 @@ const ProfilePage = () => {
                     </button>
                   </div>
                   {showLoginActivities && (
-                    <div className="absolute inset-0 z-10 bg-[#0c2734] p-6 rounded-md lg:hidden text-sm h-[65vh]">
+                    <div className="absolute z-10 bg-[#0c2734] p-6 rounded-md lg:hidden text-sm w-72 bottom-[40%] h-[70%] left-16">
+                      <h1 className="text-white">Account Login Activity</h1>
+                      <p className="text-white">
+                        Monitor the devices that have been used to log into your
+                        account
+                      </p>
                       <button
-                        className="absolute top-2 right-2 text-white text-xl"
+                        className="absolute bottom-1 right-8 bg-[#184e64] text-[#e4f3ff] text-3xl hover:text-[#0c2734] px-4 py-1 rounded-3xl"
                         onClick={handleCloseLoginActivities}
                       >
-                        &times;
+                        <FiArrowLeft />
                       </button>
-                      <div className="w-full h-full overflow-auto">
-                        <div className="bg-[#184e64] text-white rounded-md w-full">
+
+                      <div className="h-96 overflow-auto mt-8 rounded-xl">
+                        <div className="bg-[#184e64] text-[#fafafa] rounded-md">
                           {Array.isArray(sortedLoginActivities) &&
                             sortedLoginActivities.map((activity, index) => (
                               <div
                                 key={index}
-                                className="border-t border-gray-700 flex items-center justify-between py-2 px-4"
+                                className="border-t border-gray-700 flex items-center justify-between py-1 px-3"
                               >
                                 <div>
                                   <div className="font-semibold">
@@ -414,8 +419,8 @@ const ProfilePage = () => {
                                     {activity.location}
                                   </div>
                                 </div>
-                                <div className="text-xs">
-                                  {activity.date} at <br></br> {activity.time}
+                                <div className="text-xs pl-6">
+                                  {activity.date} at {activity.time}
                                 </div>
                               </div>
                             ))}

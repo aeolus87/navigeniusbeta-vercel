@@ -61,8 +61,7 @@ const Login = () => {
     if (/iPhone|iPad|iPod/i.test(userAgent)) {
       if (
         /iPhone/i.test(userAgent) ||
-        /CriOS/i.test(userAgent) ||
-        /FxiOS/i.test(userAgent)
+        /CriOS/i.test(userAgent.replace('Chrome on', ''))
       ) {
         console.log('Detected Device:', 'iPhone');
         return 'iPhone';
