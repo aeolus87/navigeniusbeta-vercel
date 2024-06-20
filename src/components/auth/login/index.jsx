@@ -55,9 +55,10 @@ const Login = () => {
   const getOS = () => {
     const { userAgent } = navigator;
     if (/Android/i.test(userAgent)) {
-      const match = userAgent.match(/(?:;\s*(.+?)\s*Build)/);
+      const match = userAgent.match(/\((.+?)\)/);
       if (match) {
-        const deviceName = match[1];
+        const details = match[1].split(';');
+        const deviceName = details[details.length - 1].trim();
         console.log('Detected Device:', deviceName);
         return deviceName;
       }
