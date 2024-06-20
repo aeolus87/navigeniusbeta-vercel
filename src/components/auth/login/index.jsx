@@ -6,7 +6,7 @@ import {
 } from '../../../firebase/auth';
 import { useAuth } from '../../../contexts/authContext';
 import axios from 'axios';
-import platform from 'platform';
+import UAParser from 'ua-parser-js';
 
 const GEOLOCATION_API_KEY = process.env.REACT_APP_GEOLOCATION_API_KEY;
 const API_BASE_URL = 'https://navigeniusbeta-vercel-backend.onrender.com';
@@ -53,46 +53,47 @@ const Login = () => {
   };
 
   const getOS = () => {
-    const { userAgent } = navigator;
-    console.log('User Agent:', userAgent);
+    const parser = new UAParser();
+    const result = parser.getResult();
+    const { name, version } = result.os;
+    const { vendor, model, type } = result.device;
 
-    if (/Android/i.test(userAgent)) {
-      const match = userAgent.match(/Android\s([0-9.]+)/);
-      const version = match ? match[1] : '';
-      const brand = userAgent
-        .match(/\((.+?)\)/)[1]
-        .split(';')[0]
-        .trim();
-      const model =
-        userAgent
-          .match(/\((.+?)\)/)[1]
-          .split(';')[2]
-          ?.trim() || 'Unknown Model';
-      const result = `Android ${version} (${brand} ${model})`;
-      console.log('Detected OS:', result);
-      return result;
-    }
+    // Capture the full user agent string
+    const userAgent = navigator.userAgent;
 
-    if (/iPhone|iPad|iPod/i.test(userAgent)) {
-      const match = userAgent.match(/OS\s([0-9_]+)/);
-      const version = match ? match[1].replace(/_/g, '.') : '';
-      const device = userAgent.match(/\(([^;]+)/)[1];
-      const result = `iOS ${version} (${device})`;
-      console.log('Detected OS:', result);
-      return result;
-    }
+    console.log('Parsed User Agent Result:', result);
+    console.log('Full User Agent String:', userAgent);
 
-    if (userAgent.indexOf('Windows NT 10.0') !== -1) {
-      if (
-        userAgent.indexOf('Win64') !== -1 ||
-        userAgent.indexOf('WOW64') !== -1
-      ) {
-        return 'Windows 11';
+    if (type === 'mobile' || type === 'tablet') {
+      if (name === 'Android') {
+        // Manually extract device model if vendor/model are missing
+        const match = userAgent.match(/Android.*?;\s*(.*?)(\s*Build|$)/);
+        const extractedModel =
+          match && match[1] ? match[1].trim() : 'Unknown Model';
+        return `${vendor || 'Unknown'} ${extractedModel} (Android ${version})`;
       }
-      return 'Windows 10';
+
+      if (name === 'iOS') {
+        return `${model || 'Unknown Device'} (iOS ${version})`;
+      }
     }
 
-    return platform.os.family || 'Unknown OS';
+    if (name === 'Windows') {
+      if (version.startsWith('10.')) {
+        return 'Windows PC';
+      }
+      return `Windows ${version}`;
+    }
+
+    if (name === 'Linux') {
+      return 'Linux';
+    }
+
+    if (name === 'Mac OS') {
+      return 'macOS';
+    }
+
+    return 'Unknown OS';
   };
 
   if (GEOLOCATION_API_KEY) {
@@ -110,7 +111,8 @@ const Login = () => {
       try {
         const { user } = await doSignInWithEmailAndPassword(email, password);
 
-        const deviceInfo = `${platform.name} on ${getOS()}`;
+        const deviceInfo = getOS();
+        console.log('Device Info:', deviceInfo);
         const location = await fetchLocation();
         console.log('Logging activity:', {
           userId: user.uid,
@@ -140,7 +142,8 @@ const Login = () => {
         const user = userCredential.user;
 
         if (user) {
-          const deviceInfo = `${platform.name} on ${getOS()}`;
+          const deviceInfo = getOS();
+          console.log('Device Info:', deviceInfo);
           const location = await fetchLocation();
           console.log('Logging activity:', {
             userId: user.uid,

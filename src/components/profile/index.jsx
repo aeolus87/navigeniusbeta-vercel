@@ -36,6 +36,7 @@ const ProfilePage = () => {
   const [childName, setChildName] = useState('');
   const [isEditing, setIsEditing] = useState(false); // declare new state variable
   const [sortedLoginActivities, setSortedLoginActivities] = useState([]);
+  const [showLoginActivities, setShowLoginActivities] = useState(false);
 
   const navigate = useNavigate();
   const auth = getAuth();
@@ -104,6 +105,14 @@ const ProfilePage = () => {
       .catch((error) => {
         console.error('Error sending verification code:', error);
       });
+  };
+
+  const handleShowLoginActivities = () => {
+    setShowLoginActivities(true);
+  };
+
+  const handleCloseLoginActivities = () => {
+    setShowLoginActivities(false);
   };
 
   const handleVerificationCodeChange = (e) => {
@@ -226,7 +235,11 @@ const ProfilePage = () => {
 
   return (
     <div className="flex justify-center items-center h-screen overflow-hidden">
-      <div className="relative border-blue-950 rounded-md p-6 w-11/12 max-w-screen lg:h-4/5 h-[63%] max-h-screen-md bg-[#0c2734] shadow-xl">
+      <div
+        className={`relative border-blue-950 rounded-md p-6 w-11/12 max-w-screen lg:h-4/5 h-[75%] max-h-screen-md bg-[#0c2734] shadow-xl transition-transform duration-500 transform-style-preserve-3d ${
+          showLoginActivities ? 'lg:transform-none rotate-y-180' : ''
+        }`}
+      >
         <div className="absolute top-4 right-4">
           <button
             className="text-[#e4f3ff] text-2xl hover:text-[#184e64]"
@@ -266,7 +279,7 @@ const ProfilePage = () => {
             </span>
           </button>
         </div>
-        <div className="lg:ml-1/4 flex flex-col items-center relative z-0 lg:w-full h-screen mt-2 ml-4">
+        <div className="lg:ml-1/4 flex flex-col items-center relative z-0 lg:w-full h-screen mt-20 ml-4">
           {activeTab === 'Information' && (
             <div className="flex flex-col items-center justify-center w-full h-full">
               <div className="flex flex-col lg:flex-row items-center justify-center w-full lg:ml-64 ml-[5rem]">
@@ -338,7 +351,7 @@ const ProfilePage = () => {
                   </p>
                   <div className="overflow-x-auto rounded-md lg:mt-3">
                     {/* Render the table for large screens */}
-                    <table className="lg:min-w-full bg-[#184e64] text-white rounded-md lg:block hidden">
+                    <table className="lg:min-w-full bg-[#184e64] text-white text-[0.92rem] rounded-md lg:block hidden">
                       <thead>
                         <tr>
                           <th className="px-4 py-2 text-left">Device</th>
@@ -372,13 +385,44 @@ const ProfilePage = () => {
                     </table>
                     <button
                       className="lg:hidden block bg-[#184e64] hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2 w-full"
-                      onClick={() => {
-                        // Open a modal or navigate to a new page to show the login activities
-                      }}
+                      onClick={handleShowLoginActivities}
                     >
                       Where you're logged in
                     </button>
                   </div>
+                  {showLoginActivities && (
+                    <div className="absolute inset-0 z-10 bg-[#0c2734] p-6 rounded-md lg:hidden text-sm h-[65vh]">
+                      <button
+                        className="absolute top-2 right-2 text-white text-xl"
+                        onClick={handleCloseLoginActivities}
+                      >
+                        &times;
+                      </button>
+                      <div className="w-full h-full overflow-auto">
+                        <div className="bg-[#184e64] text-white rounded-md w-full">
+                          {Array.isArray(sortedLoginActivities) &&
+                            sortedLoginActivities.map((activity, index) => (
+                              <div
+                                key={index}
+                                className="border-t border-gray-700 flex items-center justify-between py-2 px-4"
+                              >
+                                <div>
+                                  <div className="font-semibold">
+                                    {activity.device}
+                                  </div>
+                                  <div className="text-xs">
+                                    {activity.location}
+                                  </div>
+                                </div>
+                                <div className="text-xs">
+                                  {activity.date} at <br></br> {activity.time}
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

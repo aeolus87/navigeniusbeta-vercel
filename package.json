@@ -10,6 +10,7 @@
     "axios": "^1.7.2",
     "body-parser": "^1.20.2",
     "bootstrap": "^5.3.3",
+    "bowser": "^2.11.0",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
     "crypto-browserify": "^3.12.0",
@@ -37,6 +38,7 @@
     "react-scripts": "^5.0.1",
     "react-toastify": "^10.0.5",
     "tailwindcss": "^3.4.1",
+    "ua-parser-js": "^1.0.38",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
