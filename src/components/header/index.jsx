@@ -6,28 +6,28 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const Header = () => {
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const { userLoggedIn } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
       await doSignOut();
-      notify("Logged Out");
+      notify('Logged Out');
       navigate('/login');
     } catch (error) {
       console.error('Error signing out:', error);
     }
-
   };
 
   const handleProfileClick = () => {
-    navigate('/profile'); 
+    setMenuOpen(false);
+    navigate('/profile');
   };
 
   const notify = (message) => {
     toast.dark(message, {
-      position: "top-right",
+      position: 'top-right',
       autoClose: 5000,
       hideProgressBar: false,
       closeOnClick: true,
@@ -51,15 +51,26 @@ const Header = () => {
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="text-white mt-4 bg-[#0b2d3900] hover:bg-gray-900 focus:outline-none font-medium rounded-lg text-sm px-3 py-2 md:hidden"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 6h16M4 12h16m-7 6h7"
+                  ></path>
                 </svg>
               </button>
               <div
                 className={`absolute top-16 right-0 w-[40%] bg-[#0b2d3900] md:static md:w-auto md:flex md:flex-row md:items-center ${menuOpen ? 'block' : 'hidden'} md:block transition duration-600 ease-in-out`}
               >
                 <button
-                  onClick={handleProfileClick} 
+                  onClick={handleProfileClick}
                   className="w-full text-left text-white hover:bg-[#1a1a4e6a] focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 md:me-2 md:mb-0"
                 >
                   Profile

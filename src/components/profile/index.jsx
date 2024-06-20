@@ -350,7 +350,7 @@ const ProfilePage = () => {
                   </p>
                   <div className="overflow-x-auto rounded-md lg:mt-3">
                     {/* Render the table for large screens */}
-                    <table className="lg:min-w-full bg-[#184e64] text-white text-[0.92rem] rounded-md lg:block hidden">
+                    <table className="lg:min-w-full bg-[#184e64] text-white text-[1.1rem] rounded-md lg:block hidden">
                       <thead>
                         <tr>
                           <th className="px-4 py-2 text-left">Device</th>
@@ -383,27 +383,29 @@ const ProfilePage = () => {
                       </tbody>
                     </table>
                     <button
-                      className="lg:hidden block bg-[#184e64] hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2 w-full"
+                      className="lg:hidden block bg-[#184e64] hover:bg-[#ffffff] text-white hover:!text-[#0c2734] font-bold py-2 px-4 rounded mt-2 w-full transition duration-300 ease-in-out"
                       onClick={handleShowLoginActivities}
                     >
                       Where you're logged in
                     </button>
                   </div>
                   {showLoginActivities && (
-                    <div className="absolute z-10 bg-[#0c2734] p-6 rounded-md lg:hidden text-sm w-72 bottom-[40%] h-[70%] left-16">
-                      <h1 className="text-white">Account Login Activity</h1>
-                      <p className="text-white">
+                    <div className="absolute z-10 bg-[#0c2734] p-6 rounded-md lg:hidden text-sm w-72 bottom-[40%] h-[70%] left-12">
+                      <h1 className="text-white ml-2">
+                        Account Login Activity
+                      </h1>
+                      <p className="text-white ml-2">
                         Monitor the devices that have been used to log into your
                         account
                       </p>
                       <button
-                        className="absolute bottom-1 right-8 bg-[#184e64] text-[#e4f3ff] text-3xl hover:text-[#0c2734] px-4 py-1 rounded-3xl"
+                        className="absolute bottom-1 right-6 bg-[#184e64] text-[#e4f3ff] text-3xl hover:text-[#0c2734] px-4 py-1 rounded-3xl"
                         onClick={handleCloseLoginActivities}
                       >
                         <FiArrowLeft />
                       </button>
 
-                      <div className="h-96 overflow-auto mt-8 rounded-xl">
+                      <div className="h-96 overflow-auto mt-8 rounded-xl ml-2">
                         <div className="bg-[#184e64] text-[#fafafa] rounded-md">
                           {Array.isArray(sortedLoginActivities) &&
                             sortedLoginActivities.map((activity, index) => (
