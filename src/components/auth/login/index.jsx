@@ -58,29 +58,28 @@ const Login = () => {
     const { name, version } = result.os;
     const { vendor, model, type } = result.device;
 
-    // Capture the full user agent string
-    const userAgent = navigator.userAgent;
-
     console.log('Parsed User Agent Result:', result);
-    console.log('Full User Agent String:', userAgent);
 
     if (type === 'mobile' || type === 'tablet') {
       if (name === 'Android') {
         // Manually extract device model if vendor/model are missing
-        const match = userAgent.match(/Android.*?;\s*(.*?)(\s*Build|$)/);
+        const match = navigator.userAgent.match(
+          /Android.*?;\s*(.*?)(\s*Build|$)/,
+        );
         const extractedModel =
           match && match[1] ? match[1].trim() : 'Unknown Model';
-        return `${vendor || 'Unknown'} ${extractedModel} (Android ${version})`;
+        return `${vendor || 'Unknown'} ${extractedModel}`;
       }
 
       if (name === 'iOS') {
-        return `${model || 'Unknown Device'} (iOS ${version})`;
+        return `${model || 'Unknown Device'}`;
       }
     }
 
     if (name === 'Windows') {
       if (version.startsWith('10.')) {
-        return 'Windows PC';
+        // Assumption for Windows 11 based on user knowledge
+        return 'Windows 10 or 11 PC';
       }
       return `Windows ${version}`;
     }
