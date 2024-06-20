@@ -63,9 +63,8 @@ const Login = () => {
     if (type === 'mobile' || type === 'tablet') {
       if (name === 'Android') {
         // Manually extract device model if vendor/model are missing
-        const match = navigator.userAgent.match(
-          /Android.*?;\s*(.*?)(\s*Build|$)/,
-        );
+        const userAgent = navigator.userAgent;
+        const match = userAgent.match(/Android.*?;\s*(.*?)(\s*Build|$)/);
         const extractedModel =
           match && match[1] ? match[1].trim() : 'Unknown Model';
         return `${vendor || 'Unknown'} ${extractedModel}`;
