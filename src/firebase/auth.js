@@ -17,6 +17,10 @@ export const doCreateUserWithEmailAndPassword = async (
   password,
   fullname,
 ) => {
+  if (!email || !password || !fullname) {
+    throw new Error('Email, password, and fullname are required');
+  }
+
   try {
     const { user } = await createUserWithEmailAndPassword(
       auth,
@@ -33,42 +37,87 @@ export const doCreateUserWithEmailAndPassword = async (
 
     return user;
   } catch (error) {
-    console.error('Error creating user document:', error);
+    console.error('Error creating user:', error);
     throw error;
   }
 };
 
-export const doSignInWithEmailAndPassword = (email, password) => {
-  return signInWithEmailAndPassword(auth, email, password);
+export const doSignInWithEmailAndPassword = async (email, password) => {
+  if (!email || !password) {
+    throw new Error('Email and password are required');
+  }
+
+  try {
+    return await signInWithEmailAndPassword(auth, email, password);
+  } catch (error) {
+    console.error('Error signing in:', error);
+    throw error;
+  }
 };
 
 export const doSignInWithGoogle = async () => {
   const provider = new GoogleAuthProvider();
-  const userCredential = await signInWithPopup(auth, provider);
-  return userCredential;
+  try {
+    const userCredential = await signInWithPopup(auth, provider);
+    return userCredential;
+  } catch (error) {
+    console.error('Error signing in with Google:', error);
+    throw error;
+  }
 };
 
-export const doSignOut = () => {
-  return signOut(auth)
-    .then(() => {
-      // Replace the current URL with the root path after successful logout
-      window.location.replace('/');
-    })
-    .catch((error) => {
-      console.error('Error signing out:', error);
+export const doSignOut = async () => {
+  try {
+    await signOut(auth);
+    // Replace the current URL with the root path after successful logout
+    window.location.replace('/');
+  } catch (error) {
+    console.error('Error signing out:', error);
+    throw error;
+  }
+};
+
+export const doPasswordReset = async (email) => {
+  if (!email) {
+    throw new Error('Email is required');
+  }
+
+  try {
+    await sendPasswordResetEmail(auth, email);
+  } catch (error) {
+    console.error('Error sending password reset email:', error);
+    throw error;
+  }
+};
+
+export const doPasswordChange = async (password) => {
+  if (!password) {
+    throw new Error('New password is required');
+  }
+
+  if (!auth.currentUser) {
+    throw new Error('No authenticated user');
+  }
+
+  try {
+    await updatePassword(auth.currentUser, password);
+  } catch (error) {
+    console.error('Error updating password:', error);
+    throw error;
+  }
+};
+
+export const doSendEmailVerification = async () => {
+  if (!auth.currentUser) {
+    throw new Error('No authenticated user');
+  }
+
+  try {
+    await sendEmailVerification(auth.currentUser, {
+      url: `${window.location.origin}/home`,
     });
-};
-
-export const doPasswordReset = (email) => {
-  return sendPasswordResetEmail(auth, email);
-};
-
-export const doPasswordChange = (password) => {
-  return updatePassword(auth.currentUser, password);
-};
-
-export const doSendEmailVerification = () => {
-  return sendEmailVerification(auth.currentUser, {
-    url: `${window.location.origin}/verify-email`,
-  });
+  } catch (error) {
+    console.error('Error sending email verification:', error);
+    throw error;
+  }
 };

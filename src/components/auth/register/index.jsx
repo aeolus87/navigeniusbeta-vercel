@@ -17,27 +17,30 @@ const Register = () => {
   const [confirmPasswordTouched, setConfirmPasswordTouched] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const navigate = useNavigate();
+
   const { userLoggedIn } = useAuth();
 
   useEffect(() => {
-    const sessionId = generateSessionId();
+    const sessionId =
+      sessionStorage.getItem('registrationSessionId') || generateSessionId();
     sessionStorage.setItem('registrationSessionId', sessionId);
 
-    const savedFormData = sessionStorage.getItem('registerFormData');
+    const savedFormData = localStorage.getItem(`registerFormData_${sessionId}`);
     if (savedFormData) {
       const formData = JSON.parse(savedFormData);
-      setFullName(formData.fullName);
-      setEmail(formData.email);
-      setPassword(formData.password);
-      setConfirmPassword(formData.confirmPassword);
-      setAgreedToTerms(formData.agreedToTerms);
+      setFullName(formData.fullName || '');
+      setEmail(formData.email || '');
+      setPassword(formData.password || '');
+      setConfirmPassword(formData.confirmPassword || '');
+      setAgreedToTerms(formData.agreedToTerms || false);
     }
   }, []);
 
   useEffect(() => {
-    return () => {
-      sessionStorage.setItem(
-        'registerFormData',
+    const sessionId = sessionStorage.getItem('registrationSessionId');
+    const saveFormData = () => {
+      localStorage.setItem(
+        `registerFormData_${sessionId}`,
         JSON.stringify({
           fullName,
           email,
@@ -47,6 +50,13 @@ const Register = () => {
         }),
       );
     };
+
+    saveFormData();
+
+    window.addEventListener('beforeunload', saveFormData);
+    return () => {
+      window.removeEventListener('beforeunload', saveFormData);
+    };
   }, [fullName, email, password, confirmPassword, agreedToTerms]);
 
   const onSubmit = async (e) => {
@@ -54,9 +64,7 @@ const Register = () => {
     if (!isRegistering && password === confirmPassword) {
       setIsRegistering(true);
       try {
-        await doCreateUserWithEmailAndPassword(email, password);
-        await doSendEmailVerification();
-        navigate('/verify-email', { state: { email, fullName, password } });
+        await doCreateUserWithEmailAndPassword(email, password, fullName);
       } catch (error) {
         if (error.code === 'auth/email-already-in-use') {
           setEmailErrorMessage('This email is already used');
@@ -89,7 +97,6 @@ const Register = () => {
   };
 
   const generateSessionId = () => {
-    // Generate a random session ID
     return Math.random().toString(36).substring(2, 15);
   };
 
