@@ -240,7 +240,7 @@ const ProfilePage = () => {
           showLoginActivities ? 'lg:transform-none rotate-y-180' : ''
         }`}
       >
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-4 right-6">
           <button
             className="text-[#e4f3ff] text-2xl hover:text-[#184e64]"
             onClick={handleBack}
@@ -279,12 +279,12 @@ const ProfilePage = () => {
             </span>
           </button>
         </div>
-        <div className="lg:ml-1/4 flex flex-col items-center relative z-0 lg:w-full h-screen lg:mt-6 mt-20 ml-4">
+        <div className="lg:ml-1/4 flex flex-col items-center relative z-0 lg:w-full w-auto h-screen lg:mt-6 mt-20 ml-4">
           {activeTab === 'Information' && (
             <div className="flex flex-col items-center justify-center w-full h-full">
-              <div className="flex flex-col lg:flex-row items-center justify-center w-full h-full lg:ml-64 ml-[5rem]">
+              <div className="flex flex-col lg:flex-row items-center justify-center w-full h-full lg:ml-64 ml-[4.5rem]">
                 <div
-                  className="relative size-24 lg:w-48 lg:h-48 rounded-full bg-white cursor-pointer flex items-center justify-center lg:mb-[30rem] lg:mr-8"
+                  className="relative size-20 lg:w-48 lg:h-48 rounded-full bg-white cursor-pointer flex items-center justify-center lg:mb-[30rem] lg:ml-20"
                   onClick={handleProfilePicClick}
                 >
                   {profileImage ? (
@@ -294,19 +294,29 @@ const ProfilePage = () => {
                       className="rounded-full size-20 lg:w-44 lg:h-44"
                     />
                   ) : (
-                    <span className="text-gray-500">
+                    <span className="text-gray-500 text-xs text-center">
                       Choose Profile Picture
                     </span>
                   )}
                 </div>
 
-                <div className="flex flex-col bg-[#0c2734] rounded-2xl shadow-xl p-6 lg:w-[45rem] w-[15rem] lg:h-[30rem] h-[25rem] lg:mb-[14rem] mb-[24rem] ">
+                <div className="flex flex-col bg-[#0c2734] rounded-2xl shadow-xl p-6 lg:w-[48rem] w-[13rem] lg:h-[30rem] h-[25rem] lg:mb-[14rem] mb-[20rem] lg:ml-6 mr-2">
                   <p className="text-[#f4f4f4] text-lg lg:text-3xl font-bold">
                     {name}
                   </p>
                   <p className="text-[#f4f4f4] text-md lg:text-xl lg:mt-2">
                     Contact Number:{' '}
-                    {verifiedPhoneNumber ? verifiedPhoneNumber : 'Not verified'}
+                    <>
+                      {' '}
+                      {verifiedPhoneNumber ? (
+                        <span className="font-semibold">
+                          {' '}
+                          {verifiedPhoneNumber}
+                        </span>
+                      ) : (
+                        'Not verified'
+                      )}
+                    </>
                   </p>
                   <p className="text-[#f4f4f4] text-md lg:text-xl mt-2">
                     Child's First Name or Nickname
@@ -350,7 +360,7 @@ const ProfilePage = () => {
                   </p>
                   <div className="overflow-x-auto rounded-md lg:mt-3">
                     {/* Render the table for large screens */}
-                    <table className="lg:min-w-full bg-[#184e64] text-white text-[1.1rem] rounded-md lg:block hidden">
+                    <table className="lg:min-w-full bg-[#184e64] text-white text-[1.16rem] rounded-md lg:block hidden">
                       <thead>
                         <tr>
                           <th className="px-4 py-2 text-left">Device</th>
@@ -383,15 +393,15 @@ const ProfilePage = () => {
                       </tbody>
                     </table>
                     <button
-                      className="lg:hidden block bg-[#184e64] hover:bg-[#ffffff] text-white hover:!text-[#0c2734] font-bold py-2 px-4 rounded mt-2 w-full transition duration-300 ease-in-out"
+                      className="lg:hidden block bg-[#184e64] hover:bg-[#ffffff] text-white hover:!text-[#0c2734] font-bold py-2 px-4 rounded mt-2 w-full"
                       onClick={handleShowLoginActivities}
                     >
                       Where you're logged in
                     </button>
                   </div>
                   {showLoginActivities && (
-                    <div className="absolute z-10 bg-[#0c2734] p-6 rounded-md lg:hidden text-sm w-72 bottom-[40%] h-[70%] left-12">
-                      <h1 className="text-white ml-2">
+                    <div className="absolute z-10 bg-[#0c2734] p-2 rounded-md lg:hidden text-sm w-auto bottom-[39%] h-[73%] left-[16vw]">
+                      <h1 className="text-white ml-2 mt-2">
                         Account Login Activity
                       </h1>
                       <p className="text-white ml-2">
@@ -399,13 +409,13 @@ const ProfilePage = () => {
                         account
                       </p>
                       <button
-                        className="absolute bottom-1 right-6 bg-[#184e64] text-[#e4f3ff] text-3xl hover:text-[#0c2734] px-4 py-1 rounded-3xl"
+                        className="absolute mt-[22rem] right-6 bg-[#184e64] text-[#e4f3ff] text-3xl hover:text-[#0c2734] px-4 py-1 rounded-3xl"
                         onClick={handleCloseLoginActivities}
                       >
                         <FiArrowLeft />
                       </button>
 
-                      <div className="h-96 overflow-auto mt-8 rounded-xl ml-2">
+                      <div className="h-[20rem] overflow-auto mt-8 rounded-xl ml-2">
                         <div className="bg-[#184e64] text-[#fafafa] rounded-md">
                           {Array.isArray(sortedLoginActivities) &&
                             sortedLoginActivities.map((activity, index) => (
