@@ -55,6 +55,8 @@ const Register = () => {
       } catch (error) {
         if (error.code === 'auth/email-already-in-use') {
           setEmailErrorMessage('This email is already used');
+        } else if (error.code === 'auth/weak-password') {
+          setPasswordErrorMessage('Password should be at least 6 characters');
         } else {
           setPasswordErrorMessage('Error signing up. Please try again later.');
         }
@@ -62,7 +64,6 @@ const Register = () => {
       }
     }
   };
-
   const handlePasswordChange = (e) => {
     setPassword(e.target.value);
     if (confirmPasswordTouched && e.target.value !== confirmPassword) {
