@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/authContext';
-import {
-  doCreateUserWithEmailAndPassword,
-  doSendEmailVerification,
-} from '../../../firebase/auth';
+import { doCreateUserWithEmailAndPassword } from '../../../firebase/auth';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Register = () => {
+  const navigate = useNavigate();
+  const { userLoggedIn } = useAuth();
+
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,16 +17,14 @@ const Register = () => {
   const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
   const [confirmPasswordTouched, setConfirmPasswordTouched] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const navigate = useNavigate();
-
-  const { userLoggedIn } = useAuth();
-
   useEffect(() => {
     const sessionId =
       sessionStorage.getItem('registrationSessionId') || generateSessionId();
     sessionStorage.setItem('registrationSessionId', sessionId);
 
-    const savedFormData = localStorage.getItem(`registerFormData_${sessionId}`);
+    const savedFormData = sessionStorage.getItem(
+      `registerFormData_${sessionId}`,
+    );
     if (savedFormData) {
       const formData = JSON.parse(savedFormData);
       setFullName(formData.fullName || '');
@@ -39,7 +38,7 @@ const Register = () => {
   useEffect(() => {
     const sessionId = sessionStorage.getItem('registrationSessionId');
     const saveFormData = () => {
-      localStorage.setItem(
+      sessionStorage.setItem(
         `registerFormData_${sessionId}`,
         JSON.stringify({
           fullName,
@@ -51,13 +50,38 @@ const Register = () => {
       );
     };
 
+    const resetSessionTimeout = () => {
+      clearTimeout(sessionStorage.getItem('sessionTimeoutId'));
+      const sessionTimeout = setTimeout(() => {
+        clearSessionData(sessionId);
+        sessionStorage.setItem('registrationTimeout', 'true');
+        navigate('/');
+      }, 600000);
+      sessionStorage.setItem('sessionTimeoutId', sessionTimeout);
+    };
+
     saveFormData();
+    resetSessionTimeout();
 
     window.addEventListener('beforeunload', saveFormData);
     return () => {
       window.removeEventListener('beforeunload', saveFormData);
+      clearTimeout(sessionStorage.getItem('sessionTimeoutId'));
     };
-  }, [fullName, email, password, confirmPassword, agreedToTerms]);
+  }, [fullName, email, password, confirmPassword, agreedToTerms, navigate]);
+
+  const clearSessionData = (sessionId) => {
+    sessionStorage.removeItem(`registerFormData_${sessionId}`);
+    sessionStorage.removeItem('registrationSessionId');
+    sessionStorage.removeItem('sessionTimeoutId');
+    setFullName('');
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
+    setAgreedToTerms(false);
+    setEmailErrorMessage('');
+    setPasswordErrorMessage('');
+  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -65,6 +89,9 @@ const Register = () => {
       setIsRegistering(true);
       try {
         await doCreateUserWithEmailAndPassword(email, password, fullName);
+        const sessionId = sessionStorage.getItem('registrationSessionId');
+        clearSessionData(sessionId);
+        navigate('/home');
       } catch (error) {
         if (error.code === 'auth/email-already-in-use') {
           setEmailErrorMessage('This email is already used');
@@ -77,6 +104,7 @@ const Register = () => {
       }
     }
   };
+
   const handlePasswordChange = (e) => {
     setPassword(e.target.value);
     if (confirmPasswordTouched && e.target.value !== confirmPassword) {
@@ -99,11 +127,9 @@ const Register = () => {
   const generateSessionId = () => {
     return Math.random().toString(36).substring(2, 15);
   };
-
   return (
     <>
       {userLoggedIn && <Navigate to={'/home'} replace={true} />}
-
       <main className="w-full h-screen flex self-center place-content-center place-items-center">
         <div className="w-96 text-gray-600 space-y-5 p-4 shadow-xl border bg-[#fff9f9] rounded-xl">
           <div className="text-center mb-6">
