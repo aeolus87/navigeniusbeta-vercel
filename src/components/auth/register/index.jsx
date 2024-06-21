@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Navigate, Link } from 'react-router-dom';
+import { Navigate, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/authContext';
-import { doCreateUserWithEmailAndPassword } from '../../../firebase/auth';
+import {
+  doCreateUserWithEmailAndPassword,
+  doSendEmailVerification,
+} from '../../../firebase/auth';
 
 const Register = () => {
   const [fullName, setFullName] = useState('');
@@ -13,7 +16,7 @@ const Register = () => {
   const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
   const [confirmPasswordTouched, setConfirmPasswordTouched] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-
+  const navigate = useNavigate();
   const { userLoggedIn } = useAuth();
 
   useEffect(() => {
@@ -51,7 +54,9 @@ const Register = () => {
     if (!isRegistering && password === confirmPassword) {
       setIsRegistering(true);
       try {
-        await doCreateUserWithEmailAndPassword(email, password, fullName);
+        await doCreateUserWithEmailAndPassword(email, password);
+        await doSendEmailVerification();
+        navigate('/verify-email', { state: { email, fullName, password } });
       } catch (error) {
         if (error.code === 'auth/email-already-in-use') {
           setEmailErrorMessage('This email is already used');

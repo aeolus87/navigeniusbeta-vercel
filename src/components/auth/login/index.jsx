@@ -7,9 +7,8 @@ import {
 import { useAuth } from '../../../contexts/authContext';
 import axios from 'axios';
 import platform from 'platform';
-
 const GEOLOCATION_API_KEY = process.env.REACT_APP_GEOLOCATION_API_KEY;
-const API_BASE_URL = process.env.API_BASE_URL;
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const Login = () => {
   const { userLoggedIn } = useAuth();
