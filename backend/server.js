@@ -47,7 +47,6 @@ const loginActivitySchema = new mongoose.Schema({
 
 const LoginActivity = mongoose.model('LoginActivity', loginActivitySchema);
 
-// API endpoint to get login activities
 app.get('/api/login-activities', async (req, res) => {
   try {
     const userId = req.query.userId;
@@ -60,7 +59,6 @@ app.get('/api/login-activities', async (req, res) => {
   }
 });
 
-// API endpoint to add login activity
 app.post('/api/login-activities', async (req, res) => {
   const { userId, device, location, date, time } = req.body;
 
@@ -95,7 +93,6 @@ mongoose
   })
   .catch((error) => {
     console.error('Database connection error:', error);
-    // Start the server even if database connection fails
     app.listen(port, '0.0.0.0', () => {
       console.log(
         `Server running on port ${port} (without database connection)`,

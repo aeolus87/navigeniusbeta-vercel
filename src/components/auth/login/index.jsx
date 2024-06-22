@@ -9,8 +9,6 @@ import axios from 'axios';
 import platform from 'platform';
 const GEOLOCATION_API_KEY = process.env.REACT_APP_GEOLOCATION_API_KEY;
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
-console.log('GEOLOCATION_API_KEY:', GEOLOCATION_API_KEY);
-console.log('API_BASE_URL:', API_BASE_URL);
 const Login = () => {
   const { userLoggedIn } = useAuth();
 
@@ -47,8 +45,10 @@ const Login = () => {
         },
       );
       console.log('Login activity logged:', response.data);
+      return response.data; // Optionally return data if needed
     } catch (error) {
       console.error('Error logging login activity:', error);
+      throw error; // Propagate the error to handle it in the calling function
     }
   };
 
