@@ -47,7 +47,7 @@ const ProfilePage = () => {
       try {
         const userId = firebase.auth().currentUser?.uid;
         const response = await axios.get(
-          `https://navigeniusbeta-vercel-backend.onrender.com/api/login-activities?userId=${userId}`,
+          `https://navigeniusbeta-vercel.onrender.com/api/login-activities?userId=${userId}`,
         );
         const sortedActivities = response.data.sort((a, b) => {
           const dateA = new Date(`${a.date} ${a.time}`);
