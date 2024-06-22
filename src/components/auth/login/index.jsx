@@ -9,7 +9,6 @@ import axios from 'axios';
 import platform from 'platform';
 const GEOLOCATION_API_KEY = process.env.REACT_APP_GEOLOCATION_API_KEY;
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
-console.log('API Base URL:', API_BASE_URL); // For debugging
 
 const Login = () => {
   const { userLoggedIn } = useAuth();
@@ -26,35 +25,23 @@ const Login = () => {
       );
       return `${response.data.city}, ${response.data.country_name}`;
     } catch (error) {
-      console.error('Error fetching location:', error);
       return 'Unknown Location';
     }
   };
 
   const logLoginActivity = async (userId, device, location) => {
-    console.log('Attempting to log activity:', { userId, device, location });
-    console.log('API URL:', `${API_BASE_URL}/api/login-activities`);
+    const date = new Date().toLocaleDateString();
+    const time = new Date().toLocaleTimeString();
 
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/login-activities`,
-        {
-          userId,
-          device,
-          location,
-          date: new Date().toLocaleDateString(),
-          time: new Date().toLocaleTimeString(),
-        },
-      );
-      console.log('Full server response:', response);
-      return response.data;
-    } catch (error) {
-      console.error(
-        'Error logging login activity:',
-        error.response ? error.response : error.message,
-      );
-      throw error;
-    }
+      await axios.post(`${API_BASE_URL}/api/login-activities`, {
+        userId,
+        device,
+        location,
+        date,
+        time,
+      });
+    } catch (error) {}
   };
 
   const getOS = () => {
@@ -108,11 +95,6 @@ const Login = () => {
 
         const deviceInfo = `${platform.name} on ${getOS()}`;
         const location = await fetchLocation();
-        console.log('Logging activity:', {
-          userId: user.uid,
-          deviceInfo,
-          location,
-        });
         await logLoginActivity(user.uid, deviceInfo, location);
         userLoggedIn(user);
       } catch (error) {

@@ -10,7 +10,7 @@ const compression = require('compression');
 const app = express();
 const port = process.env.PORT || 5000;
 const mongourl = process.env.MONGODB_URI;
-console.log('MongoDB URI:', mongourl);
+
 app.use(bodyParser.json());
 app.use(helmet());
 app.use(compression());
@@ -23,7 +23,6 @@ const allowedOrigins = [
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
-
     if (allowedOrigins.indexOf(origin) === -1) {
       const msg =
         'The CORS policy for this site does not allow access from the specified origin.';
@@ -51,16 +50,13 @@ app.get('/api/login-activities', async (req, res) => {
   try {
     const userId = req.query.userId;
     const activities = await LoginActivity.find({ userId });
-    console.log(`Fetched ${activities.length} activities for user ${userId}`);
     res.json(activities);
   } catch (error) {
-    console.error('Error fetching login activities:', error);
     res.status(500).json({ error: 'Error fetching login activities' });
   }
 });
 
 app.post('/api/login-activities', async (req, res) => {
-  console.log('Received login activity request:', req.body);
   const { userId, device, location, date, time } = req.body;
 
   if (!userId || !device || !location || !date || !time) {
@@ -76,10 +72,8 @@ app.post('/api/login-activities', async (req, res) => {
       time,
     });
     await newActivity.save();
-    console.log('New login activity recorded:', newActivity);
     res.status(201).json({ message: 'Login activity recorded' });
   } catch (error) {
-    console.error('Error recording login activity:', error);
     res.status(500).json({ error: 'Error recording login activity' });
   }
 });
@@ -87,17 +81,17 @@ app.post('/api/login-activities', async (req, res) => {
 mongoose
   .connect(mongourl)
   .then(() => {
-    console.log('Database is connected successfully.');
     app.listen(port, '0.0.0.0', () => {
+      // Server start message can be kept for operational purposes
       console.log(`Server running on port ${port}`);
     });
   })
-  .catch((error) => {
-    console.error('Database connection error:', error);
+  .catch(() => {
     app.listen(port, '0.0.0.0', () => {
       console.log(
         `Server running on port ${port} (without database connection)`,
       );
     });
   });
+
 module.exports = app;
