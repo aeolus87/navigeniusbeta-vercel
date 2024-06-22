@@ -13,8 +13,11 @@ const Map = () => {
   const defaultCenter = [0, 0];
   const [userLocation, setUserLocation] = useState(defaultCenter);
   const [navigeniusLocation, setNavigeniusLocation] = useState(defaultCenter);
-  const [hasShownAlert, setHasShownAlert] = useState(false); // Moved useState inside the component
+  const [hasShownAlert, setHasShownAlert] = useState(false);
+  const [isCircleClicked, setIsCircleClicked] = useState(false);
+  const mapRef = useRef(null);
   const watchIdRef = useRef(null);
+
   const defaultIcon = L.icon({
     iconUrl,
     iconRetinaUrl,
@@ -25,8 +28,6 @@ const Map = () => {
     tooltipAnchor: [16, -28],
     shadowSize: [41, 41],
   });
-
-  const [isCircleClicked, setIsCircleClicked] = useState(false);
 
   const handleCircleClick = () => {
     setIsCircleClicked(true);
@@ -43,36 +44,46 @@ const Map = () => {
     };
 
     const center = [getCoordinates('c_lat'), getCoordinates('c_long')];
-    if (!center[0] || !center[1]) {
-      console.warn('Unable to retrieve valid location data from localStorage. Using default center.');
-    } else {
+    if (center[0] && center[1]) {
       setUserLocation(center);
     }
 
-    const navigeniusCoords = [getCoordinates('lat_val'), getCoordinates('long_val')];
+    const navigeniusCoords = [
+      getCoordinates('lat_val'),
+      getCoordinates('long_val'),
+    ];
     setNavigeniusLocation(navigeniusCoords);
 
-    const watchUserLocation = () => {
-      if (navigator.geolocation) {
-        watchIdRef.current = navigator.geolocation.watchPosition((position) => {
-          setUserLocation([position.coords.latitude, position.coords.longitude]);
-        });
-      } else {
-        console.warn('Geolocation not supported by browser.');
-      }
-    };
+    if (navigator.geolocation) {
+      watchIdRef.current = navigator.geolocation.watchPosition(
+        (position) => {
+          const newLocation = [
+            position.coords.latitude,
+            position.coords.longitude,
+          ];
+          setUserLocation(newLocation);
+          localStorage.setItem('c_lat', position.coords.latitude);
+          localStorage.setItem('c_long', position.coords.longitude);
+        },
+        (error) => {
+          console.error('Error watching user location:', error);
+        },
+        { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 },
+      );
+    } else {
+      console.warn('Geolocation not supported by browser.');
+    }
 
-    watchUserLocation();
-
-    const refreshLocations = setInterval(() => {
-      navigator.geolocation.getCurrentPosition((position) => {
-        setUserLocation([position.coords.latitude, position.coords.longitude]);
-      });
-      // Update the location of navigeniusLocation using your logic
+    const refreshNavigeniusLocation = setInterval(() => {
+      const newNavigeniusCoords = [
+        getCoordinates('lat_val'),
+        getCoordinates('long_val'),
+      ];
+      setNavigeniusLocation(newNavigeniusCoords);
     }, 1000);
 
     return () => {
-      clearInterval(refreshLocations);
+      clearInterval(refreshNavigeniusLocation);
       if (watchIdRef.current) {
         navigator.geolocation.clearWatch(watchIdRef.current);
       }
@@ -87,9 +98,11 @@ const Map = () => {
 
   useEffect(() => {
     const checkGeofence = () => {
-      const geofenceCenter = [14.6497, 120.9943]; // Replace with your desired geofence center
-      const distance = L.latLng(navigeniusLocation).distanceTo(L.latLng(geofenceCenter));
-      if (distance > 100 && !hasShownAlert) { // Check if alert has not been shown
+      const geofenceCenter = [14.6497, 120.9943];
+      const distance = L.latLng(navigeniusLocation).distanceTo(
+        L.latLng(geofenceCenter),
+      );
+      if (distance > 100 && !hasShownAlert) {
         toast.error('Your child is outside the area!', {
           position: 'top-right',
           autoClose: 3000,
@@ -103,17 +116,11 @@ const Map = () => {
       }
     };
     checkGeofence();
-
-    return () => {
-      // Clean up if needed
-    };
-  }, [navigeniusLocation, userLocation, hasShownAlert]);
-
-  const mapRef = useRef(null);
+  }, [navigeniusLocation, hasShownAlert]);
 
   return (
-    <div className="lg:fixed top-20 lg:right-20 z-10 max-w-[1100px] lg:w-[90vw] w-[93vw] ml-4">
-      <div className="rounded-xl overflow-hidden lg:h-[80vh] h-[55vh]">
+    <div className="lg:fixed top-20 lg:right-20 z-10 lg:max-w-[1100px] lg:w-[90vw] max-w-[93%] ml-4">
+      <div className="rounded-xl overflow-hidden lg:h-[80vh] h-[40vh]">
         <MapContainer
           center={initialCenter}
           zoom={6}
