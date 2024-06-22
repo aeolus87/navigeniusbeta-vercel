@@ -150,7 +150,6 @@ const ProfilePage = () => {
           .then(() => {
             console.log('Phone number updated in Firestore database');
 
-            // Update Realtime Database with the verified phone number
             const realtimeDbRef = firebase
               .database()
               .ref(`users/${user.uid}/emergency_contact`);
