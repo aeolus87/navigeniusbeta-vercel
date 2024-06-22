@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FiInfo, FiLock, FiPhone, FiArrowLeft, FiEdit } from 'react-icons/fi';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
+import 'firebase/compat/database';
 import {
   getAuth,
   signInWithPhoneNumber,
@@ -34,7 +35,7 @@ const ProfilePage = () => {
   const [verificationId, setVerificationId] = useState(null);
   const [verifiedPhoneNumber, setVerifiedPhoneNumber] = useState('');
   const [childName, setChildName] = useState('');
-  const [isEditing, setIsEditing] = useState(false); // declare new state variable
+  const [isEditing, setIsEditing] = useState(false);
   const [sortedLoginActivities, setSortedLoginActivities] = useState([]);
   const [showLoginActivities, setShowLoginActivities] = useState(false);
 
@@ -52,7 +53,7 @@ const ProfilePage = () => {
         const sortedActivities = response.data.sort((a, b) => {
           const dateA = new Date(`${a.date} ${a.time}`);
           const dateB = new Date(`${b.date} ${b.time}`);
-          return dateB - dateA; // Sort in descending order (latest first)
+          return dateB - dateA;
         });
         setSortedLoginActivities(sortedActivities);
       } catch (error) {
@@ -61,6 +62,26 @@ const ProfilePage = () => {
     };
 
     fetchLoginActivities();
+
+    const user = firebase.auth().currentUser;
+    if (user) {
+      const emergencyRef = firebase.database().ref(`emergencies/${user.uid}`);
+      emergencyRef.on('value', (snapshot) => {
+        const emergencyData = snapshot.val();
+        if (emergencyData && emergencyData.active) {
+          toast.error('Emergency alert! Child has pressed the SOS button.', {
+            position: 'top-center',
+            autoClose: false,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+        }
+      });
+
+      return () => emergencyRef.off();
+    }
   }, []);
 
   useEffect(() => {
@@ -107,18 +128,6 @@ const ProfilePage = () => {
       });
   };
 
-  const handleShowLoginActivities = () => {
-    setShowLoginActivities(true);
-  };
-
-  const handleCloseLoginActivities = () => {
-    setShowLoginActivities(false);
-  };
-
-  const handleVerificationCodeChange = (e) => {
-    setVerificationCode(e.target.value);
-  };
-
   const handleVerifyPhoneNumber = () => {
     if (!verificationId || !verificationCode) {
       console.error('Verification ID or code is missing.');
@@ -140,8 +149,26 @@ const ProfilePage = () => {
         updateDoc(userDocRef, { phone_number: phoneNumber })
           .then(() => {
             console.log('Phone number updated in Firestore database');
-            toast.success('Your number is verified successfully!');
-            setVerifiedPhoneNumber(phoneNumber);
+
+            // Update Realtime Database with the verified phone number
+            const realtimeDbRef = firebase
+              .database()
+              .ref(`users/${user.uid}/emergency_contact`);
+            realtimeDbRef
+              .set(phoneNumber)
+              .then(() => {
+                console.log('Phone number updated in Realtime Database');
+                toast.success(
+                  'Your number is verified and set as emergency contact!',
+                );
+                setVerifiedPhoneNumber(phoneNumber);
+              })
+              .catch((error) => {
+                console.error(
+                  'Error updating phone number in Realtime Database:',
+                  error,
+                );
+              });
           })
           .catch((error) => {
             console.error('Error updating phone number in Firestore:', error);
@@ -150,6 +177,18 @@ const ProfilePage = () => {
       .catch((error) => {
         console.error('Error linking phone number to user:', error);
       });
+  };
+
+  const handleShowLoginActivities = () => {
+    setShowLoginActivities(true);
+  };
+
+  const handleCloseLoginActivities = () => {
+    setShowLoginActivities(false);
+  };
+
+  const handleVerificationCodeChange = (e) => {
+    setVerificationCode(e.target.value);
   };
 
   const handleProfilePicClick = () => {
@@ -221,6 +260,7 @@ const ProfilePage = () => {
       }
     }
   };
+
   const handleBack = () => {
     navigate('/home');
   };
@@ -232,7 +272,6 @@ const ProfilePage = () => {
       console.log('Child name saved successfully');
     }
   };
-
   return (
     <div className="flex justify-center items-center h-screen overflow-hidden">
       <div
@@ -309,7 +348,7 @@ const ProfilePage = () => {
                     <>
                       {' '}
                       {verifiedPhoneNumber ? (
-                        <span className="font-semibold">
+                        <span className="font-semibold text-2xl">
                           {' '}
                           {verifiedPhoneNumber}
                         </span>
@@ -324,7 +363,7 @@ const ProfilePage = () => {
                   <div className="flex flex-col lg:flex-row">
                     {!isEditing ? (
                       <div className="flex">
-                        <p className="lg:mt-2 lg:max-w-xs rounded-md bg-[#0c2734] text-white lg:text-xl lg:ml-0 justify-start">
+                        <p className="lg:mt-2 lg:max-w-xs rounded-md bg-[#0c2734] text-white lg:text-xl font-semibold lg:ml-0 justify-start">
                           {childName}
                         </p>
                         <button
