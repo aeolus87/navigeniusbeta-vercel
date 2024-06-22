@@ -9,6 +9,8 @@ import axios from 'axios';
 import platform from 'platform';
 const GEOLOCATION_API_KEY = process.env.REACT_APP_GEOLOCATION_API_KEY;
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+console.log('API Base URL:', API_BASE_URL); // For debugging
+
 const Login = () => {
   const { userLoggedIn } = useAuth();
 
@@ -30,16 +32,7 @@ const Login = () => {
   };
 
   const logLoginActivity = async (userId, device, location) => {
-    const date = new Date().toLocaleDateString();
-    const time = new Date().toLocaleTimeString();
-
-    console.log('Attempting to log activity:', {
-      userId,
-      device,
-      location,
-      date,
-      time,
-    });
+    console.log('Attempting to log activity:', { userId, device, location });
     console.log('API URL:', `${API_BASE_URL}/api/login-activities`);
 
     try {
@@ -49,16 +42,16 @@ const Login = () => {
           userId,
           device,
           location,
-          date,
-          time,
+          date: new Date().toLocaleDateString(),
+          time: new Date().toLocaleTimeString(),
         },
       );
-      console.log('Login activity logged:', response.data);
+      console.log('Full server response:', response);
       return response.data;
     } catch (error) {
       console.error(
         'Error logging login activity:',
-        error.response ? error.response.data : error.message,
+        error.response ? error.response : error.message,
       );
       throw error;
     }
