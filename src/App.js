@@ -13,7 +13,7 @@ import firebaseConfig from './firebase/firebase.js';
 import Main from './components/main/main.jsx';
 import Profile from './components/profile/index.jsx';
 import TermsAndConditions from './components/auth/terms/TermsConditions.jsx';
-
+import NotFound from './components/main/notfound.jsx';
 firebase.initializeApp(firebaseConfig);
 
 function App() {
@@ -25,7 +25,7 @@ function App() {
       element: <Main />,
     },
     {
-      path: '/main', // Handle the /main route
+      path: '/main',
       element: <Navigate to="/" replace />,
     },
     {
@@ -59,6 +59,10 @@ function App() {
           <Home />
         </PrivateRoute>
       ),
+    },
+    {
+      path: '*',
+      element: <NotFound />,
     },
   ];
 

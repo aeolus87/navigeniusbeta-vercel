@@ -1,19 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/authContext';
-import { doSignOut } from '../../firebase/auth';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const Header = () => {
   const navigate = useNavigate();
-  const { userLoggedIn } = useAuth();
+  const { userLoggedIn, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
-      await doSignOut();
-      notify('Logged Out');
+      await logout();
       navigate('/login');
     } catch (error) {
       console.error('Error signing out:', error);
@@ -25,22 +23,10 @@ const Header = () => {
     navigate('/profile');
   };
 
-  const notify = (message) => {
-    toast.dark(message, {
-      position: 'top-right',
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
-  };
-
   return (
     <>
       <ToastContainer />
-      <nav className="flex justify-between items-center z-50 w-full fixed top-0 left-0 h-16  text-white px-4 transition duration-300 ease-in-out">
+      <nav className="flex justify-between items-center z-50 w-full fixed top-0 left-0 h-16 text-white px-4 transition duration-300 ease-in-out">
         <div className="flex items-center">
           <h2 className="text-2xl mt-3 lg:mt-0 xl:mt-0">Navigenius</h2>
         </div>
@@ -76,9 +62,7 @@ const Header = () => {
                   Profile
                 </button>
                 <button
-                  onClick={() => {
-                    handleLogout();
-                  }}
+                  onClick={handleLogout}
                   className="w-full text-left text-white hover:bg-[#1a1a4e6a] focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 md:me-2 md:mb-0"
                 >
                   Logout

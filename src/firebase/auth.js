@@ -69,7 +69,6 @@ export const doSignInWithGoogle = async () => {
 export const doSignOut = async () => {
   try {
     await signOut(auth);
-    // Replace the current URL with the root path after successful logout
     window.location.replace('/');
   } catch (error) {
     console.error('Error signing out:', error);
