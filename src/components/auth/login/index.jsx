@@ -33,6 +33,15 @@ const Login = () => {
     const date = new Date().toLocaleDateString();
     const time = new Date().toLocaleTimeString();
 
+    console.log('Attempting to log activity:', {
+      userId,
+      device,
+      location,
+      date,
+      time,
+    });
+    console.log('API URL:', `${API_BASE_URL}/api/login-activities`);
+
     try {
       const response = await axios.post(
         `${API_BASE_URL}/api/login-activities`,
@@ -45,10 +54,13 @@ const Login = () => {
         },
       );
       console.log('Login activity logged:', response.data);
-      return response.data; // Optionally return data if needed
+      return response.data;
     } catch (error) {
-      console.error('Error logging login activity:', error);
-      throw error; // Propagate the error to handle it in the calling function
+      console.error(
+        'Error logging login activity:',
+        error.response ? error.response.data : error.message,
+      );
+      throw error;
     }
   };
 

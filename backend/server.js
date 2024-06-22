@@ -60,6 +60,7 @@ app.get('/api/login-activities', async (req, res) => {
 });
 
 app.post('/api/login-activities', async (req, res) => {
+  console.log('Received login activity request:', req.body);
   const { userId, device, location, date, time } = req.body;
 
   if (!userId || !device || !location || !date || !time) {
