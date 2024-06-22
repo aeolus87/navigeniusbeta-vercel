@@ -46,7 +46,7 @@
     "server": "nodemon backend/server.js",
     "client": "set PORT=3000 && react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "react-scripts test --passWithNoTests",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

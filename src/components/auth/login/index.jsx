@@ -113,6 +113,8 @@ const Login = () => {
         console.error('Sign-in error:', error);
         if (error.code === 'auth/user-not-found') {
           setErrorMessage('Email is not registered.');
+        } else if (error.code === 'auth/weak-password') {
+          setPasswordErrorMessage('Password should be at least 6 characters');
         } else {
           setErrorMessage('Invalid email or password.');
         }
