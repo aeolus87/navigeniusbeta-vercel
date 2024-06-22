@@ -1,0 +1,4 @@
+services:
+  - name: navigeniusbeta-vercel-backend
+    buildCommand: npm install
+    startCommand: node server.js
