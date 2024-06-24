@@ -73,7 +73,7 @@ const Map = () => {
             (error) => {
               console.error('Error getting user location:', error);
             },
-            { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 },
+            { enableHighAccuracy: true, timeout: 30000, maximumAge: 30000 },
           );
         } else {
           console.warn('Geolocation not supported by browser.');
@@ -128,7 +128,9 @@ const Map = () => {
 
   return (
     <div className="lg:fixed top-20 lg:right-20 z-10 lg:max-w-[1100px] lg:w-[90vw] max-w-[93%] ml-4">
-      <div className="mb-2">Map will update in: {countdown} seconds</div>
+      <div className="mb-2 text-white border-white bg-[#776e6e9e]">
+        Map will update in: {countdown} seconds
+      </div>
       <div className="rounded-xl overflow-hidden lg:h-[80vh] h-[40vh]">
         <MapContainer
           center={initialCenter}
