@@ -14,7 +14,7 @@ import Main from './components/main/main.jsx';
 import Profile from './components/profile/index.jsx';
 import TermsAndConditions from './components/auth/terms/TermsConditions.jsx';
 import NotFound from './components/main/notfound.jsx';
-import VerifyEmail from './components/auth/verify/verifyemail.jsx';
+import VerifyEmail from './components/auth/register/verifyemail.jsx';
 import VerifiedMessage from './components/auth/verify/verified.jsx';
 import CompleteRegistration from './components/auth/register/complete.jsx';
 

@@ -18,6 +18,7 @@ app.use(compression());
 const allowedOrigins = [
   'http://localhost:3000',
   'https://navigeniusbeta-vercel.vercel.app',
+  'https://navigeniusbeta-vercel.onrender.com',
 ];
 
 const corsOptions = {

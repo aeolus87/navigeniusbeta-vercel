@@ -120,12 +120,27 @@ const Login = () => {
       setIsSigningIn(true);
       try {
         const result = await doSignInWithGoogle();
-        if (result.needsToCompleteRegistration) {
-          navigate('/complete-registration', {
-            state: { email: result.user.email, uid: result.user.uid },
-          });
+        const user = result.user;
+
+        if (user) {
+          if (result.needsToCompleteRegistration) {
+            navigate('/complete-registration', {
+              state: { email: user.email, uid: user.uid },
+            });
+          } else {
+            // Log login activity
+            const deviceInfo = `${platform.name} on ${getOS()}`;
+            const location = await fetchLocation();
+            console.log('Logging activity:', {
+              userId: user.uid,
+              deviceInfo,
+              location,
+            });
+            await logLoginActivity(user.uid, deviceInfo, location);
+            userLoggedIn(user);
+          }
         } else {
-          // Handle successful sign-in
+          console.error('Google sign-in error: User not found');
         }
       } catch (error) {
         console.error('Google sign-in error:', error);
@@ -135,6 +150,7 @@ const Login = () => {
       }
     }
   };
+
   return (
     <div>
       {userLoggedIn && <Navigate to={'/dashboard'} replace={true} />}

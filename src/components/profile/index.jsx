@@ -47,9 +47,14 @@ const ProfilePage = () => {
     const fetchLoginActivities = async () => {
       try {
         const userId = firebase.auth().currentUser?.uid;
+        if (!userId) {
+          console.error('No user ID found');
+          return;
+        }
         const response = await axios.get(
           `https://navigeniusbeta-vercel.onrender.com/api/login-activities?userId=${userId}`,
         );
+        console.log('Login activities response:', response.data); // Add this line
         const sortedActivities = response.data.sort((a, b) => {
           const dateA = new Date(`${a.date} ${a.time}`);
           const dateB = new Date(`${b.date} ${b.time}`);
@@ -57,7 +62,10 @@ const ProfilePage = () => {
         });
         setSortedLoginActivities(sortedActivities);
       } catch (error) {
-        console.error('Error fetching login activities:', error);
+        console.error(
+          'Error fetching login activities:',
+          error.response ? error.response.data : error.message,
+        );
       }
     };
 
