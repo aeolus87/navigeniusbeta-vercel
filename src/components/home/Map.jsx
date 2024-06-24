@@ -15,6 +15,7 @@ const Map = () => {
   const [navigeniusLocation, setNavigeniusLocation] = useState(defaultCenter);
   const [hasShownAlert, setHasShownAlert] = useState(false);
   const [isCircleClicked, setIsCircleClicked] = useState(false);
+  const [countdown, setCountdown] = useState(30);
   const mapRef = useRef(null);
   const watchIdRef = useRef(null);
 
@@ -54,25 +55,31 @@ const Map = () => {
     ];
     setNavigeniusLocation(navigeniusCoords);
 
-    if (navigator.geolocation) {
-      watchIdRef.current = navigator.geolocation.watchPosition(
-        (position) => {
-          const newLocation = [
-            position.coords.latitude,
-            position.coords.longitude,
-          ];
-          setUserLocation(newLocation);
-          localStorage.setItem('c_lat', position.coords.latitude);
-          localStorage.setItem('c_long', position.coords.longitude);
-        },
-        (error) => {
-          console.error('Error watching user location:', error);
-        },
-        { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 },
-      );
-    } else {
-      console.warn('Geolocation not supported by browser.');
-    }
+    const updateInterval = setInterval(() => {
+      setCountdown((prevCount) => (prevCount > 0 ? prevCount - 1 : 30));
+
+      if (countdown === 0) {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const newLocation = [
+                position.coords.latitude,
+                position.coords.longitude,
+              ];
+              setUserLocation(newLocation);
+              localStorage.setItem('c_lat', position.coords.latitude);
+              localStorage.setItem('c_long', position.coords.longitude);
+            },
+            (error) => {
+              console.error('Error getting user location:', error);
+            },
+            { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 },
+          );
+        } else {
+          console.warn('Geolocation not supported by browser.');
+        }
+      }
+    }, 1000);
 
     const refreshNavigeniusLocation = setInterval(() => {
       const newNavigeniusCoords = [
@@ -83,12 +90,13 @@ const Map = () => {
     }, 1000);
 
     return () => {
+      clearInterval(updateInterval);
       clearInterval(refreshNavigeniusLocation);
       if (watchIdRef.current) {
         navigator.geolocation.clearWatch(watchIdRef.current);
       }
     };
-  }, []);
+  }, [countdown]);
 
   useEffect(() => {
     if (userLocation && mapRef.current) {
@@ -120,6 +128,7 @@ const Map = () => {
 
   return (
     <div className="lg:fixed top-20 lg:right-20 z-10 lg:max-w-[1100px] lg:w-[90vw] max-w-[93%] ml-4">
+      <div className="mb-2">Map will update in: {countdown} seconds</div>
       <div className="rounded-xl overflow-hidden lg:h-[80vh] h-[40vh]">
         <MapContainer
           center={initialCenter}

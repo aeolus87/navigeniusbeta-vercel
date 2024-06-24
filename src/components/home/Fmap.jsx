@@ -46,7 +46,7 @@ function Fmap() {
 
   const getHaversineDistance = useCallback(
     (lat1, lon1, lat2, lon2) => {
-      const R = 6371; // Earth's radius in km
+      const R = 6371;
       const dLat = toRadians(lat2 - lat1);
       const dLon = toRadians(lon2 - lon1);
       const a =
@@ -56,7 +56,7 @@ function Fmap() {
           Math.sin(dLon / 2) *
           Math.sin(dLon / 2);
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c * 1000; // Convert to meters
+      return R * c * 1000;
     },
     [toRadians],
   );
@@ -89,7 +89,7 @@ function Fmap() {
               reject(error);
             }
           },
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+          { enableHighAccuracy: true, timeout: 30000, maximumAge: 30000 },
         );
       }
 
@@ -98,10 +98,8 @@ function Fmap() {
   }, []);
 
   const fetchDGPSCorrections = useCallback(async () => {
-    // In a real scenario, you'd fetch this data from a DGPS service
-    // This is a simplified simulation
     const simulatedCorrections = {
-      lat: (Math.random() - 0.5) * 0.0001, // Simulate corrections in the range of ±5 meters
+      lat: (Math.random() - 0.5) * 0.0001,
       lon: (Math.random() - 0.5) * 0.0001,
     };
     setDgpsCorrections(simulatedCorrections);
@@ -113,7 +111,6 @@ function Fmap() {
       const rawLat = position.coords.latitude;
       const rawLon = position.coords.longitude;
 
-      // Apply DGPS corrections
       const correctedLat = rawLat + dgpsCorrections.lat;
       const correctedLon = rawLon + dgpsCorrections.lon;
 
@@ -167,7 +164,7 @@ function Fmap() {
       fetchDGPSCorrections();
       getBestLocation();
       getDistance();
-    }, 10000); // Update every 10 seconds
+    }, 30000);
 
     return () => {
       cleanupCompanion();
