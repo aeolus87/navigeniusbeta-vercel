@@ -128,7 +128,7 @@ const Map = () => {
 
   return (
     <div className="lg:fixed top-20 lg:right-20 z-10 lg:max-w-[1100px] lg:w-[90vw] max-w-[93%] ml-4">
-      <div className="mb-2 text-white border-white bg-[#776e6e9e]">
+      <div className="mb-2 rounded-xl mx-2 text-white border-white bg-[#776e6e9e]">
         Map will update in: {countdown} seconds
       </div>
       <div className="rounded-xl overflow-hidden lg:h-[80vh] h-[40vh]">
