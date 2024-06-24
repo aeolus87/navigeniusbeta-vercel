@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Navigate, Link } from 'react-router-dom';
+import { Navigate, Link, useNavigate } from 'react-router-dom';
 import {
   doSignInWithEmailAndPassword,
   doSignInWithGoogle,
@@ -12,7 +12,7 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const Login = () => {
   const { userLoggedIn } = useAuth();
-
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSigningIn, setIsSigningIn] = useState(false);
@@ -28,6 +28,7 @@ const Login = () => {
       return 'Unknown Location';
     }
   };
+  const { notify } = useAuth();
 
   const logLoginActivity = async (userId, device, location) => {
     const date = new Date().toLocaleDateString();
@@ -101,6 +102,10 @@ const Login = () => {
         console.error('Sign-in error:', error);
         if (error.code === 'auth/user-not-found') {
           setErrorMessage('Email is not registered.');
+        } else if (
+          error.message === 'Please verify your email before logging in.'
+        ) {
+          setErrorMessage('Email not verified. Please check your email.');
         } else {
           setErrorMessage('Invalid email or password.');
         }
@@ -114,29 +119,22 @@ const Login = () => {
     if (!isSigningIn) {
       setIsSigningIn(true);
       try {
-        const userCredential = await doSignInWithGoogle();
-        const user = userCredential.user;
-
-        if (user) {
-          const deviceInfo = `${platform.name} on ${getOS()}`;
-          const location = await fetchLocation();
-          console.log('Logging activity:', {
-            userId: user.uid,
-            deviceInfo,
-            location,
+        const result = await doSignInWithGoogle();
+        if (result.needsToCompleteRegistration) {
+          navigate('/complete-registration', {
+            state: { email: result.user.email, uid: result.user.uid },
           });
-          await logLoginActivity(user.uid, deviceInfo, location);
-          userLoggedIn(user);
         } else {
-          console.error('Google sign-in error: User not found');
+          // Handle successful sign-in
         }
       } catch (error) {
         console.error('Google sign-in error:', error);
+        notify(error.message);
+      } finally {
         setIsSigningIn(false);
       }
     }
   };
-
   return (
     <div>
       {userLoggedIn && <Navigate to={'/dashboard'} replace={true} />}

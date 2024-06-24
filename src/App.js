@@ -7,7 +7,7 @@ import Header from './components/header/index.jsx';
 import Dashboard from './components/home/Dashboard.jsx';
 import ForgotPassword from './components/auth/forgot/index.jsx';
 import { AuthProvider } from './contexts/authContext/index.jsx';
-import PrivateRoute from './contexts/PrivateRoute.js';
+import PrivateRoute from './contexts/authContext/PrivateRoute.js';
 import firebase from 'firebase/compat/app';
 import firebaseConfig from './firebase/firebase.js';
 import Main from './components/main/main.jsx';
@@ -16,6 +16,7 @@ import TermsAndConditions from './components/auth/terms/TermsConditions.jsx';
 import NotFound from './components/main/notfound.jsx';
 import VerifyEmail from './components/auth/verify/verifyemail.jsx';
 import VerifiedMessage from './components/auth/verify/verified.jsx';
+import CompleteRegistration from './components/auth/register/complete.jsx';
 
 firebase.initializeApp(firebaseConfig);
 
@@ -26,6 +27,7 @@ function App() {
     { path: '/', element: <Main /> },
     { path: '/login', element: <Login /> },
     { path: '/register', element: <Register /> },
+    { path: '/complete-registration', element: <CompleteRegistration /> },
     { path: '/terms', element: <TermsAndConditions /> },
     { path: '/verifyemail', element: <VerifyEmail /> },
     { path: '/verified', element: <VerifiedMessage /> },

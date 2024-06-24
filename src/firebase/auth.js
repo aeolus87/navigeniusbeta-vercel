@@ -9,7 +9,7 @@ import {
   GoogleAuthProvider,
   signOut,
 } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from './firebase';
 
 export const doCreateUserWithEmailAndPassword = async (
@@ -28,19 +28,16 @@ export const doCreateUserWithEmailAndPassword = async (
       password,
     );
 
-    // Save user data to Firestore
     await setDoc(doc(db, 'users', user.uid), {
       uid: user.uid,
       email: user.email,
       fullname: fullname,
     });
 
-    // Send email verification
     await sendEmailVerification(user, {
-      url: `${window.location.origin}/verified`, // Change the URL to your verification page
+      url: `${window.location.origin}/verified`,
     });
 
-    // Do not automatically sign in the user here
     return user;
   } catch (error) {
     console.error('Error creating user:', error);
@@ -72,14 +69,29 @@ export const doSignInWithEmailAndPassword = async (email, password) => {
 export const doSignInWithGoogle = async () => {
   const provider = new GoogleAuthProvider();
   try {
-    const userCredential = await signInWithPopup(auth, provider);
-    return userCredential;
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+
+    // Check if the user exists in Firestore
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+
+    if (!userDoc.exists()) {
+      // User doesn't exist in Firestore, needs to complete registration
+      return {
+        user,
+        needsToCompleteRegistration: true,
+      };
+    }
+
+    return {
+      user,
+      needsToCompleteRegistration: false,
+    };
   } catch (error) {
     console.error('Error signing in with Google:', error);
     throw error;
   }
 };
-
 export const doSignOut = async () => {
   try {
     await signOut(auth);
