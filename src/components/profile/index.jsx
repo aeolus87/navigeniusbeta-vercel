@@ -261,7 +261,7 @@ const ProfilePage = () => {
   };
 
   const handleBack = () => {
-    navigate('/home');
+    navigate('/dashboard');
   };
 
   const handleSaveChildName = async () => {

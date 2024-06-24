@@ -13,20 +13,20 @@ export function useAuth() {
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [userLoggedIn, setUserLoggedIn] = useState(false);
-  const [isEmailUser, setIsEmailUser] = useState(false);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const initializeUser = useCallback(async (user) => {
     try {
       if (user) {
-        setCurrentUser({ ...user });
-        const isEmail = user.providerData.some(
-          (provider) => provider.providerId === 'password',
-        );
-        setIsEmailUser(isEmail);
-        setUserLoggedIn(true);
-        notify('Logged In');
+        setCurrentUser(user);
+        setUserLoggedIn(false); // Initially set to false
+        if (user.emailVerified) {
+          setUserLoggedIn(true); // Set to true only if email is verified
+          notify('Logged In');
+        } else {
+          notify('Please verify your email before logging in.');
+        }
       } else {
         setCurrentUser(null);
         setUserLoggedIn(false);
@@ -56,7 +56,7 @@ export function AuthProvider({ children }) {
   const notify = (message) => {
     toast.dark(message, {
       position: 'top-right',
-      autoClose: 1500,
+      autoClose: 3000,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: false,
@@ -67,10 +67,9 @@ export function AuthProvider({ children }) {
 
   const value = {
     userLoggedIn,
-    isEmailUser,
     currentUser,
     logout,
-    notify, 
+    notify,
   };
 
   return (

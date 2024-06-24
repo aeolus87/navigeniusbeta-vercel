@@ -1,10 +1,10 @@
 import React from 'react';
-import { useRoutes, useLocation, Navigate } from 'react-router-dom';
+import { useRoutes, useLocation } from 'react-router-dom';
 import './index.css';
 import Login from './components/auth/login/index.jsx';
 import Register from './components/auth/register/index.jsx';
 import Header from './components/header/index.jsx';
-import Home from './components/home/Home.jsx';
+import Dashboard from './components/home/Dashboard.jsx';
 import ForgotPassword from './components/auth/forgot/index.jsx';
 import { AuthProvider } from './contexts/authContext/index.jsx';
 import PrivateRoute from './contexts/PrivateRoute.js';
@@ -14,36 +14,22 @@ import Main from './components/main/main.jsx';
 import Profile from './components/profile/index.jsx';
 import TermsAndConditions from './components/auth/terms/TermsConditions.jsx';
 import NotFound from './components/main/notfound.jsx';
+import VerifyEmail from './components/auth/verify/verifyemail.jsx';
+import VerifiedMessage from './components/auth/verify/verified.jsx';
+
 firebase.initializeApp(firebaseConfig);
 
 function App() {
   const location = useLocation();
 
   const routesArray = [
-    {
-      path: '/',
-      element: <Main />,
-    },
-    {
-      path: '/main',
-      element: <Navigate to="/" replace />,
-    },
-    {
-      path: '/login',
-      element: <Login />,
-    },
-    {
-      path: '/register',
-      element: <Register />,
-    },
-    {
-      path: '/terms',
-      element: <TermsAndConditions />,
-    },
-    {
-      path: '/forgot-password',
-      element: <ForgotPassword />,
-    },
+    { path: '/', element: <Main /> },
+    { path: '/login', element: <Login /> },
+    { path: '/register', element: <Register /> },
+    { path: '/terms', element: <TermsAndConditions /> },
+    { path: '/verifyemail', element: <VerifyEmail /> },
+    { path: '/verified', element: <VerifiedMessage /> },
+    { path: '/forgot-password', element: <ForgotPassword /> },
     {
       path: '/profile',
       element: (
@@ -53,17 +39,14 @@ function App() {
       ),
     },
     {
-      path: '/home',
+      path: '/dashboard',
       element: (
         <PrivateRoute>
-          <Home />
+          <Dashboard />
         </PrivateRoute>
       ),
     },
-    {
-      path: '*',
-      element: <NotFound />,
-    },
+    { path: '*', element: <NotFound /> },
   ];
 
   const isTermsPage = location.pathname === '/terms';
@@ -75,7 +58,11 @@ function App() {
     <AuthProvider>
       {!isTermsPage && !isMainPage && <Header />}
       <div
-        className={`h-screen flex flex-col mx-0 my-0${isTermsPage ? ' bg-white' : ' bg-main bg-cover bg-center backdrop-blur-sm'}`}
+        className={`h-screen flex flex-col mx-0 my-0${
+          isTermsPage
+            ? ' bg-white'
+            : ' bg-main bg-cover bg-center backdrop-blur-sm'
+        }`}
       >
         {routesElement}
       </div>

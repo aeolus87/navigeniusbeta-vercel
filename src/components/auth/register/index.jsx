@@ -6,7 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const Register = () => {
   const navigate = useNavigate();
-  const { userLoggedIn } = useAuth();
+  const { userLoggedIn, notify } = useAuth();
 
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -89,17 +89,12 @@ const Register = () => {
       setIsRegistering(true);
       try {
         await doCreateUserWithEmailAndPassword(email, password, fullName);
-        const sessionId = sessionStorage.getItem('registrationSessionId');
-        clearSessionData(sessionId);
-        navigate('/home');
+        notify('  Please check your email for verification.');
+        navigate('/verifyemail'); // Navigate to verifyemail after successful registration
       } catch (error) {
-        if (error.code === 'auth/email-already-in-use') {
-          setEmailErrorMessage('This email is already used');
-        } else if (error.code === 'auth/weak-password') {
-          setPasswordErrorMessage('Password should be at least 6 characters');
-        } else {
-          setPasswordErrorMessage('Error signing up. Please try again later.');
-        }
+        console.error('Registration error:', error);
+        notify(error.message);
+      } finally {
         setIsRegistering(false);
       }
     }
@@ -129,7 +124,7 @@ const Register = () => {
   };
   return (
     <>
-      {userLoggedIn && <Navigate to={'/home'} replace={true} />}
+      {userLoggedIn && <Navigate to={'/dashboard'} replace={true} />}
       <main className="w-full h-screen flex self-center place-content-center place-items-center">
         <div className="w-96 text-gray-600 space-y-5 p-4 shadow-xl border bg-[#fff9f9] rounded-xl">
           <div className="text-center mb-6">
@@ -235,9 +230,19 @@ const Register = () => {
               disabled={
                 isRegistering ||
                 emailErrorMessage !== '' ||
-                passwordErrorMessage !== ''
+                passwordErrorMessage !== '' ||
+                password !== confirmPassword ||
+                !agreedToTerms
               }
-              className={`w-full px-4 py-2 text-white font-medium rounded-lg ${isRegistering ? 'bg-gray-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 hover:shadow-xl transition duration-300'}`}
+              className={`w-full px-4 py-2 text-white font-medium rounded-lg ${
+                isRegistering ||
+                emailErrorMessage !== '' ||
+                passwordErrorMessage !== '' ||
+                password !== confirmPassword ||
+                !agreedToTerms
+                  ? 'bg-gray-300 cursor-not-allowed'
+                  : 'bg-indigo-600 hover:bg-indigo-700 hover:shadow-xl transition duration-300'
+              }`}
             >
               {isRegistering ? 'Signing Up...' : 'Sign Up'}
             </button>

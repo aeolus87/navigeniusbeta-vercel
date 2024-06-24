@@ -16,7 +16,7 @@ function EmailVerificationPage() {
                 await firebase.auth().applyActionCode(actionCode);
                 
                 // Redirect to home page after successful email verification.
-                navigate('/home');
+                navigate('/dashboard');
             } catch (error) {
                 console.error(error);
                 // Handle error as needed, such as displaying an error message.

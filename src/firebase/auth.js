@@ -28,13 +28,19 @@ export const doCreateUserWithEmailAndPassword = async (
       password,
     );
 
-    // Create a new document in the "users" collection with the user's information
+    // Save user data to Firestore
     await setDoc(doc(db, 'users', user.uid), {
       uid: user.uid,
       email: user.email,
       fullname: fullname,
     });
 
+    // Send email verification
+    await sendEmailVerification(user, {
+      url: `${window.location.origin}/verified`, // Change the URL to your verification page
+    });
+
+    // Do not automatically sign in the user here
     return user;
   } catch (error) {
     console.error('Error creating user:', error);
@@ -48,7 +54,15 @@ export const doSignInWithEmailAndPassword = async (email, password) => {
   }
 
   try {
-    return await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password,
+    );
+    if (!userCredential.user.emailVerified) {
+      throw new Error('Please verify your email before logging in.');
+    }
+    return userCredential;
   } catch (error) {
     console.error('Error signing in:', error);
     throw error;
@@ -113,7 +127,7 @@ export const doSendEmailVerification = async () => {
 
   try {
     await sendEmailVerification(auth.currentUser, {
-      url: `${window.location.origin}/home`,
+      url: `${window.location.origin}/dashboard`,
     });
   } catch (error) {
     console.error('Error sending email verification:', error);
