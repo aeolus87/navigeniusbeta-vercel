@@ -21,6 +21,7 @@
     "helmet": "^7.1.0",
     "install": "^0.13.0",
     "leaflet": "^1.9.4",
+    "lodash": "^4.17.21",
     "mobile-detect": "^1.4.5",
     "mongoose": "^8.4.1",
     "os-browserify": "^0.3.0",
@@ -77,12 +78,12 @@
     }
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "",
     "@testing-library/dom": "^10.1.0",
     "@testing-library/react": "^16.0.0",
     "concurrently": "^8.1.0",
     "dotenv": "^16.4.5",
     "dotenv-webpack": "^8.1.0",
-    "prettier": "^3.3.1",
-    "@babel/plugin-proposal-private-property-in-object": ""
+    "prettier": "^3.3.1"
   }
 }

@@ -1,7 +1,8 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, onValue, off } from 'firebase/database';
 import Coordinates from './Coordinates';
+import _ from 'lodash';
 
 const firebaseConfig = {
   apiKey: `${process.env.REACT_APP_API_KEY}`,
@@ -31,18 +32,16 @@ function KalmanFilter() {
   };
 }
 
-function Fmap() {
+const Fmap = React.memo(() => {
   const [userLocation, setUserLocation] = useState(null);
   const [companionLocation, setCompanionLocation] = useState(null);
   const [distance, setDistance] = useState(0);
   const [error, setError] = useState(null);
-  const [latitudeFilter] = useState(() => new KalmanFilter());
-  const [longitudeFilter] = useState(() => new KalmanFilter());
+  const latitudeFilter = useMemo(() => new KalmanFilter(), []);
+  const longitudeFilter = useMemo(() => new KalmanFilter(), []);
   const [dgpsCorrections, setDgpsCorrections] = useState({ lat: 0, lon: 0 });
 
-  const toRadians = useCallback((degrees) => {
-    return (degrees * Math.PI) / 180;
-  }, []);
+  const toRadians = useCallback((degrees) => (degrees * Math.PI) / 180, []);
 
   const getHaversineDistance = useCallback(
     (lat1, lon1, lat2, lon2) => {
@@ -64,14 +63,19 @@ function Fmap() {
   const getCompanionLocation = useCallback(() => {
     const database = getDatabase();
     const databaseRef = ref(database, 'Device/Locator');
-    onValue(databaseRef, (snapshot) => {
+    const handler = (snapshot) => {
       const location = snapshot.val();
       setCompanionLocation(location);
       localStorage.setItem('long_val', location.Longitude);
       localStorage.setItem('lat_val', location.Latitude);
-    });
+    };
+    const throttledHandler = _.throttle(handler, 1000);
+    onValue(databaseRef, throttledHandler);
 
-    return () => off(databaseRef);
+    return () => {
+      off(databaseRef);
+      throttledHandler.cancel();
+    };
   }, []);
 
   const getLocationWithRetry = useCallback((maxRetries = 3, delay = 2000) => {
@@ -97,7 +101,7 @@ function Fmap() {
     });
   }, []);
 
-  const fetchDGPSCorrections = useCallback(async () => {
+  const fetchDGPSCorrections = useCallback(() => {
     const simulatedCorrections = {
       lat: (Math.random() - 0.5) * 0.0001,
       lon: (Math.random() - 0.5) * 0.0001,
@@ -133,7 +137,7 @@ function Fmap() {
         setError('Failed to get location');
       }
     }
-  }, [latitudeFilter, longitudeFilter, getLocationWithRetry, dgpsCorrections]);
+  }, [latitudeFilter, longitudeFilter, dgpsCorrections, getLocationWithRetry]);
 
   const getDistance = useCallback(() => {
     const lat1 = localStorage.getItem('c_lat');
@@ -160,15 +164,25 @@ function Fmap() {
   useEffect(() => {
     const cleanupCompanion = getCompanionLocation();
 
+    const throttledGetBestLocation = _.throttle(getBestLocation, 1000);
+    const debouncedGetDistance = _.debounce(getDistance, 1000);
+    const debouncedFetchDGPSCorrections = _.debounce(
+      fetchDGPSCorrections,
+      1000,
+    );
+
     const updateInterval = setInterval(() => {
-      fetchDGPSCorrections();
-      getBestLocation();
-      getDistance();
+      debouncedFetchDGPSCorrections();
+      throttledGetBestLocation();
+      debouncedGetDistance();
     }, 30000);
 
     return () => {
       cleanupCompanion();
       clearInterval(updateInterval);
+      throttledGetBestLocation.cancel();
+      debouncedGetDistance.cancel();
+      debouncedFetchDGPSCorrections.cancel();
     };
   }, [
     getCompanionLocation,
@@ -177,8 +191,8 @@ function Fmap() {
     fetchDGPSCorrections,
   ]);
 
-  return (
-    <div className="map-container">
+  const memoizedCoordinates = useMemo(
+    () => (
       <Coordinates
         userLocation={userLocation}
         companionLocation={companionLocation}
@@ -186,8 +200,11 @@ function Fmap() {
         error={error}
         dgpsCorrections={dgpsCorrections}
       />
-    </div>
+    ),
+    [userLocation, companionLocation, distance, error, dgpsCorrections],
   );
-}
+
+  return <div className="map-container">{memoizedCoordinates}</div>;
+});
 
 export default Fmap;
