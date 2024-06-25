@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Navigate, Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Navigate, Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   doSignInWithEmailAndPassword,
   doSignInWithGoogle,
@@ -7,16 +7,26 @@ import {
 import { useAuth } from '../../../contexts/authContext';
 import axios from 'axios';
 import platform from 'platform';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../../firebase/firebase';
+
 const GEOLOCATION_API_KEY = process.env.REACT_APP_GEOLOCATION_API_KEY;
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const Login = () => {
-  const { userLoggedIn } = useAuth();
+  const { userLoggedIn, setUserLoggedIn, notify } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    if (location.state && location.state.from === 'logout') {
+      notify('Logged Out');
+    }
+  }, [location, notify]);
 
   const fetchLocation = async () => {
     try {
@@ -28,12 +38,10 @@ const Login = () => {
       return 'Unknown Location';
     }
   };
-  const { notify } = useAuth();
 
   const logLoginActivity = async (userId, device, location) => {
     const date = new Date().toLocaleDateString();
     const time = new Date().toLocaleTimeString();
-
     try {
       await axios.post(`${API_BASE_URL}/api/login-activities`, {
         userId,
@@ -42,114 +50,85 @@ const Login = () => {
         date,
         time,
       });
-    } catch (error) {}
+    } catch (error) {
+      console.error('Error logging login activity:', error);
+    }
   };
 
   const getOS = () => {
     const { userAgent } = navigator;
-    if (/Android/i.test(userAgent)) {
-      console.log('Detected Device:', 'Android');
-      return 'Android';
-    }
+    if (/Android/i.test(userAgent)) return 'Android';
     if (/iPhone|iPad|iPod/i.test(userAgent)) {
       if (
         /iPhone/i.test(userAgent) ||
         /CriOS/i.test(userAgent.replace('Chrome on', ''))
-      ) {
-        console.log('Detected Device:', 'iPhone');
+      )
         return 'iPhone';
-      } else {
-        const device = userAgent
-          .match(/\((.*?)\)/)[1]
-          .split(';')[0]
-          .trim();
-        console.log('Detected Device:', device);
-        return device;
-      }
+      return userAgent
+        .match(/\((.*?)\)/)[1]
+        .split(';')[0]
+        .trim();
     }
     if (userAgent.indexOf('Windows NT 10.0') !== -1) {
-      if (
-        userAgent.indexOf('Win64') !== -1 ||
+      return userAgent.indexOf('Win64') !== -1 ||
         userAgent.indexOf('WOW64') !== -1
-      ) {
-        return 'Windows 11';
-      }
-      return 'Windows 10';
+        ? 'Windows 11'
+        : 'Windows 10';
     }
     return 'Unknown OS';
   };
 
-  if (GEOLOCATION_API_KEY) {
-    fetchLocation();
-  } else {
-    console.error('GEOLOCATION_API_KEY is not defined.');
-  }
+  const handleSignIn = async (signInMethod) => {
+    if (isSigningIn) return;
+    setIsSigningIn(true);
+    setErrorMessage('');
 
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    if (!isSigningIn) {
-      setIsSigningIn(true);
-      setErrorMessage('');
+    try {
+      const { user } = await signInMethod();
+      const deviceInfo = `${platform.name} on ${getOS()}`;
+      const location = await fetchLocation();
+      await logLoginActivity(user.uid, deviceInfo, location);
 
-      try {
-        const { user } = await doSignInWithEmailAndPassword(email, password);
+      // Check if the user needs to complete registration
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
 
-        const deviceInfo = `${platform.name} on ${getOS()}`;
-        const location = await fetchLocation();
-        await logLoginActivity(user.uid, deviceInfo, location);
-        userLoggedIn(user);
-      } catch (error) {
-        console.error('Sign-in error:', error);
-        if (error.code === 'auth/user-not-found') {
-          setErrorMessage('Email is not registered.');
-        } else if (
-          error.message === 'Please verify your email before logging in.'
-        ) {
-          setErrorMessage('Email not verified. Please check your email.');
-        } else {
-          setErrorMessage('Invalid email or password.');
-        }
-        setIsSigningIn(false);
+      if (!userDoc.exists()) {
+        // User needs to complete registration
+        navigate('/complete-registration', {
+          state: { email: user.email, uid: user.uid },
+        });
+      } else {
+        // User is already registered
+        setUserLoggedIn(true);
+        notify('Logged In');
+        navigate('/dashboard');
       }
+    } catch (error) {
+      console.error('Sign-in error:', error);
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setIsSigningIn(false);
     }
   };
 
-  const onGoogleSignIn = async (e) => {
-    e.preventDefault();
-    if (!isSigningIn) {
-      setIsSigningIn(true);
-      try {
-        const result = await doSignInWithGoogle();
-        const user = result.user;
-
-        if (user) {
-          if (result.needsToCompleteRegistration) {
-            navigate('/complete-registration', {
-              state: { email: user.email, uid: user.uid },
-            });
-          } else {
-            // Log login activity
-            const deviceInfo = `${platform.name} on ${getOS()}`;
-            const location = await fetchLocation();
-            console.log('Logging activity:', {
-              userId: user.uid,
-              deviceInfo,
-              location,
-            });
-            await logLoginActivity(user.uid, deviceInfo, location);
-            userLoggedIn(user);
-          }
-        } else {
-          console.error('Google sign-in error: User not found');
-        }
-      } catch (error) {
-        console.error('Google sign-in error:', error);
-        notify(error.message);
-      } finally {
-        setIsSigningIn(false);
-      }
-    }
+  const getErrorMessage = (error) => {
+    if (error.code === 'auth/user-not-found') return 'Email is not registered.';
+    if (error.message === 'Please verify your email before logging in.')
+      return 'Email not verified. Please check your email.';
+    return 'Invalid email or password.';
   };
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+    handleSignIn(() => doSignInWithEmailAndPassword(email, password));
+  };
+
+  const onGoogleSignIn = (e) => {
+    e.preventDefault();
+    handleSignIn(doSignInWithGoogle);
+  };
+
+  if (userLoggedIn) return <Navigate to="/dashboard" replace />;
 
   return (
     <div>

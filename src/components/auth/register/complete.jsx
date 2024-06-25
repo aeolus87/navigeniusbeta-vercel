@@ -7,7 +7,8 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 function CompleteRegistration() {
   const [fullName, setFullName] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const { notify } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const { notify, setUserLoggedIn } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -27,6 +28,8 @@ function CompleteRegistration() {
       return;
     }
 
+    setIsLoading(true);
+
     try {
       await setDoc(
         doc(db, 'users', uid),
@@ -34,18 +37,40 @@ function CompleteRegistration() {
           uid: uid,
           email: email,
           fullname: fullName,
-          justRegistered: true, // Add this line
+          justRegistered: true,
         },
         { merge: true },
       );
 
+      setUserLoggedIn(true);
+
       notify('Registration completed successfully');
-      navigate('/dashboard');
+
+      setTimeout(() => {
+        navigate('/dashboard', { replace: true });
+      }, 100);
     } catch (error) {
       console.error('Error completing registration:', error);
       notify('Error completing registration. Please try again.');
+      setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="text-center">
+          <div className="inline-block">
+            <div className="w-16 h-16 border-4 border-blue-500 border-solid rounded-full border-t-transparent animate-spin"></div>
+          </div>
+          <p className="mt-4 text-xl font-semibold text-gray-700">
+            Completing Registration...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="w-full max-w-md">
@@ -91,23 +116,23 @@ function CompleteRegistration() {
             />
           </div>
 
-          <p className="text-gray-600 flex items-center ml-1">
-            <input
-              type="checkbox"
-              id="termsCheckbox"
-              className="mr-4 h-5 w-5"
-              checked={agreedToTerms}
-              onChange={() => setAgreedToTerms(!agreedToTerms)}
-              required
-            />
-            <label htmlFor="termsCheckbox">
-              By registering, you agree to our{' '}
-              <Link to="/terms" className="text-indigo-600 hover:underline">
-                Terms and Conditions
-              </Link>
-              .
+          <div className="mb-6">
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                className="form-checkbox h-5 w-5 text-blue-600"
+                checked={agreedToTerms}
+                onChange={() => setAgreedToTerms(!agreedToTerms)}
+                required
+              />
+              <span className="ml-2 text-gray-700">
+                I agree to the{' '}
+                <Link to="/terms" className="text-blue-600 hover:underline">
+                  Terms and Conditions
+                </Link>
+              </span>
             </label>
-          </p>
+          </div>
 
           <div className="flex items-center justify-center">
             <button
@@ -122,4 +147,5 @@ function CompleteRegistration() {
     </div>
   );
 }
+
 export default CompleteRegistration;

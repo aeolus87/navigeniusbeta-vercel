@@ -95,7 +95,6 @@ export const doSignInWithGoogle = async () => {
 export const doSignOut = async () => {
   try {
     await signOut(auth);
-    window.location.replace('/');
   } catch (error) {
     console.error('Error signing out:', error);
     throw error;

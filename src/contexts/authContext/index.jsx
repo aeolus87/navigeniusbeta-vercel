@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { auth } from '../../firebase/firebase';
+import { auth, db } from '../../firebase/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '../../firebase/firebase';
 
 const AuthContext = React.createContext();
 
@@ -48,29 +47,26 @@ export function AuthProvider({ children }) {
         }
         if (user) {
           const userDoc = await getDoc(doc(db, 'users', user.uid));
-
+          setCurrentUser(user);
           if (!userDoc.exists()) {
-            setCurrentUser(user);
+            console.log(
+              "User document doesn't exist, should redirect to registration",
+            );
             setUserLoggedIn(false);
             setNeedsToCompleteRegistration(true);
             navigate('/complete-registration', {
               state: { email: user.email, uid: user.uid },
             });
           } else {
-            setCurrentUser(user);
             const userData = userDoc.data();
-
             if (userData.justRegistered) {
               setNeedsToCompleteRegistration(false);
               setUserLoggedIn(true);
-              notify('Registration completed successfully');
-
               await setDoc(
                 doc(db, 'users', user.uid),
                 { justRegistered: false },
                 { merge: true },
               );
-
               navigate('/dashboard');
             } else {
               setNeedsToCompleteRegistration(false);
@@ -117,9 +113,9 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     try {
       await signOut(auth);
-      navigate('/login');
-      notify('Logged Out');
+      setUserLoggedIn(false);
       setIsInitialLogin(true);
+      navigate('/login', { state: { from: 'logout' } });
     } catch (error) {
       console.error('Error logging out:', error);
     }
@@ -127,6 +123,7 @@ export function AuthProvider({ children }) {
 
   const value = {
     userLoggedIn,
+    setUserLoggedIn: (value) => setUserLoggedIn(value),
     currentUser,
     logout,
     notify,
