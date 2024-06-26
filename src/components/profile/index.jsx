@@ -116,10 +116,18 @@ const ProfilePage = () => {
   }, [user]);
 
   const handlePhoneNumberChange = (e) => {
-    setPhoneNumber(e.target.value);
+    let number = e.target.value;
+    if (number.startsWith('+')) {
+      number = number.slice(1);
+    }
+    setPhoneNumber(number);
   };
 
   const handleSendVerificationCode = () => {
+    const formattedPhoneNumber = phoneNumber.startsWith('63')
+      ? `+${phoneNumber}`
+      : `+63${phoneNumber}`;
+
     const appVerifier = new firebase.auth.RecaptchaVerifier(
       'recaptcha-container',
       {
@@ -127,7 +135,7 @@ const ProfilePage = () => {
       },
     );
 
-    signInWithPhoneNumber(auth, phoneNumber, appVerifier)
+    signInWithPhoneNumber(auth, formattedPhoneNumber, appVerifier)
       .then((confirmationResult) => {
         setVerificationId(confirmationResult.verificationId);
       })
@@ -135,7 +143,6 @@ const ProfilePage = () => {
         console.error('Error sending verification code:', error);
       });
   };
-
   const handleVerifyPhoneNumber = () => {
     if (!verificationId || !verificationCode) {
       console.error('Verification ID or code is missing.');
@@ -152,23 +159,24 @@ const ProfilePage = () => {
       .currentUser.linkWithCredential(credential)
       .then((userCredential) => {
         const user = userCredential.user;
+        const phoneNumberToStore = phoneNumber.startsWith('63')
+          ? phoneNumber
+          : `63${phoneNumber}`;
 
         const userDocRef = doc(db, 'users', user.uid);
-        updateDoc(userDocRef, { phone_number: phoneNumber })
+        updateDoc(userDocRef, { phone_number: phoneNumberToStore })
           .then(() => {
             console.log('Phone number updated in Firestore database');
 
-            const realtimeDbRef = firebase
-              .database()
-              .ref(`users/${user.uid}/emergency_contact`);
+            const realtimeDbRef = firebase.database().ref(`Number`);
             realtimeDbRef
-              .set(phoneNumber)
+              .set(phoneNumberToStore)
               .then(() => {
                 console.log('Phone number updated in Realtime Database');
                 toast.success(
                   'Your number is verified and set as emergency contact!',
                 );
-                setVerifiedPhoneNumber(phoneNumber);
+                setVerifiedPhoneNumber(phoneNumberToStore);
               })
               .catch((error) => {
                 console.error(
@@ -185,7 +193,6 @@ const ProfilePage = () => {
         console.error('Error linking phone number to user:', error);
       });
   };
-
   const handleShowLoginActivities = () => {
     setShowLoginActivities(true);
   };
