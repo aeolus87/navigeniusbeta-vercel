@@ -405,7 +405,6 @@ const ProfilePage = () => {
                     Account Login Activity
                   </p>
                   <div className="overflow-x-auto rounded-md lg:mt-3">
-                    {/* Render the table for large screens */}
                     <table className="lg:min-w-full bg-[#184e64] text-white text-[1.16rem] rounded-md lg:block hidden">
                       <thead>
                         <tr>
