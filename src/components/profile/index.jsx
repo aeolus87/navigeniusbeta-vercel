@@ -170,7 +170,7 @@ const ProfilePage = () => {
 
             const realtimeDbRef = firebase.database().ref(`Number`);
             realtimeDbRef
-              .set(phoneNumberToStore)
+              .set(parseInt(phoneNumberToStore, 10)) // Convert to integer
               .then(() => {
                 console.log('Phone number updated in Realtime Database');
                 toast.success(
