@@ -19,6 +19,7 @@ const allowedOrigins = [
   'http://localhost:3000',
   'https://navigeniusbeta-vercel.vercel.app',
   'https://navigeniusbeta-vercel.onrender.com',
+  'https://navigenius.live',
 ];
 
 const corsOptions = {
