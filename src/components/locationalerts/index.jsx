@@ -13,14 +13,11 @@ function Emergency() {
 
   // Define your API base URL from environment variables
   const API_BASE_URL2 = process.env.REACT_APP_API_BASE_URL2;
-  const url = `${API_BASE_URL2}/api/storeData`;
-  console.log('Full Axios POST URL:', url);
   const storeDataInMongoDB = useCallback(
     async (data) => {
       try {
         const response = await axios.post(
           `${API_BASE_URL2}/api/storeData`,
-          url,
           data,
         );
         if (response.status !== 200) {
@@ -31,7 +28,7 @@ function Emergency() {
         // You might want to add some user-facing error handling here
       }
     },
-    [API_BASE_URL2, url],
+    [API_BASE_URL2],
   );
 
   const fetchDataFromMongoDB = useCallback(async () => {
