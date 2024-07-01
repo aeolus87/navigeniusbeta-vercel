@@ -93,7 +93,7 @@ async function connectToDatabase() {
     return client.db(DB_NAME);
   } catch (error) {
     console.error('Error connecting to MongoDB:', error);
-    throw error; // Ensure errors are thrown to handle them properly
+    throw error;
   }
 }
 
@@ -125,36 +125,83 @@ function setupFirebaseListeners(db) {
   const locationRef = firebaseDb.ref('Device/Locator');
   const emergencyRef = firebaseDb.ref('Device/Locator/emergency');
 
-  locationRef.on('value', async (snapshot) => {
-    const data = snapshot.val();
-    if (data && data.Latitude && data.Longitude) {
-      const newLocation = {
-        latitude: data.Latitude,
-        longitude: data.Longitude,
-        timestamp: new Date(),
-      };
-      try {
-        await db.collection('locations').insertOne(newLocation);
-        console.log('New location saved');
-      } catch (error) {
-        console.error('Error saving location:', error);
-      }
-    }
-  });
+  const setupLocationListener = () => {
+    locationRef.on(
+      'value',
+      async (snapshot) => {
+        console.log('Received new location data from Firebase');
+        const data = snapshot.val();
+        if (data && data.Latitude && data.Longitude) {
+          const newLocation = {
+            latitude: data.Latitude,
+            longitude: data.Longitude,
+            timestamp: new Date(),
+          };
+          try {
+            await db.collection('locations').insertOne(newLocation);
+            console.log('New location saved:', newLocation);
+          } catch (error) {
+            console.error('Error saving location:', error);
+          }
+        }
+      },
+      (error) => {
+        console.error('Error in Firebase location listener:', error);
+        setTimeout(() => {
+          console.log('Attempting to reconnect location listener...');
+          setupLocationListener();
+        }, 5000); // Retry after 5 seconds
+      },
+    );
+  };
 
-  emergencyRef.on('value', async (snapshot) => {
-    const data = snapshot.val();
-    if (data && data.emergency !== undefined) {
-      const newEmergency = {
-        emergency: data.emergency,
-        timestamp: new Date(),
-      };
-      try {
-        await db.collection('emergencies').insertOne(newEmergency);
-        console.log('New emergency status saved');
-      } catch (error) {
-        console.error('Error saving emergency status:', error);
-      }
+  const setupEmergencyListener = () => {
+    emergencyRef.on(
+      'value',
+      async (snapshot) => {
+        console.log('Received new emergency data from Firebase');
+        const data = snapshot.val();
+        if (data && data.emergency !== undefined) {
+          const newEmergency = {
+            emergency: data.emergency,
+            timestamp: new Date(),
+          };
+          try {
+            await db.collection('emergencies').insertOne(newEmergency);
+            console.log('New emergency status saved:', newEmergency);
+          } catch (error) {
+            console.error('Error saving emergency status:', error);
+          }
+        }
+      },
+      (error) => {
+        console.error('Error in Firebase emergency listener:', error);
+        setTimeout(() => {
+          console.log('Attempting to reconnect emergency listener...');
+          setupEmergencyListener();
+        }, 5000); // Retry after 5 seconds
+      },
+    );
+  };
+
+  setupLocationListener();
+  setupEmergencyListener();
+
+  // Setup periodic connection check
+  setInterval(() => {
+    if (firebaseDb.serverTimeOffset === null) {
+      console.log('Firebase connection lost. Attempting to reconnect...');
+      firebaseDb.goOnline();
+    }
+  }, 60000); // Check every minute
+
+  // Handle app-wide Firebase connection state
+  const connectedRef = firebaseDb.ref('.info/connected');
+  connectedRef.on('value', (snap) => {
+    if (snap.val() === true) {
+      console.log('Connected to Firebase');
+    } else {
+      console.log('Disconnected from Firebase');
     }
   });
 }
@@ -167,6 +214,7 @@ async function setupRoutes(db) {
       const latestEmergency = await db
         .collection('emergencies')
         .findOne({}, { sort: { timestamp: -1 } });
+      console.log('Latest emergency:', latestEmergency);
 
       const locationHistory = await db
         .collection('locations')
@@ -174,13 +222,16 @@ async function setupRoutes(db) {
         .sort({ timestamp: -1 })
         .limit(10)
         .toArray();
+      console.log('Location history count:', locationHistory.length);
 
       const emergencyHistory = await db
         .collection('emergencies')
         .find()
         .sort({ timestamp: -1 })
         .toArray();
+      console.log('Emergency history count:', emergencyHistory.length);
 
+      console.log('Sending response for /api/getData');
       res.status(200).json({
         latestEmergency,
         locationHistory,
@@ -188,10 +239,12 @@ async function setupRoutes(db) {
       });
     } catch (error) {
       console.error('Error fetching data from MongoDB:', error);
-      res.status(500).json({
-        error: 'Error fetching data from the database',
-        details: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          error: 'Error fetching data from the database',
+          details: error.message,
+        });
     }
   });
 
@@ -213,10 +266,12 @@ async function setupRoutes(db) {
       res.status(200).json({ message: 'Data stored successfully' });
     } catch (error) {
       console.error('Error storing data in MongoDB:', error);
-      res.status(500).json({
-        error: 'Error storing data in the database',
-        details: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          error: 'Error storing data in the database',
+          details: error.message,
+        });
     }
   });
 }
