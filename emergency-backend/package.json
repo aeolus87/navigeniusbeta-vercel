@@ -8,15 +8,15 @@
     "dev": "nodemon --expose-gc --max-old-space-size=8192 server.js"
   },
   "dependencies": {
-    "axios": "^1.6.7",
+    "axios": "^1.6.0",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "mongodb": "^6.3.0",
-    "node-cron": "^3.0.3"
+    "dotenv": "^16.0.0",
+    "express": "^4.17.1",
+    "mongodb": "^6.0.0",
+    "node-cron": "^3.0.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.0"
+    "nodemon": "^3.0.0"
   },
   "author": "",
   "license": "ISC"
