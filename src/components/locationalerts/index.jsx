@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { getDatabase, ref, onValue, off } from 'firebase/database';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { getDatabase, ref, onValue } from 'firebase/database';
 import { app } from '../../firebase/firebase';
 import axios from 'axios';
 
@@ -17,6 +17,8 @@ function Emergency() {
   const [selectedInterval, setSelectedInterval] = useState(refreshInterval);
 
   const API_BASE_URL2 = process.env.REACT_APP_API_BASE_URL2;
+
+  const latestDataRef = useRef({ locationHistory: [], emergencyHistory: [] });
 
   const storeDataInMongoDB = useCallback(
     async (data) => {
@@ -41,9 +43,16 @@ function Emergency() {
 
   const fetchDataFromMongoDB = useCallback(async () => {
     try {
+      console.log('Fetching data from MongoDB...'); // Debug log
       const response = await axios.get(`${API_BASE_URL2}/api/getData`);
       const { latestEmergency, locationHistory, emergencyHistory } =
         response.data;
+
+      console.log('Data fetched:', {
+        latestEmergency,
+        locationHistory,
+        emergencyHistory,
+      }); // Debug log
 
       if (latestEmergency && latestEmergency.emergency) {
         setEmergency(true);
@@ -53,8 +62,24 @@ function Emergency() {
         setEmergencyDetails(null);
       }
 
-      setLocationHistory(locationHistory);
-      setEmergencyHistory(emergencyHistory);
+      // Compare new data with the latest data we have
+      if (
+        JSON.stringify(locationHistory) !==
+        JSON.stringify(latestDataRef.current.locationHistory)
+      ) {
+        setLocationHistory(locationHistory);
+        latestDataRef.current.locationHistory = locationHistory;
+        console.log('Location history updated'); // Debug log
+      }
+
+      if (
+        JSON.stringify(emergencyHistory) !==
+        JSON.stringify(latestDataRef.current.emergencyHistory)
+      ) {
+        setEmergencyHistory(emergencyHistory);
+        latestDataRef.current.emergencyHistory = emergencyHistory;
+        console.log('Emergency history updated'); // Debug log
+      }
     } catch (error) {
       console.error('Error fetching data from MongoDB:', error);
     }
@@ -74,10 +99,14 @@ function Emergency() {
             longitude: data.Longitude,
             timestamp: new Date().toISOString(),
           };
-          setLocationHistory((prevHistory) => [
-            newLocation,
-            ...(prevHistory || []).slice(0, 9),
-          ]);
+          setLocationHistory((prevHistory) => {
+            const updatedHistory = [
+              newLocation,
+              ...(prevHistory || []).slice(0, 9),
+            ];
+            latestDataRef.current.locationHistory = updatedHistory;
+            return updatedHistory;
+          });
           storeDataInMongoDB({ type: 'location', ...newLocation }).catch(
             (error) => {
               console.error('Error storing data in MongoDB:', error);
@@ -137,7 +166,6 @@ function Emergency() {
     localStorage.setItem('refreshInterval', selectedInterval.toString());
     fetchData(); // Force an immediate data fetch when the interval changes
   };
-
   return (
     <div className="container mx-auto p-4 mt-20 max-w-6xl">
       {emergency && (

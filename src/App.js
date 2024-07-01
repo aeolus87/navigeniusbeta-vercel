@@ -5,7 +5,7 @@ import { AuthProvider } from './contexts/authContext/index.jsx';
 import PrivateRoute from './contexts/authContext/PrivateRoute.js';
 import firebase from 'firebase/compat/app';
 import firebaseConfig from './firebase/firebase.js';
-import LoadingSpinner from './components/LoadingSpinner/LoadingSpinner.jsx';
+import LoadingSpinner from './components/LoadingSpinner.jsx';
 
 const Login = lazy(() => import('./components/auth/login/index.jsx'));
 const Register = lazy(() => import('./components/auth/register/index.jsx'));
@@ -78,12 +78,12 @@ function App() {
   let routesElement = useRoutes(routesArray);
 
   if (!firebaseInitialized) {
-    return <div>Loading...</div>; // Or some loading indicator
+    return <LoadingSpinner />;
   }
 
   return (
     <AuthProvider>
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<LoadingSpinner />}>
         {!isTermsPage && !isMainPage && <Header />}
         <div
           className={`h-screen flex flex-col mx-0 my-0${
