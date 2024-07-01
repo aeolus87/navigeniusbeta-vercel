@@ -194,15 +194,11 @@ function setupFirebaseListeners(db) {
 
   // Setup periodic connection check
   setInterval(() => {
-    console.log('Checking Firebase connection...');
-    if (admin.database().app.INTERNAL.backgroundLoopManager.isRunning) {
-      console.log('Firebase connection is active');
-    } else {
-      console.log('Firebase connection seems inactive, reconnecting...');
-      admin.database().goOnline();
+    if (firebaseDb.serverTimeOffset === null) {
+      console.log('Firebase connection lost. Attempting to reconnect...');
+      firebaseDb.goOnline();
     }
   }, 60000); // Check every minute
-}
 
   // Handle app-wide Firebase connection state
   const connectedRef = firebaseDb.ref('.info/connected');
@@ -214,7 +210,6 @@ function setupFirebaseListeners(db) {
     }
   });
 }
-
 // Routes
 async function setupRoutes(db) {
   app.get('/api/getData', async (req, res) => {
@@ -268,12 +263,10 @@ async function setupRoutes(db) {
       };
       const result = await db.collection('locations').insertOne(newLocation);
       console.log('Manually added new location:', result.insertedId);
-      res
-        .status(200)
-        .json({
-          message: 'Location updated successfully',
-          id: result.insertedId,
-        });
+      res.status(200).json({
+        message: 'Location updated successfully',
+        id: result.insertedId,
+      });
     } catch (error) {
       console.error('Error manually updating location:', error);
       res
