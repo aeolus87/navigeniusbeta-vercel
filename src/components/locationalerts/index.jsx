@@ -19,7 +19,9 @@ function Emergency() {
   const fetchDataFromMongoDB = useCallback(async () => {
     try {
       console.log('Fetching data from MongoDB...');
-      const response = await axios.get(`${API_BASE_URL2}/api/getData`);
+      const response = await axios.get(`${API_BASE_URL2}/api/getData`, {
+        params: { timestamp: new Date().getTime() }, // Add a timestamp to prevent caching
+      });
       const { latestEmergency, locationHistory, emergencyHistory } =
         response.data;
 
@@ -28,6 +30,10 @@ function Emergency() {
         locationHistory,
         emergencyHistory,
       });
+
+      // Update state with new data
+      setLocationHistory(locationHistory);
+      setEmergencyHistory(emergencyHistory);
 
       if (latestEmergency && latestEmergency.emergency) {
         setEmergency(true);
@@ -39,11 +45,10 @@ function Emergency() {
         setEmergency(false);
         setEmergencyDetails(null);
       }
-
-      setLocationHistory(locationHistory);
-      setEmergencyHistory(emergencyHistory);
     } catch (error) {
       console.error('Error fetching data from MongoDB:', error);
+      // Optionally, you can set an error state here to display to the user
+      // setError('Failed to fetch data. Please try again later.');
     }
   }, [API_BASE_URL2, emergency]);
 

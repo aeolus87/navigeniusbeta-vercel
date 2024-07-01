@@ -129,8 +129,9 @@ function setupFirebaseListeners(db) {
     locationRef.on(
       'value',
       async (snapshot) => {
-        console.log('Received new location data from Firebase');
         const data = snapshot.val();
+        console.log('Received new location data from Firebase:', data);
+
         if (data && data.Latitude && data.Longitude) {
           const newLocation = {
             latitude: data.Latitude,
@@ -138,11 +139,15 @@ function setupFirebaseListeners(db) {
             timestamp: new Date(),
           };
           try {
-            await db.collection('locations').insertOne(newLocation);
-            console.log('New location saved:', newLocation);
+            const result = await db
+              .collection('locations')
+              .insertOne(newLocation);
+            console.log('New location saved to MongoDB:', result.insertedId);
           } catch (error) {
-            console.error('Error saving location:', error);
+            console.error('Error saving location to MongoDB:', error);
           }
+        } else {
+          console.log('Received invalid location data');
         }
       },
       (error) => {
@@ -189,11 +194,15 @@ function setupFirebaseListeners(db) {
 
   // Setup periodic connection check
   setInterval(() => {
-    if (firebaseDb.serverTimeOffset === null) {
-      console.log('Firebase connection lost. Attempting to reconnect...');
-      firebaseDb.goOnline();
+    console.log('Checking Firebase connection...');
+    if (admin.database().app.INTERNAL.backgroundLoopManager.isRunning) {
+      console.log('Firebase connection is active');
+    } else {
+      console.log('Firebase connection seems inactive, reconnecting...');
+      admin.database().goOnline();
     }
   }, 60000); // Check every minute
+}
 
   // Handle app-wide Firebase connection state
   const connectedRef = firebaseDb.ref('.info/connected');
@@ -222,7 +231,7 @@ async function setupRoutes(db) {
         .sort({ timestamp: -1 })
         .limit(10)
         .toArray();
-      console.log('Location history count:', locationHistory.length);
+      console.log('Location history:', locationHistory);
 
       const emergencyHistory = await db
         .collection('emergencies')
@@ -231,7 +240,6 @@ async function setupRoutes(db) {
         .toArray();
       console.log('Emergency history count:', emergencyHistory.length);
 
-      console.log('Sending response for /api/getData');
       res.status(200).json({
         latestEmergency,
         locationHistory,
@@ -239,39 +247,38 @@ async function setupRoutes(db) {
       });
     } catch (error) {
       console.error('Error fetching data from MongoDB:', error);
-      res
-        .status(500)
-        .json({
-          error: 'Error fetching data from the database',
-          details: error.message,
-        });
+      res.status(500).json({
+        error: 'Error fetching data from the database',
+        details: error.message,
+      });
     }
   });
 
-  app.post('/api/storeData', async (req, res) => {
-    console.log('Received POST request to /api/storeData');
-    console.log('Request body:', req.body);
+  app.post('/api/updateLocation', async (req, res) => {
+    const { latitude, longitude } = req.body;
+    if (!latitude || !longitude) {
+      return res.status(400).json({ error: 'Invalid location data' });
+    }
+
     try {
-      const { type, ...data } = req.body;
-      data.timestamp = new Date(data.timestamp);
-
-      if (type === 'emergency') {
-        await db.collection('emergencies').insertOne(data);
-      } else if (type === 'location') {
-        await db.collection('locations').insertOne(data);
-      } else {
-        throw new Error('Invalid data type');
-      }
-
-      res.status(200).json({ message: 'Data stored successfully' });
+      const newLocation = {
+        latitude,
+        longitude,
+        timestamp: new Date(),
+      };
+      const result = await db.collection('locations').insertOne(newLocation);
+      console.log('Manually added new location:', result.insertedId);
+      res
+        .status(200)
+        .json({
+          message: 'Location updated successfully',
+          id: result.insertedId,
+        });
     } catch (error) {
-      console.error('Error storing data in MongoDB:', error);
+      console.error('Error manually updating location:', error);
       res
         .status(500)
-        .json({
-          error: 'Error storing data in the database',
-          details: error.message,
-        });
+        .json({ error: 'Error updating location', details: error.message });
     }
   });
 }
