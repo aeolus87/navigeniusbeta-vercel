@@ -1,15 +1,43 @@
-require('dotenv').config();
+require('dotenv').config({ path: './.env.local' });
 const express = require('express');
 const { MongoClient } = require('mongodb');
 const cors = require('cors');
 const cron = require('node-cron');
+const helmet = require('helmet');
+const compression = require('compression');
 
 const app = express();
 const port = process.env.PORT || 5001;
 const DB_NAME = 'Navigenius';
 
-app.use(cors());
 app.use(express.json());
+app.use(helmet());
+app.use(compression());
+
+// Allowed origins
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://navigeniusbeta-vercel.vercel.app',
+  'https://navigeniusbeta-vercel.onrender.com',
+  'https://navigenius.live',
+];
+
+// CORS options
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg =
+        'The CORS policy for this site does not allow access from the specified origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
 
 let client;
 
@@ -74,6 +102,7 @@ async function deleteOldData(db) {
 // Routes
 async function setupRoutes(db) {
   app.get('/api/getData', async (req, res) => {
+    console.log('Received GET request to /api/getData');
     try {
       const latestEmergency = await db
         .collection('emergencies')
@@ -107,6 +136,8 @@ async function setupRoutes(db) {
   });
 
   app.post('/api/storeData', async (req, res) => {
+    console.log('Received POST request to /api/storeData');
+    console.log('Request body:', req.body);
     try {
       const { type, ...data } = req.body;
       data.timestamp = new Date(data.timestamp);
@@ -115,6 +146,8 @@ async function setupRoutes(db) {
         await db.collection('emergencies').insertOne(data);
       } else if (type === 'location') {
         await db.collection('locations').insertOne(data);
+      } else {
+        throw new Error('Invalid data type');
       }
 
       res.status(200).json({ message: 'Data stored successfully' });
@@ -148,7 +181,7 @@ async function startServer() {
   // Schedule the task to run at midnight every day
   cron.schedule('0 0 * * *', () => deleteOldData(db));
 
-  app.listen(port, () => {
+  app.listen(port, '0.0.0.0', () => {
     console.log(`Server running on port ${port}`);
   });
 }
@@ -164,3 +197,5 @@ process.on('SIGINT', async () => {
   }
   process.exit(0);
 });
+
+module.exports = app;
