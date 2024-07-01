@@ -11,17 +11,23 @@ function Emergency() {
   const [refreshInterval, setRefreshInterval] = useState(30000);
   const [selectedInterval, setSelectedInterval] = useState(30000);
 
-  const storeDataInMongoDB = useCallback(async (data) => {
-    try {
-      await axios.post('http://localhost:5001/api/storeData', data);
-    } catch (error) {
-      console.error('Error storing data in MongoDB:', error);
-    }
-  }, []);
+  // Define your API base URL from environment variables
+  const API_BASE_URL2 = process.env.REACT_APP_API_BASE_URL2;
+
+  const storeDataInMongoDB = useCallback(
+    async (data) => {
+      try {
+        await axios.post(`${API_BASE_URL2}/api/storeData`, data);
+      } catch (error) {
+        console.error('Error storing data in MongoDB:', error);
+      }
+    },
+    [API_BASE_URL2],
+  );
 
   const fetchDataFromMongoDB = useCallback(async () => {
     try {
-      const response = await axios.get('http://localhost:5001/api/getData');
+      const response = await axios.get(`${API_BASE_URL2}/api/getData`);
       const { latestEmergency, locationHistory, emergencyHistory } =
         response.data;
 
@@ -38,7 +44,7 @@ function Emergency() {
     } catch (error) {
       console.error('Error fetching data from MongoDB:', error);
     }
-  }, []);
+  }, [API_BASE_URL2]);
 
   useEffect(() => {
     const db = getDatabase(app);
