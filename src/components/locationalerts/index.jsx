@@ -16,7 +16,10 @@ function Emergency() {
   const storeDataInMongoDB = useCallback(
     async (data) => {
       try {
-        const response = await axios.post(`${API_BASE_URL2}/api/storeData`);
+        const response = await axios.post(
+          `${API_BASE_URL2}/api/storeData`,
+          data,
+        );
         if (response.status !== 200) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
