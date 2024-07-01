@@ -13,13 +13,19 @@ function Emergency() {
 
   // Define your API base URL from environment variables
   const API_BASE_URL2 = process.env.REACT_APP_API_BASE_URL2;
-
   const storeDataInMongoDB = useCallback(
     async (data) => {
       try {
-        await axios.post(`${API_BASE_URL2}/api/storeData`, data);
+        const response = await axios.post(
+          `${API_BASE_URL2}/api/storeData`,
+          data,
+        );
+        if (response.status !== 200) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
       } catch (error) {
         console.error('Error storing data in MongoDB:', error);
+        // You might want to add some user-facing error handling here
       }
     },
     [API_BASE_URL2],
@@ -78,9 +84,13 @@ function Emergency() {
             };
             setLocationHistory((prevHistory) => [
               newLocation,
-              ...prevHistory.slice(0, 9),
+              ...(prevHistory || []).slice(0, 9),
             ]);
-            storeDataInMongoDB({ type: 'location', ...newLocation });
+            storeDataInMongoDB({ type: 'location', ...newLocation }).catch(
+              (error) => {
+                console.error('Error storing data in MongoDB:', error);
+              },
+            );
           }
         },
         { onlyOnce: true },
