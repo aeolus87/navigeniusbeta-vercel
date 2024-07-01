@@ -5,6 +5,7 @@ const cors = require('cors');
 const cron = require('node-cron');
 const helmet = require('helmet');
 const compression = require('compression');
+const admin = require('firebase-admin');
 
 const app = express();
 const port = process.env.PORT || 5001;
@@ -63,6 +64,16 @@ process.on('memoryUsage', (info) => {
   }
 });
 
+// Initialize Firebase Admin SDK
+admin.initializeApp({
+  credential: admin.credential.cert({
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+  }),
+  databaseURL: process.env.FIREBASE_DATABASE_URL,
+});
+
 // Database connection
 async function connectToDatabase() {
   try {
@@ -98,6 +109,46 @@ async function deleteOldData(db) {
   if (global.gc) {
     global.gc();
   }
+}
+
+// Firebase Realtime Database listeners
+function setupFirebaseListeners(db) {
+  const firebaseDb = admin.database();
+  const locationRef = firebaseDb.ref('Device/Locator');
+  const emergencyRef = firebaseDb.ref('Device/Locator/emergency');
+
+  locationRef.on('value', async (snapshot) => {
+    const data = snapshot.val();
+    if (data && data.Latitude && data.Longitude) {
+      const newLocation = {
+        latitude: data.Latitude,
+        longitude: data.Longitude,
+        timestamp: new Date(),
+      };
+      try {
+        await db.collection('locations').insertOne(newLocation);
+        console.log('New location saved');
+      } catch (error) {
+        console.error('Error saving location:', error);
+      }
+    }
+  });
+
+  emergencyRef.on('value', async (snapshot) => {
+    const data = snapshot.val();
+    if (data && data.emergency !== undefined) {
+      const newEmergency = {
+        emergency: data.emergency,
+        timestamp: new Date(),
+      };
+      try {
+        await db.collection('emergencies').insertOne(newEmergency);
+        console.log('New emergency status saved');
+      } catch (error) {
+        console.error('Error saving emergency status:', error);
+      }
+    }
+  });
 }
 
 // Routes
@@ -178,6 +229,7 @@ async function startServer() {
   const db = await connectToDatabase();
   await createIndexes(db);
   await setupRoutes(db);
+  setupFirebaseListeners(db);
 
   // Schedule the task to run at midnight every day
   cron.schedule('0 0 * * *', () => deleteOldData(db));
