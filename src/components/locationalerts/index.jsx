@@ -3,16 +3,21 @@ import { getDatabase, ref, onValue, off } from 'firebase/database';
 import { app } from '../../firebase/firebase';
 import axios from 'axios';
 
+const DEFAULT_REFRESH_INTERVAL = 120000;
+
 function Emergency() {
   const [emergency, setEmergency] = useState(false);
   const [emergencyDetails, setEmergencyDetails] = useState(null);
   const [locationHistory, setLocationHistory] = useState([]);
   const [emergencyHistory, setEmergencyHistory] = useState([]);
-  const [refreshInterval, setRefreshInterval] = useState(30000);
-  const [selectedInterval, setSelectedInterval] = useState(30000);
+  const [refreshInterval, setRefreshInterval] = useState(() => {
+    const savedInterval = localStorage.getItem('refreshInterval');
+    return savedInterval ? parseInt(savedInterval) : DEFAULT_REFRESH_INTERVAL;
+  });
+  const [selectedInterval, setSelectedInterval] = useState(refreshInterval);
 
-  // Define your API base URL from environment variables
   const API_BASE_URL2 = process.env.REACT_APP_API_BASE_URL2;
+
   const storeDataInMongoDB = useCallback(
     async (data) => {
       try {
@@ -25,7 +30,10 @@ function Emergency() {
         }
       } catch (error) {
         console.error('Error storing data in MongoDB:', error);
-        // You might want to add some user-facing error handling here
+        console.log(
+          'Error details:',
+          error.response ? error.response.data : 'No response data',
+        );
       }
     },
     [API_BASE_URL2],
@@ -70,7 +78,6 @@ function Emergency() {
       }
     });
 
-    let locationInterval;
     const fetchLocation = () => {
       onValue(
         locationRef,
@@ -97,21 +104,19 @@ function Emergency() {
       );
     };
 
-    fetchLocation(); // Fetch initial location
-    locationInterval = setInterval(fetchLocation, refreshInterval);
+    fetchLocation();
+    const locationInterval = setInterval(fetchLocation, refreshInterval);
 
-    // Fetch initial data from MongoDB
     fetchDataFromMongoDB();
 
-    // Set up interval to periodically fetch data from MongoDB
     const mongoFetchInterval = setInterval(
       fetchDataFromMongoDB,
       refreshInterval,
     );
 
     return () => {
-      emergencyUnsubscribe(); // Use the unsubscribe function
-      off(locationRef); // Unsubscribe from locationRef
+      emergencyUnsubscribe();
+      off(locationRef);
       clearInterval(locationInterval);
       clearInterval(mongoFetchInterval);
     };
@@ -123,6 +128,7 @@ function Emergency() {
 
   const applyRefreshInterval = () => {
     setRefreshInterval(selectedInterval);
+    localStorage.setItem('refreshInterval', selectedInterval.toString());
   };
 
   return (

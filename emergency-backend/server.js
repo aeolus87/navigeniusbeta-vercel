@@ -20,7 +20,7 @@ const allowedOrigins = [
   'https://navigeniusbeta-vercel.vercel.app',
   'https://navigeniusbeta-vercel.onrender.com',
   'https://navigenius.live',
-  'navigeniusbeta-vercel-production.up.railway.app',
+  'https://navigeniusbeta-vercel-production.up.railway.app',
 ];
 
 // CORS options
