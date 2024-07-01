@@ -34,7 +34,7 @@ function Emergency() {
         // You might want to add some user-facing error handling here
       }
     },
-    [API_BASE_URL2],
+    [API_BASE_URL2, url],
   );
 
   const fetchDataFromMongoDB = useCallback(async () => {
