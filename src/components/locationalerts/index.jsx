@@ -172,9 +172,9 @@ function Emergency() {
 
         <div className="bg-white shadow-md rounded-lg p-4">
           <h2 className="text-2xl font-bold mb-4">Emergency History</h2>
-          <ul className="space-y-2 max-h-96 overflow-y-auto">
-            {emergencyHistory &&
-              emergencyHistory.map((emergency) => (
+          {emergencyHistory && emergencyHistory.length > 0 ? (
+            <ul className="space-y-2 max-h-96 overflow-y-auto">
+              {emergencyHistory.map((emergency) => (
                 <li key={emergency._id} className="bg-red-100 p-2 mr-8 rounded">
                   <p>Emergency alert activated!</p>
                   <p className="text-sm text-gray-600">
@@ -182,8 +182,10 @@ function Emergency() {
                   </p>
                 </li>
               ))}
-          </ul>
-          {emergencyHistory.length === 0 && <p>No emergency history.</p>}
+            </ul>
+          ) : (
+            <p>No emergency history.</p>
+          )}
         </div>
       </div>
     </div>
