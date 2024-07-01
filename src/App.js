@@ -17,6 +17,7 @@ import NotFound from './components/main/notfound.jsx';
 import VerifyEmail from './components/auth/register/verifyemail.jsx';
 import VerifiedMessage from './components/auth/verify/verified.jsx';
 import CompleteRegistration from './components/auth/register/complete.jsx';
+import Emergency from './components/locationalerts/index.jsx';
 
 firebase.initializeApp(firebaseConfig);
 
@@ -32,6 +33,7 @@ function App() {
     { path: '/verifyemail', element: <VerifyEmail /> },
     { path: '/verified', element: <VerifiedMessage /> },
     { path: '/forgot-password', element: <ForgotPassword /> },
+    { path: '/locationalerts', element: <Emergency /> },
     {
       path: '/profile',
       element: (

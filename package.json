@@ -43,8 +43,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "start": "concurrently \"npm run server\" \"npm run client\" \"npm run emergency-server\"",
     "server": "nodemon backend/server.js",
+    "emergency-server": "nodemon C:\\Users\\jcall\\navigeniusbeta\\emergency-backend\\server.js",
     "client": "set PORT=3000 && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --passWithNoTests",

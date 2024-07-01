@@ -1,5 +1,5 @@
-      import React, { useState } from 'react';
-      import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/authContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -20,6 +20,11 @@ const Header = () => {
   const handleProfileClick = () => {
     setMenuOpen(false);
     navigate('/profile');
+  };
+
+  const handleLocationAndAlertsClick = () => {
+    setMenuOpen(false);
+    navigate('/locationalerts');
   };
 
   return (
@@ -59,6 +64,12 @@ const Header = () => {
                   className="w-full text-left text-white hover:bg-[#1a1a4e6a] focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 md:me-2 md:mb-0"
                 >
                   Profile
+                </button>
+                <button
+                  onClick={handleLocationAndAlertsClick}
+                  className="w-full text-left text-white hover:bg-[#1a1a4e6a] focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 md:me-2 md:mb-0"
+                >
+                  Location & Alerts
                 </button>
                 <button
                   onClick={handleLogout}
