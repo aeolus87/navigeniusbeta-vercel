@@ -82,10 +82,18 @@ async function connectToDatabase() {
       useUnifiedTopology: true,
     });
     console.log('Connected to MongoDB:', client.s.url);
+
+    // Set up event listeners for connection events
+    client.on('close', () => console.log('MongoDB connection closed'));
+    client.on('reconnect', () => console.log('MongoDB reconnected'));
+    client.on('error', (err) =>
+      console.error('MongoDB connection error:', err),
+    );
+
     return client.db(DB_NAME);
   } catch (error) {
     console.error('Error connecting to MongoDB:', error);
-    process.exit(1);
+    throw error; // Ensure errors are thrown to handle them properly
   }
 }
 
