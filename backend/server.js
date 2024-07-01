@@ -1,4 +1,4 @@
-require('dotenv').config({ path: './.env.local' });
+require('dotenv').config({ path: './.env.backend' });
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -8,7 +8,7 @@ const helmet = require('helmet');
 const compression = require('compression');
 
 const app = express();
-const port = process.env.PORT1 || 5000;
+const port = process.env.PORT || 5000;
 const mongourl = process.env.MONGODB_URI;
 
 app.use(bodyParser.json());
