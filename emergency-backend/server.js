@@ -11,8 +11,6 @@ const app = express();
 const port = process.env.PORT || 5001;
 const DB_NAME = 'Navigenius';
 
-console.log('FIREBASE_PRIVATE_KEY:', process.env.FIREBASE_PRIVATE_KEY);
-
 app.use(express.json());
 app.use(helmet());
 app.use(compression());
@@ -83,7 +81,7 @@ async function connectToDatabase() {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    console.log('Connected to MongoDB');
+    console.log('Connected to MongoDB:', client.s.url);
     return client.db(DB_NAME);
   } catch (error) {
     console.error('Error connecting to MongoDB:', error);
