@@ -60,10 +60,44 @@ function Emergency() {
     }
   }, [API_BASE_URL2]);
 
+  const fetchLocation = useCallback(() => {
+    const db = getDatabase(app);
+    const locationRef = ref(db, 'Device/Locator');
+
+    onValue(
+      locationRef,
+      (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const newLocation = {
+            latitude: data.Latitude,
+            longitude: data.Longitude,
+            timestamp: new Date().toISOString(),
+          };
+          setLocationHistory((prevHistory) => [
+            newLocation,
+            ...(prevHistory || []).slice(0, 9),
+          ]);
+          storeDataInMongoDB({ type: 'location', ...newLocation }).catch(
+            (error) => {
+              console.error('Error storing data in MongoDB:', error);
+            },
+          );
+        }
+      },
+      { onlyOnce: true },
+    );
+  }, [storeDataInMongoDB]);
+
+  const fetchData = useCallback(() => {
+    console.log('Fetching data...'); // Debug log
+    fetchLocation();
+    fetchDataFromMongoDB();
+  }, [fetchLocation, fetchDataFromMongoDB]);
+
   useEffect(() => {
     const db = getDatabase(app);
     const emergencyRef = ref(db, 'Device/Locator/emergency');
-    const locationRef = ref(db, 'Device/Locator');
 
     const emergencyUnsubscribe = onValue(emergencyRef, (snapshot) => {
       const data = snapshot.val();
@@ -78,49 +112,21 @@ function Emergency() {
       }
     });
 
-    const fetchLocation = () => {
-      onValue(
-        locationRef,
-        (snapshot) => {
-          const data = snapshot.val();
-          if (data) {
-            const newLocation = {
-              latitude: data.Latitude,
-              longitude: data.Longitude,
-              timestamp: new Date().toISOString(),
-            };
-            setLocationHistory((prevHistory) => [
-              newLocation,
-              ...(prevHistory || []).slice(0, 9),
-            ]);
-            storeDataInMongoDB({ type: 'location', ...newLocation }).catch(
-              (error) => {
-                console.error('Error storing data in MongoDB:', error);
-              },
-            );
-          }
-        },
-        { onlyOnce: true },
-      );
-    };
-
-    fetchLocation();
-    const locationInterval = setInterval(fetchLocation, refreshInterval);
-
-    fetchDataFromMongoDB();
-
-    const mongoFetchInterval = setInterval(
-      fetchDataFromMongoDB,
-      refreshInterval,
-    );
-
     return () => {
       emergencyUnsubscribe();
-      off(locationRef);
-      clearInterval(locationInterval);
-      clearInterval(mongoFetchInterval);
     };
-  }, [refreshInterval, storeDataInMongoDB, fetchDataFromMongoDB]);
+  }, [storeDataInMongoDB]);
+
+  useEffect(() => {
+    console.log('Setting up interval with', refreshInterval, 'ms'); // Debug log
+    fetchData(); // Initial fetch
+    const dataInterval = setInterval(fetchData, refreshInterval);
+
+    return () => {
+      console.log('Clearing interval'); // Debug log
+      clearInterval(dataInterval);
+    };
+  }, [refreshInterval, fetchData]);
 
   const handleRefreshIntervalChange = (event) => {
     setSelectedInterval(Number(event.target.value));
@@ -129,6 +135,7 @@ function Emergency() {
   const applyRefreshInterval = () => {
     setRefreshInterval(selectedInterval);
     localStorage.setItem('refreshInterval', selectedInterval.toString());
+    fetchData(); // Force an immediate data fetch when the interval changes
   };
 
   return (
