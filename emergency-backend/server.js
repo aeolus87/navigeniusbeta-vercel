@@ -1,4 +1,4 @@
-require('dotenv').config({ path: './.env.local' });
+require('dotenv').config({ path: './.env.backend' });
 const express = require('express');
 const { MongoClient } = require('mongodb');
 const cors = require('cors');
@@ -10,6 +10,8 @@ const admin = require('firebase-admin');
 const app = express();
 const port = process.env.PORT || 5001;
 const DB_NAME = 'Navigenius';
+
+console.log('FIREBASE_PRIVATE_KEY:', process.env.FIREBASE_PRIVATE_KEY);
 
 app.use(express.json());
 app.use(helmet());
@@ -73,10 +75,6 @@ admin.initializeApp({
   }),
   databaseURL: process.env.FIREBASE_DATABASE_URL,
 });
-console.log('FIREBASE_PROJECT_ID:', process.env.FIREBASE_PROJECT_ID);
-console.log('FIREBASE_PRIVATE_KEY:', process.env.FIREBASE_PRIVATE_KEY);
-console.log('FIREBASE_CLIENT_EMAIL:', process.env.FIREBASE_CLIENT_EMAIL);
-console.log('FIREBASE_DATABASE_URL:', process.env.FIREBASE_DATABASE_URL);
 
 // Database connection
 async function connectToDatabase() {
