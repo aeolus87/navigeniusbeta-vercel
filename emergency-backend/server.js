@@ -1,4 +1,4 @@
-require('dotenv').config({ path: './.env.backend' });
+require('dotenv').config({ path: './.env.local' });
 const express = require('express');
 const { MongoClient } = require('mongodb');
 const cors = require('cors');
