@@ -5,6 +5,7 @@ import { AuthProvider } from './contexts/authContext/index.jsx';
 import PrivateRoute from './contexts/authContext/PrivateRoute.js';
 import firebase from 'firebase/compat/app';
 import firebaseConfig from './firebase/firebase.js';
+import LoadingSpinner from './components/LoadingSpinner/LoadingSpinner.jsx';
 
 const Login = lazy(() => import('./components/auth/login/index.jsx'));
 const Register = lazy(() => import('./components/auth/register/index.jsx'));
@@ -99,4 +100,3 @@ function App() {
 }
 
 export default App;
-  
