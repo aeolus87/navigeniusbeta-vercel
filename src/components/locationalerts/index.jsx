@@ -1,6 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { getDatabase, ref, onValue } from 'firebase/database';
-import { app } from '../../firebase/firebase';
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 
 const DEFAULT_REFRESH_INTERVAL = 120000;
@@ -17,29 +15,7 @@ function Emergency() {
   const [selectedInterval, setSelectedInterval] = useState(refreshInterval);
   const [lastUpdateTime, setLastUpdateTime] = useState(new Date());
 
-  const lastLocationRef = useRef(null);
   const API_BASE_URL2 = process.env.REACT_APP_API_BASE_URL2;
-
-  const storeDataInMongoDB = useCallback(
-    async (data) => {
-      try {
-        const response = await axios.post(
-          `${API_BASE_URL2}/api/storeData`,
-          data,
-        );
-        if (response.status !== 200) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-      } catch (error) {
-        console.error('Error storing data in MongoDB:', error);
-        console.log(
-          'Error details:',
-          error.response ? error.response.data : 'No response data',
-        );
-      }
-    },
-    [API_BASE_URL2],
-  );
 
   const fetchDataFromMongoDB = useCallback(async () => {
     try {
@@ -55,17 +31,7 @@ function Emergency() {
         setEmergencyDetails(null);
       }
 
-      setLocationHistory((prevHistory) => {
-        if (lastLocationRef.current) {
-          return [
-            lastLocationRef.current,
-            ...locationHistory.filter(
-              (loc) => loc.timestamp !== lastLocationRef.current.timestamp,
-            ),
-          ].slice(0, 10);
-        }
-        return locationHistory.slice(0, 10);
-      });
+      setLocationHistory(locationHistory.slice(0, 10));
       setEmergencyHistory(emergencyHistory);
       setLastUpdateTime(new Date());
     } catch (error) {
@@ -73,86 +39,15 @@ function Emergency() {
     }
   }, [API_BASE_URL2]);
 
-  const reverseGeocode = async (latitude, longitude) => {
-    try {
-      const response = await axios.get(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
-      );
-      return response.data.display_name;
-    } catch (error) {
-      console.error('Error reverse geocoding:', error);
-      return 'Address not available';
-    }
-  };
-
-  const fetchLocation = useCallback(async () => {
-    const db = getDatabase(app);
-    const locationRef = ref(db, 'Device/Locator');
-
-    onValue(
-      locationRef,
-      async (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          const address = await reverseGeocode(data.Latitude, data.Longitude);
-          const newLocation = {
-            latitude: data.Latitude,
-            longitude: data.Longitude,
-            address: address,
-            timestamp: data.timestamp || new Date().toISOString(),
-          };
-          lastLocationRef.current = newLocation;
-          setLocationHistory((prevHistory) => [
-            newLocation,
-            ...prevHistory.slice(0, 9),
-          ]);
-          setLastUpdateTime(new Date(newLocation.timestamp));
-          storeDataInMongoDB({ type: 'location', ...newLocation }).catch(
-            (error) => {
-              console.error('Error storing data in MongoDB:', error);
-            },
-          );
-        }
-      },
-      { onlyOnce: true },
-    );
-  }, [storeDataInMongoDB]);
-
   useEffect(() => {
-    const db = getDatabase(app);
-    const emergencyRef = ref(db, 'Device/Locator/emergency');
-
-    const emergencyUnsubscribe = onValue(emergencyRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data && data.emergency) {
-        setEmergency(true);
-        setEmergencyDetails(data);
-        alert('Emergency alert received!');
-        storeDataInMongoDB({ type: 'emergency', ...data });
-      } else {
-        setEmergency(false);
-        setEmergencyDetails(null);
-      }
-    });
-
-    fetchLocation();
     fetchDataFromMongoDB();
 
     const intervalId = setInterval(() => {
-      fetchLocation();
       fetchDataFromMongoDB();
     }, refreshInterval);
 
-    return () => {
-      emergencyUnsubscribe();
-      clearInterval(intervalId);
-    };
-  }, [
-    refreshInterval,
-    storeDataInMongoDB,
-    fetchDataFromMongoDB,
-    fetchLocation,
-  ]);
+    return () => clearInterval(intervalId);
+  }, [refreshInterval, fetchDataFromMongoDB]);
 
   const handleRefreshIntervalChange = (event) => {
     setSelectedInterval(Number(event.target.value));

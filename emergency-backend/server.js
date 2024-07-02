@@ -5,6 +5,8 @@ const cors = require('cors');
 const cron = require('node-cron');
 const helmet = require('helmet');
 const compression = require('compression');
+const admin = require('firebase-admin');
+const axios = require('axios');
 
 const app = express();
 const port = process.env.PORT || 5001;
@@ -13,7 +15,7 @@ const DB_NAME = 'Navigenius';
 app.use(express.json());
 app.use(helmet());
 app.use(compression());
-
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 // Allowed origins
 const allowedOrigins = [
   'http://localhost:3000',
@@ -63,6 +65,12 @@ process.on('memoryUsage', (info) => {
   }
 });
 
+// Initialize Firebase Admin SDK
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: process.env.FIREBASE_DATABASE_URL,
+});
+
 // Database connection
 async function connectToDatabase() {
   try {
@@ -98,6 +106,53 @@ async function deleteOldData(db) {
   if (global.gc) {
     global.gc();
   }
+}
+
+// Reverse geocoding function
+async function reverseGeocode(latitude, longitude) {
+  try {
+    const response = await axios.get(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
+    );
+    return response.data.display_name;
+  } catch (error) {
+    console.error('Error reverse geocoding:', error);
+    return 'Address not available';
+  }
+}
+
+// Listen to Firebase changes
+async function listenToFirebaseChanges(db) {
+  const firebaseDb = admin.database();
+  const locationRef = firebaseDb.ref('Device/Locator');
+  const emergencyRef = firebaseDb.ref('Device/Locator/emergency');
+
+  locationRef.on('value', async (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      const address = await reverseGeocode(data.Latitude, data.Longitude);
+      const newLocation = {
+        latitude: data.Latitude,
+        longitude: data.Longitude,
+        address: address,
+        timestamp: new Date(data.timestamp || Date.now()),
+      };
+      await db.collection('locations').insertOne(newLocation);
+      console.log('Location saved to MongoDB');
+    }
+  });
+
+  emergencyRef.on('value', async (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      const emergency = {
+        emergency: data.emergency,
+        timestamp: new Date(data.timestamp || Date.now()),
+      };
+      await db.collection('emergencies').insertOne(emergency);
+      console.log('Emergency status saved to MongoDB');
+    }
+  });
 }
 
 // Routes
@@ -178,6 +233,7 @@ async function startServer() {
   const db = await connectToDatabase();
   await createIndexes(db);
   await setupRoutes(db);
+  await listenToFirebaseChanges(db);
 
   // Schedule the task to run at midnight every day
   cron.schedule('0 0 * * *', () => deleteOldData(db));
