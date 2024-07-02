@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { getDatabase, ref, onValue, off } from 'firebase/database';
 import { app } from '../../firebase/firebase';
 import axios from 'axios';
@@ -15,7 +15,9 @@ function Emergency() {
     return savedInterval ? parseInt(savedInterval) : DEFAULT_REFRESH_INTERVAL;
   });
   const [selectedInterval, setSelectedInterval] = useState(refreshInterval);
+  const [lastUpdateTime, setLastUpdateTime] = useState(new Date());
 
+  const lastLocationRef = useRef(null);
   const API_BASE_URL2 = process.env.REACT_APP_API_BASE_URL2;
 
   const storeDataInMongoDB = useCallback(
@@ -53,8 +55,19 @@ function Emergency() {
         setEmergencyDetails(null);
       }
 
-      setLocationHistory(locationHistory);
+      setLocationHistory((prevHistory) => {
+        if (lastLocationRef.current) {
+          return [
+            lastLocationRef.current,
+            ...locationHistory.filter(
+              (loc) => loc.timestamp !== lastLocationRef.current.timestamp,
+            ),
+          ].slice(0, 10);
+        }
+        return locationHistory.slice(0, 10);
+      });
       setEmergencyHistory(emergencyHistory);
+      setLastUpdateTime(new Date());
     } catch (error) {
       console.error('Error fetching data from MongoDB:', error);
     }
@@ -89,15 +102,17 @@ function Emergency() {
               longitude: data.Longitude,
               timestamp: new Date().toISOString(),
             };
+            lastLocationRef.current = newLocation;
             setLocationHistory((prevHistory) => [
               newLocation,
-              ...(prevHistory || []).slice(0, 9),
+              ...prevHistory.slice(0, 9),
             ]);
             storeDataInMongoDB({ type: 'location', ...newLocation }).catch(
               (error) => {
                 console.error('Error storing data in MongoDB:', error);
               },
             );
+            setLastUpdateTime(new Date());
           }
         },
         { onlyOnce: true },
@@ -127,6 +142,7 @@ function Emergency() {
     setRefreshInterval(selectedInterval);
     localStorage.setItem('refreshInterval', selectedInterval.toString());
   };
+
   return (
     <div className="container mx-auto p-4 mt-20 max-w-6xl">
       {emergency && (
@@ -166,24 +182,28 @@ function Emergency() {
               Apply
             </button>
           </div>
+          <p className="mb-2">
+            Last updated: {lastUpdateTime.toLocaleString()}
+          </p>
           <ul className="space-y-2 max-h-96 overflow-y-auto mr-8">
-            {locationHistory &&
-              locationHistory.map((location, index) => (
-                <li key={index} className="bg-gray-100 p-2 rounded">
-                  <p className="break-words">
-                    Latitude: {location.latitude}, Longitude:{' '}
-                    {location.longitude}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    {new Date(location.timestamp).toLocaleString()}
-                  </p>
-                </li>
-              ))}
+            {locationHistory.map((location, index) => (
+              <li key={index} className="bg-gray-100 p-2 rounded">
+                <p className="break-words">
+                  Latitude: {location.latitude}, Longitude: {location.longitude}
+                </p>
+                <p className="text-sm text-gray-600">
+                  {new Date(location.timestamp).toLocaleString()}
+                </p>
+              </li>
+            ))}
           </ul>
         </div>
 
         <div className="bg-white shadow-md rounded-lg p-4">
           <h2 className="text-2xl font-bold mb-4">Emergency History</h2>
+          <p className="mb-2">
+            Last updated: {lastUpdateTime.toLocaleString()}
+          </p>
           {emergencyHistory && emergencyHistory.length > 0 ? (
             <ul className="space-y-2 max-h-96 overflow-y-auto">
               {emergencyHistory.map((emergency) => (
