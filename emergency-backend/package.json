@@ -8,11 +8,12 @@
     "dev": "nodemon --expose-gc --max-old-space-size=8192 server.js"
   },
   "dependencies": {
-    "axios": "^1.6.0",
+    "axios": "^1.7.2",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "firebase-admin": "^12.2.0",
     "helmet": "^7.1.0",
     "mongodb": "^6.8.0",
     "node-cron": "^3.0.3"
