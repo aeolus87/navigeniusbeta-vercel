@@ -14,6 +14,9 @@ function Emergency() {
   });
   const [selectedInterval, setSelectedInterval] = useState(refreshInterval);
   const [lastUpdateTime, setLastUpdateTime] = useState(new Date());
+  const [isEmergencyDismissed, setIsEmergencyDismissed] = useState(() => {
+    return localStorage.getItem('isEmergencyDismissed') === 'true';
+  });
 
   const API_BASE_URL2 = process.env.REACT_APP_API_BASE_URL2;
 
@@ -24,8 +27,10 @@ function Emergency() {
         response.data;
 
       if (latestEmergency && latestEmergency.emergency) {
-        setEmergency(true);
-        setEmergencyDetails(latestEmergency);
+        if (!isEmergencyDismissed) {
+          setEmergency(true);
+          setEmergencyDetails(latestEmergency);
+        }
       } else {
         setEmergency(false);
         setEmergencyDetails(null);
@@ -37,7 +42,7 @@ function Emergency() {
     } catch (error) {
       console.error('Error fetching data from MongoDB:', error);
     }
-  }, [API_BASE_URL2]);
+  }, [API_BASE_URL2, isEmergencyDismissed]);
 
   useEffect(() => {
     fetchDataFromMongoDB();
@@ -57,10 +62,14 @@ function Emergency() {
     setRefreshInterval(selectedInterval);
     localStorage.setItem('refreshInterval', selectedInterval.toString());
   };
+
   const handleCloseEmergency = () => {
     setEmergency(false);
+    setIsEmergencyDismissed(true);
+    localStorage.setItem('isEmergencyDismissed', 'true');
     // You might also want to update your backend or perform other actions here
   };
+
   return (
     <div className="container mx-auto p-4 mt-20 max-w-6xl">
       {emergency && (
