@@ -57,11 +57,34 @@ function Emergency() {
     setRefreshInterval(selectedInterval);
     localStorage.setItem('refreshInterval', selectedInterval.toString());
   };
-
+  const handleCloseEmergency = () => {
+    setEmergency(false);
+    // You might also want to update your backend or perform other actions here
+  };
   return (
     <div className="container mx-auto p-4 mt-20 max-w-6xl">
       {emergency && (
-        <div className="bg-red-600 text-white p-4 mb-4 rounded-lg">
+        <div className="bg-red-600 text-white p-4 mb-4 rounded-lg relative">
+          <button
+            onClick={handleCloseEmergency}
+            className="absolute top-2 right-2 text-white hover:text-gray-200"
+            aria-label="Close emergency alert"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
           <h2 className="text-2xl font-bold">EMERGENCY ALERT</h2>
           <p>An emergency has been reported!</p>
           {emergencyDetails && (
@@ -72,7 +95,9 @@ function Emergency() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div
+        className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${emergency ? 'h-[25rem]' : 'h-[35rem]'}`}
+      >
         <div className="bg-white shadow-md rounded-lg p-4 overflow-hidden">
           <h2 className="text-2xl font-bold mb-4 ml-8">Location History</h2>
           <div className="flex items-center flex-wrap">
@@ -100,7 +125,7 @@ function Emergency() {
           <p className="mb-2 ml-8">
             Last updated: {lastUpdateTime.toLocaleString()}
           </p>
-          <ul className="space-y-2 max-h-96 overflow-y-auto mr-8">
+          <ul className="space-y-2 max-h-96 min-h-[24rem] overflow-y-auto pr-8">
             {locationHistory.map((location, index) => (
               <li key={index} className="bg-gray-100 p-2 rounded">
                 <p className="break-words">
@@ -115,15 +140,15 @@ function Emergency() {
           </ul>
         </div>
 
-        <div className="bg-white shadow-md rounded-lg p-4">
+        <div className="bg-white shadow-md rounded-lg p-4 overflow-hidden">
           <h2 className="text-2xl font-bold mb-4 ml-8">Emergency History</h2>
           <p className="ml-8 mb-2">
             Last updated: {lastUpdateTime.toLocaleString()}
           </p>
           {emergencyHistory && emergencyHistory.length > 0 ? (
-            <ul className="space-y-2 max-h-96 overflow-y-auto">
+            <ul className="space-y-2 max-h-96 min-h-[24rem] overflow-y-auto pr-8">
               {emergencyHistory.map((emergency) => (
-                <li key={emergency._id} className="bg-red-100 p-2 mr-8 rounded">
+                <li key={emergency._id} className="bg-red-100 p-2 rounded">
                   <p>Emergency alert activated!</p>
                   <p className="text-sm text-gray-600">
                     Timestamp: {new Date(emergency.timestamp).toLocaleString()}
