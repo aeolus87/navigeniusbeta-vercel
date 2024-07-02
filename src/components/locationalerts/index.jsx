@@ -105,10 +105,12 @@ function Emergency() {
       )}
 
       <div
-        className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${emergency ? 'h-[25rem]' : 'h-[35rem]'}`}
+        className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${
+          emergency ? 'h-[30rem] lg:h-[25rem]' : 'h-[40rem] lg:h-[35rem]'
+        }`}
       >
         <div className="bg-white shadow-md rounded-lg p-4 overflow-hidden">
-          <h2 className="text-2xl font-bold mb-4 ml-8">Location History</h2>
+          <h2 className="text-2xl font-bold mb-3 ml-8">Location History</h2>
           <div className="flex items-center flex-wrap">
             <label htmlFor="refreshInterval" className="ml-8 mb-2 pr-2">
               Refresh Interval:
@@ -151,7 +153,7 @@ function Emergency() {
 
         <div className="bg-white shadow-md rounded-lg p-4 overflow-hidden">
           <h2 className="text-2xl font-bold mb-4 ml-8">Emergency History</h2>
-          <p className="ml-8 mb-2">
+          <p className="ml-8">
             Last updated: {lastUpdateTime.toLocaleString()}
           </p>
           {emergencyHistory && emergencyHistory.length > 0 ? (
