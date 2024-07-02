@@ -335,16 +335,16 @@ const ProfilePage = () => {
         <div className="lg:ml-1/4 flex flex-col items-center relative z-0 lg:w-full w-auto h-screen lg:mt-6 mt-20 ml-4">
           {activeTab === 'Information' && (
             <div className="flex flex-col items-center justify-center w-full h-full">
-              <div className="flex flex-col lg:flex-row items-center justify-center w-full h-full lg:ml-64 ml-[4.5rem]">
+              <div className="flex flex-col lg:flex-row items-center justify-center w-full h-full lg:ml-64 ml-[4.5rem] lg:mb-0 mb-28">
                 <div
-                  className="relative size-20 lg:w-48 lg:h-48 rounded-full bg-white cursor-pointer flex items-center justify-center lg:mb-[30rem] lg:ml-20"
+                  className="relative size-24 lg:w-48 lg:h-48 rounded-full bg-white cursor-pointer flex items-center justify-center lg:mb-[30rem] lg:ml-20"
                   onClick={handleProfilePicClick}
                 >
                   {profileImage ? (
                     <img
                       src={profileImage}
                       alt="Profile"
-                      className="rounded-full size-20 lg:w-44 lg:h-44"
+                      className="rounded-full size-24 lg:w-44 lg:h-44"
                     />
                   ) : (
                     <span className="text-gray-500 text-xs text-center">
@@ -362,7 +362,7 @@ const ProfilePage = () => {
                     <>
                       {' '}
                       {verifiedPhoneNumber ? (
-                        <span className="font-semibold text-2xl">
+                        <span className="font-semibold lg:text-2xl">
                           {' '}
                           {verifiedPhoneNumber}
                         </span>
@@ -445,7 +445,7 @@ const ProfilePage = () => {
                       </tbody>
                     </table>
                     <button
-                      className="lg:hidden block bg-[#184e64] hover:bg-[#ffffff] text-white hover:!text-[#0c2734] font-bold py-2 px-4 rounded mt-2 w-full"
+                      className="lg:hidden block bg-[#184e64] hover:bg-[#ffffff] text-white hover:!text-[#0c2734] font-bold py-1 px-4 rounded mt-2 w-full"
                       onClick={handleShowLoginActivities}
                     >
                       Where you're logged in

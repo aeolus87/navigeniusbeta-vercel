@@ -32,7 +32,15 @@ const Header = () => {
       <ToastContainer />
       <nav className="flex justify-between items-center z-50 w-full fixed top-0 left-0 h-16 text-white px-4 transition duration-300 ease-in-out">
         <div className="flex items-center">
-          <h2 className="text-2xl mt-3 lg:mt-0 xl:mt-0">Navigenius</h2>
+          <h2
+            className="
+    text-2xl lg:ml-12 mt-3 lg:mt-0 xl:mt-0 
+    transition-all ease-in-out
+    hover:text-shadow hover:shadow-[#8be2ff]
+  "
+          >
+            NAVIGENIUS
+          </h2>{' '}
         </div>
         <div className="flex items-center">
           {userLoggedIn && (
@@ -57,23 +65,24 @@ const Header = () => {
                 </svg>
               </button>
               <div
-                className={`absolute top-16 right-0 w-[40%] bg-[#0b2d3900] md:static md:w-auto md:flex md:flex-row md:items-center ${menuOpen ? 'block' : 'hidden'} md:block transition duration-600 ease-in-out`}
+                className={`absolute top-16 right-0 lg:mt-4 lg:bg-[#31242400] bg-[#0c273400] lg:static lg:flex lg:flex-row lg:items-center ${menuOpen ? 'block' : 'hidden'} md:block transition duration-600 ease-in-out ${menuOpen ? 'backdrop-blur-[10px]' : ''}
+`}
               >
                 <button
                   onClick={handleProfileClick}
-                  className="w-full text-left text-white hover:bg-[#1a1a4e6a] focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 md:me-2 md:mb-0"
+                  className="w-full text-center text-white hover:bg-[#184e64] focus:outline-none font-medium rounded-lg lg:text-lg text-sm px-5 lg:py-[1rem] py-2.5 md:me-2 md:mb-0"
                 >
                   Profile
                 </button>
                 <button
                   onClick={handleLocationAndAlertsClick}
-                  className="w-full text-left text-white hover:bg-[#1a1a4e6a] focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 md:me-2 md:mb-0"
+                  className="w-full text-center text-white hover:bg-[#184e64] focus:outline-none font-medium rounded-lg lg:text-lg text-sm px-5 py-1 md:me-2 md:mb-0"
                 >
                   Location & Alerts
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left text-white hover:bg-[#1a1a4e6a] focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 md:me-2 md:mb-0"
+                  className="w-full text-center text-white hover:bg-[#184e64] focus:outline-none font-medium rounded-lg lg:text-lg text-sm px-5 lg:py-[1rem] md:me-2 md:mb-0"
                 >
                   Logout
                 </button>

@@ -110,16 +110,18 @@ function Emergency() {
         }`}
       >
         <div className="bg-white shadow-md rounded-lg p-4 overflow-hidden">
-          <h2 className="text-2xl font-bold mb-3 ml-8">Location History</h2>
+          <h2 className="text-2xl font-bold mb-3 lg:ml-8 ml-10">
+            Location History
+          </h2>
           <div className="flex items-center flex-wrap">
-            <label htmlFor="refreshInterval" className="ml-8 mb-2 pr-2">
+            <label htmlFor="refreshInterval" className="lg:ml-8  mb-2 pr-1">
               Refresh Interval:
             </label>
             <select
               id="refreshInterval"
               value={selectedInterval}
               onChange={handleRefreshIntervalChange}
-              className="border p-1 rounded mr-2 mb-2"
+              className="border p-1 rounded mr-1 mb-2"
             >
               <option value={30000}>30 seconds</option>
               <option value={120000}>2 minutes</option>
@@ -128,12 +130,12 @@ function Emergency() {
             </select>
             <button
               onClick={applyRefreshInterval}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded mb-2"
+              className="bg-[#1f5b7a] hover:bg-blue-700 text-white font-bold py-1 px-2 rounded mb-2"
             >
-              Apply
+              ✓
             </button>
           </div>
-          <p className="mb-2 ml-8">
+          <p className="mb-2 lg:ml-8">
             Last updated: {lastUpdateTime.toLocaleString()}
           </p>
           <ul className="space-y-2 max-h-96 min-h-[24rem] overflow-y-auto pr-8">
@@ -152,8 +154,10 @@ function Emergency() {
         </div>
 
         <div className="bg-white shadow-md rounded-lg p-4 overflow-hidden">
-          <h2 className="text-2xl font-bold mb-4 ml-8">Emergency History</h2>
-          <p className="ml-8">
+          <h2 className="text-2xl font-bold mb-2 lg:ml-8 ml-6">
+            Emergency History
+          </h2>
+          <p className="lg:ml-8">
             Last updated: {lastUpdateTime.toLocaleString()}
           </p>
           {emergencyHistory && emergencyHistory.length > 0 ? (
