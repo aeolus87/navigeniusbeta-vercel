@@ -100,19 +100,19 @@ function Emergency() {
             const newLocation = {
               latitude: data.Latitude,
               longitude: data.Longitude,
-              timestamp: new Date().toISOString(),
+              timestamp: data.timestamp || new Date().toISOString(),
             };
             lastLocationRef.current = newLocation;
             setLocationHistory((prevHistory) => [
               newLocation,
               ...prevHistory.slice(0, 9),
             ]);
+            setLastUpdateTime(new Date(newLocation.timestamp));
             storeDataInMongoDB({ type: 'location', ...newLocation }).catch(
               (error) => {
                 console.error('Error storing data in MongoDB:', error);
               },
             );
-            setLastUpdateTime(new Date());
           }
         },
         { onlyOnce: true },
