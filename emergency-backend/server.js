@@ -187,7 +187,6 @@ async function startServer() {
   });
 }
 
-// Start the server
 startServer().catch(console.error);
 
 // Handle graceful shutdown
