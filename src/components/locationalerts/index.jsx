@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { getDatabase, ref, onValue, off } from 'firebase/database';
+import { getDatabase, ref, onValue } from 'firebase/database';
 import { app } from '../../firebase/firebase';
 import axios from 'axios';
 
@@ -73,10 +73,54 @@ function Emergency() {
     }
   }, [API_BASE_URL2]);
 
+  const reverseGeocode = async (latitude, longitude) => {
+    try {
+      const response = await axios.get(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
+      );
+      return response.data.display_name;
+    } catch (error) {
+      console.error('Error reverse geocoding:', error);
+      return 'Address not available';
+    }
+  };
+
+  const fetchLocation = useCallback(async () => {
+    const db = getDatabase(app);
+    const locationRef = ref(db, 'Device/Locator');
+
+    onValue(
+      locationRef,
+      async (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const address = await reverseGeocode(data.Latitude, data.Longitude);
+          const newLocation = {
+            latitude: data.Latitude,
+            longitude: data.Longitude,
+            address: address,
+            timestamp: data.timestamp || new Date().toISOString(),
+          };
+          lastLocationRef.current = newLocation;
+          setLocationHistory((prevHistory) => [
+            newLocation,
+            ...prevHistory.slice(0, 9),
+          ]);
+          setLastUpdateTime(new Date(newLocation.timestamp));
+          storeDataInMongoDB({ type: 'location', ...newLocation }).catch(
+            (error) => {
+              console.error('Error storing data in MongoDB:', error);
+            },
+          );
+        }
+      },
+      { onlyOnce: true },
+    );
+  }, [storeDataInMongoDB]);
+
   useEffect(() => {
     const db = getDatabase(app);
     const emergencyRef = ref(db, 'Device/Locator/emergency');
-    const locationRef = ref(db, 'Device/Locator');
 
     const emergencyUnsubscribe = onValue(emergencyRef, (snapshot) => {
       const data = snapshot.val();
@@ -91,34 +135,6 @@ function Emergency() {
       }
     });
 
-    const fetchLocation = () => {
-      onValue(
-        locationRef,
-        (snapshot) => {
-          const data = snapshot.val();
-          if (data) {
-            const newLocation = {
-              latitude: data.Latitude,
-              longitude: data.Longitude,
-              timestamp: data.timestamp || new Date().toISOString(),
-            };
-            lastLocationRef.current = newLocation;
-            setLocationHistory((prevHistory) => [
-              newLocation,
-              ...prevHistory.slice(0, 9),
-            ]);
-            setLastUpdateTime(new Date(newLocation.timestamp));
-            storeDataInMongoDB({ type: 'location', ...newLocation }).catch(
-              (error) => {
-                console.error('Error storing data in MongoDB:', error);
-              },
-            );
-          }
-        },
-        { onlyOnce: true },
-      );
-    };
-
     fetchLocation();
     fetchDataFromMongoDB();
 
@@ -129,10 +145,14 @@ function Emergency() {
 
     return () => {
       emergencyUnsubscribe();
-      off(locationRef);
       clearInterval(intervalId);
     };
-  }, [refreshInterval, storeDataInMongoDB, fetchDataFromMongoDB]);
+  }, [
+    refreshInterval,
+    storeDataInMongoDB,
+    fetchDataFromMongoDB,
+    fetchLocation,
+  ]);
 
   const handleRefreshIntervalChange = (event) => {
     setSelectedInterval(Number(event.target.value));
@@ -159,9 +179,9 @@ function Emergency() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-white shadow-md rounded-lg p-4 overflow-hidden">
-          <h2 className="text-2xl font-bold mb-4">Location History</h2>
+          <h2 className="text-2xl font-bold mb-4 ml-8">Location History</h2>
           <div className="flex items-center flex-wrap">
-            <label htmlFor="refreshInterval" className="mr-2 mb-2">
+            <label htmlFor="refreshInterval" className="ml-8 mb-2 pr-2">
               Refresh Interval:
             </label>
             <select
@@ -182,7 +202,7 @@ function Emergency() {
               Apply
             </button>
           </div>
-          <p className="mb-2">
+          <p className="mb-2 ml-8">
             Last updated: {lastUpdateTime.toLocaleString()}
           </p>
           <ul className="space-y-2 max-h-96 overflow-y-auto mr-8">
@@ -191,6 +211,7 @@ function Emergency() {
                 <p className="break-words">
                   Latitude: {location.latitude}, Longitude: {location.longitude}
                 </p>
+                <p className="break-words">Address: {location.address}</p>
                 <p className="text-sm text-gray-600">
                   {new Date(location.timestamp).toLocaleString()}
                 </p>
@@ -200,8 +221,8 @@ function Emergency() {
         </div>
 
         <div className="bg-white shadow-md rounded-lg p-4">
-          <h2 className="text-2xl font-bold mb-4">Emergency History</h2>
-          <p className="mb-2">
+          <h2 className="text-2xl font-bold mb-4 ml-8">Emergency History</h2>
+          <p className="ml-8 mb-2">
             Last updated: {lastUpdateTime.toLocaleString()}
           </p>
           {emergencyHistory && emergencyHistory.length > 0 ? (
@@ -216,7 +237,7 @@ function Emergency() {
               ))}
             </ul>
           ) : (
-            <p>No emergency history.</p>
+            <p className="ml-8">No emergency history.</p>
           )}
         </div>
       </div>
