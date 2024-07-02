@@ -105,20 +105,17 @@ function Emergency() {
     };
 
     fetchLocation();
-    const locationInterval = setInterval(fetchLocation, refreshInterval);
-
     fetchDataFromMongoDB();
 
-    const mongoFetchInterval = setInterval(
-      fetchDataFromMongoDB,
-      refreshInterval,
-    );
+    const intervalId = setInterval(() => {
+      fetchLocation();
+      fetchDataFromMongoDB();
+    }, refreshInterval);
 
     return () => {
       emergencyUnsubscribe();
       off(locationRef);
-      clearInterval(locationInterval);
-      clearInterval(mongoFetchInterval);
+      clearInterval(intervalId);
     };
   }, [refreshInterval, storeDataInMongoDB, fetchDataFromMongoDB]);
 
@@ -130,7 +127,6 @@ function Emergency() {
     setRefreshInterval(selectedInterval);
     localStorage.setItem('refreshInterval', selectedInterval.toString());
   };
-
   return (
     <div className="container mx-auto p-4 mt-20 max-w-6xl">
       {emergency && (
