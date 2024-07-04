@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, onValue, off } from 'firebase/database';
+import { getDatabase, ref, onValue } from 'firebase/database';
 import Coordinates from './Coordinates';
 import _ from 'lodash';
-
+import { getAuth } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../firebase/firebase';
 const firebaseConfig = {
   apiKey: `${process.env.REACT_APP_API_KEY}`,
   authDomain: `${process.env.REACT_APP_AUTH_DOMAIN}`,
@@ -40,8 +42,22 @@ const Fmap = React.memo(() => {
   const latitudeFilter = useMemo(() => new KalmanFilter(), []);
   const longitudeFilter = useMemo(() => new KalmanFilter(), []);
   const [dgpsCorrections, setDgpsCorrections] = useState({ lat: 0, lon: 0 });
-
+  const auth = getAuth();
+  const user = auth.currentUser;
   const toRadians = useCallback((degrees) => (degrees * Math.PI) / 180, []);
+  const [device_id, setDeviceId] = useState(null);
+
+  useEffect(() => {
+    if (user) {
+      // Fetch the device_id from Firestore
+      const userDocRef = doc(db, 'users', user.uid);
+      getDoc(userDocRef).then((docSnapshot) => {
+        if (docSnapshot.exists()) {
+          setDeviceId(docSnapshot.data().device_id);
+        }
+      });
+    }
+  }, [user]);
 
   const getHaversineDistance = useCallback(
     (lat1, lon1, lat2, lon2) => {
@@ -61,8 +77,10 @@ const Fmap = React.memo(() => {
   );
 
   const getCompanionLocation = useCallback(() => {
+    if (!device_id) return; // Don't proceed if device_id is not set
+
     const database = getDatabase();
-    const databaseRef = ref(database, 'Device/Locator');
+    const databaseRef = ref(database, `Devices/${device_id}`);
     const handler = (snapshot) => {
       const location = snapshot.val();
       setCompanionLocation(location);
@@ -71,12 +89,7 @@ const Fmap = React.memo(() => {
     };
     const throttledHandler = _.throttle(handler, 1000);
     onValue(databaseRef, throttledHandler);
-
-    return () => {
-      off(databaseRef);
-      throttledHandler.cancel();
-    };
-  }, []);
+  }, [device_id]);
 
   const getLocationWithRetry = useCallback((maxRetries = 3, delay = 2000) => {
     return new Promise((resolve, reject) => {

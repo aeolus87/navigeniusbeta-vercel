@@ -42,6 +42,7 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const auth = getAuth();
   const user = auth.currentUser;
+  const device_id = user.device_id || 'DEFAULT_DEVICE_ID';
 
   useEffect(() => {
     const fetchLoginActivities = async () => {
@@ -164,11 +165,18 @@ const ProfilePage = () => {
           : `63${phoneNumber}`;
 
         const userDocRef = doc(db, 'users', user.uid);
-        updateDoc(userDocRef, { phone_number: phoneNumberToStore })
+        updateDoc(userDocRef, {
+          phone_number: phoneNumberToStore,
+          device_id: device_id, // Store the device_id in Firestore
+        })
           .then(() => {
-            console.log('Phone number updated in Firestore database');
+            console.log(
+              'Phone number and device_id updated in Firestore database',
+            );
 
-            const realtimeDbRef = firebase.database().ref(`Number`);
+            const realtimeDbRef = firebase
+              .database()
+              .ref(`Devices/${device_id}/Number`);
             realtimeDbRef
               .set(parseInt(phoneNumberToStore, 10)) // Convert to integer
               .then(() => {

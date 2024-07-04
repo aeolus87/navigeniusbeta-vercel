@@ -19,6 +19,7 @@ import VerifiedMessage from './components/auth/verify/verified.jsx';
 import CompleteRegistration from './components/auth/register/complete.jsx';
 import Emergency from './components/locationalerts/index.jsx';
 
+
 firebase.initializeApp(firebaseConfig);
 
 function App() {
@@ -33,7 +34,6 @@ function App() {
     { path: '/verifyemail', element: <VerifyEmail /> },
     { path: '/verified', element: <VerifiedMessage /> },
     { path: '/forgot-password', element: <ForgotPassword /> },
-    { path: '/locationalerts', element: <Emergency /> },
     {
       path: '/profile',
       element: (
@@ -47,6 +47,14 @@ function App() {
       element: (
         <PrivateRoute>
           <Dashboard />
+        </PrivateRoute>
+      ),
+    },
+    {
+      path: '/locationalerts',
+      element: (
+        <PrivateRoute>
+          <Emergency />
         </PrivateRoute>
       ),
     },
