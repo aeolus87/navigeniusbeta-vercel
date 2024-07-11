@@ -127,7 +127,7 @@ const Map = () => {
   }, [debouncedCheckGeofence]);
 
   return (
-    <div className="lg:fixed top-20 lg:right-20 z-10 lg:max-w-[1300px] lg:w-[90vw] max-w-[93%] ml-4">
+    <div className="lg:fixed top-20 lg:right-20 z-10 lg:max-w-[1120px] lg:w-[90vw] max-w-[93%] ml-4">
       <div className="rounded-xl overflow-hidden lg:h-[80vh] h-[40vh] relative">
         <MapContainer
           center={INITIAL_CENTER}
