@@ -115,10 +115,10 @@ const Map = () => {
   }, []);
 
   useEffect(() => {
-    if (userLocation && mapRef.current) {
-      mapRef.current.flyTo(userLocation, 13, { duration: 2 });
+    if (navigeniusLocation && mapRef.current) {
+      mapRef.current.flyTo(navigeniusLocation, 13, { duration: 2 });
     }
-  }, [userLocation]);
+  }, [navigeniusLocation]);
 
   useEffect(() => {
     const checkFunc = debouncedCheckGeofence();
