@@ -1,9 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
+import { useAuth } from '../../contexts/authContext'; // Import the auth context
 
 const DEFAULT_REFRESH_INTERVAL = 120000;
 
 function Emergency() {
+  const { currentUser } = useAuth(); // Get the current user from auth context
+  const [isDeviceLinked, setIsDeviceLinked] = useState(false);
   const [emergency, setEmergency] = useState(false);
   const [emergencyDetails, setEmergencyDetails] = useState(null);
   const [locationHistory, setLocationHistory] = useState([]);
@@ -20,9 +23,27 @@ function Emergency() {
 
   const API_BASE_URL2 = process.env.REACT_APP_API_BASE_URL2;
 
+  const checkDeviceLink = useCallback(async () => {
+    if (currentUser) {
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL2}/api/checkDeviceLink/${currentUser.uid}`,
+        );
+        setIsDeviceLinked(response.data.isLinked);
+      } catch (error) {
+        console.error('Error checking device link:', error);
+        setIsDeviceLinked(false);
+      }
+    }
+  }, [API_BASE_URL2, currentUser]);
+
   const fetchDataFromMongoDB = useCallback(async () => {
+    if (!isDeviceLinked) return;
+
     try {
-      const response = await axios.get(`${API_BASE_URL2}/api/getData`);
+      const response = await axios.get(
+        `${API_BASE_URL2}/api/getData/${currentUser.uid}`,
+      );
       const { latestEmergency, locationHistory, emergencyHistory } =
         response.data;
 
@@ -42,17 +63,23 @@ function Emergency() {
     } catch (error) {
       console.error('Error fetching data from MongoDB:', error);
     }
-  }, [API_BASE_URL2, isEmergencyDismissed]);
+  }, [API_BASE_URL2, isDeviceLinked, currentUser, isEmergencyDismissed]);
 
   useEffect(() => {
-    fetchDataFromMongoDB();
+    checkDeviceLink();
+  }, [checkDeviceLink]);
 
-    const intervalId = setInterval(() => {
+  useEffect(() => {
+    if (isDeviceLinked) {
       fetchDataFromMongoDB();
-    }, refreshInterval);
 
-    return () => clearInterval(intervalId);
-  }, [refreshInterval, fetchDataFromMongoDB]);
+      const intervalId = setInterval(() => {
+        fetchDataFromMongoDB();
+      }, refreshInterval);
+
+      return () => clearInterval(intervalId);
+    }
+  }, [refreshInterval, fetchDataFromMongoDB, isDeviceLinked]);
 
   const handleRefreshIntervalChange = (event) => {
     setSelectedInterval(Number(event.target.value));
@@ -69,7 +96,21 @@ function Emergency() {
     localStorage.setItem('isEmergencyDismissed', 'true');
     // You might also want to update your backend or perform other actions here
   };
-
+  if (!isDeviceLinked) {
+    return (
+      <div className="container mx-auto p-4 mt-20 max-w-6xl">
+        <div
+          className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4"
+          role="alert"
+        >
+          <p className="font-bold">No Device Linked</p>
+          <p>
+            Please link a device to access the emergency and location history.
+          </p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="container mx-auto p-4 mt-20 max-w-6xl">
       {emergency && (

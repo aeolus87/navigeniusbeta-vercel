@@ -15,7 +15,9 @@ const DB_NAME = 'Navigenius';
 app.use(express.json());
 app.use(helmet());
 app.use(compression());
+
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+
 // Allowed origins
 const allowedOrigins = [
   'http://localhost:3000',
@@ -124,14 +126,16 @@ async function reverseGeocode(latitude, longitude) {
 // Listen to Firebase changes
 async function listenToFirebaseChanges(db) {
   const firebaseDb = admin.database();
-  const locationRef = firebaseDb.ref('Device/Locator');
-  const emergencyRef = firebaseDb.ref('Device/Locator/emergency');
+  const devicesRef = firebaseDb.ref('Devices');
 
-  locationRef.on('value', async (snapshot) => {
+  devicesRef.on('child_changed', async (snapshot) => {
+    const deviceId = snapshot.key;
     const data = snapshot.val();
-    if (data) {
+
+    if (data.Latitude && data.Longitude) {
       const address = await reverseGeocode(data.Latitude, data.Longitude);
       const newLocation = {
+        deviceId,
         latitude: data.Latitude,
         longitude: data.Longitude,
         address: address,
@@ -140,12 +144,10 @@ async function listenToFirebaseChanges(db) {
       await db.collection('locations').insertOne(newLocation);
       console.log('Location saved to MongoDB');
     }
-  });
 
-  emergencyRef.on('value', async (snapshot) => {
-    const data = snapshot.val();
-    if (data) {
+    if (data.emergency !== undefined) {
       const emergency = {
+        deviceId,
         emergency: data.emergency,
         timestamp: new Date(data.timestamp || Date.now()),
       };
@@ -157,23 +159,35 @@ async function listenToFirebaseChanges(db) {
 
 // Routes
 async function setupRoutes(db) {
-  app.get('/api/getData', async (req, res) => {
+  app.get('/api/getData/:userId', async (req, res) => {
     console.log('Received GET request to /api/getData');
+    const { userId } = req.params;
     try {
+      // Get the user's device ID from Firestore
+      const userDoc = await admin
+        .firestore()
+        .collection('users')
+        .doc(userId)
+        .get();
+      if (!userDoc.exists || !userDoc.data().device_id) {
+        return res.status(403).json({ error: 'No device linked to this user' });
+      }
+      const deviceId = userDoc.data().device_id;
+
       const latestEmergency = await db
         .collection('emergencies')
-        .findOne({}, { sort: { timestamp: -1 } });
+        .findOne({ deviceId }, { sort: { timestamp: -1 } });
 
       const locationHistory = await db
         .collection('locations')
-        .find()
+        .find({ deviceId })
         .sort({ timestamp: -1 })
         .limit(10)
         .toArray();
 
       const emergencyHistory = await db
         .collection('emergencies')
-        .find()
+        .find({ deviceId })
         .sort({ timestamp: -1 })
         .toArray();
 
@@ -191,28 +205,74 @@ async function setupRoutes(db) {
     }
   });
 
-  app.post('/api/storeData', async (req, res) => {
-    console.log('Received POST request to /api/storeData');
-    console.log('Request body:', req.body);
+  app.get('/api/checkDeviceLink/:userId', async (req, res) => {
+    const { userId } = req.params;
     try {
-      const { type, ...data } = req.body;
-      data.timestamp = new Date(data.timestamp);
-
-      if (type === 'emergency') {
-        await db.collection('emergencies').insertOne(data);
-      } else if (type === 'location') {
-        await db.collection('locations').insertOne(data);
-      } else {
-        throw new Error('Invalid data type');
-      }
-
-      res.status(200).json({ message: 'Data stored successfully' });
+      const userDoc = await admin
+        .firestore()
+        .collection('users')
+        .doc(userId)
+        .get();
+      const isLinked = userDoc.exists && userDoc.data().device_id;
+      res.status(200).json({ isLinked: !!isLinked });
     } catch (error) {
-      console.error('Error storing data in MongoDB:', error);
-      res.status(500).json({
-        error: 'Error storing data in the database',
-        details: error.message,
-      });
+      console.error('Error checking device link:', error);
+      res
+        .status(500)
+        .json({ error: 'Error checking device link', details: error.message });
+    }
+  });
+
+  app.post('/api/linkDevice', async (req, res) => {
+    const { userId, deviceCode } = req.body;
+    try {
+      const deviceRef = admin.database().ref(`Devices/${deviceCode}`);
+      const deviceSnapshot = await deviceRef.once('value');
+
+      if (deviceSnapshot.exists()) {
+        await admin
+          .firestore()
+          .collection('users')
+          .doc(userId)
+          .update({ device_id: deviceCode });
+        await deviceRef.child('userId').set(userId);
+        res.status(200).json({ message: 'Device linked successfully' });
+      } else {
+        res.status(400).json({ error: 'Invalid device code' });
+      }
+    } catch (error) {
+      console.error('Error linking device:', error);
+      res
+        .status(500)
+        .json({ error: 'Error linking device', details: error.message });
+    }
+  });
+
+  app.post('/api/unlinkDevice', async (req, res) => {
+    const { userId } = req.body;
+    try {
+      const userDoc = await admin
+        .firestore()
+        .collection('users')
+        .doc(userId)
+        .get();
+      if (userDoc.exists && userDoc.data().device_id) {
+        const deviceId = userDoc.data().device_id;
+        await admin
+          .firestore()
+          .collection('users')
+          .doc(userId)
+          .update({ device_id: null });
+        await admin.database().ref(`Devices/${deviceId}/userId`).remove();
+        res.status(200).json({ message: 'Device unlinked successfully' });
+      } else {
+        res.status(400).json({ error: 'No device linked to this user' });
+      }
+    } catch (error) {
+      console.error('Error unlinking device:', error);
+      res
+        .status(500)
+        .json({ error: 'Error unlinking device', details: error.message });
     }
   });
 }
