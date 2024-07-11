@@ -1,4 +1,4 @@
-import { auth, db } from './firebase';
+import { auth, db, rtdb } from './firebase';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -12,7 +12,6 @@ import {
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { ref, get, set } from 'firebase/database';
 
-// New function to get user's device ID
 export const getUserDeviceId = async (userId) => {
   try {
     const userDoc = await getDoc(doc(db, 'users', userId));
@@ -26,19 +25,18 @@ export const getUserDeviceId = async (userId) => {
   }
 };
 
-// New function to link device to user
 export const linkDeviceToUser = async (userId, deviceCode) => {
   try {
-    // Check if the device code exists in the database
-    const deviceRef = ref(db, `Devices/${deviceCode}`);
+    // Check if the device code exists in the Realtime Database
+    const deviceRef = ref(rtdb, `Devices/${deviceCode}`);
     const deviceSnapshot = await get(deviceRef);
 
     if (deviceSnapshot.exists()) {
-      // Update user document with device ID
+      // Update user document in Firestore with device ID
       await updateDoc(doc(db, 'users', userId), { device_id: deviceCode });
 
-      // Update device data with user ID
-      await set(ref(db, `Devices/${deviceCode}/user_id`), userId);
+      // Update device data in Realtime Database with user ID
+      await set(ref(rtdb, `Devices/${deviceCode}/userId`), userId);
 
       return true;
     } else {
@@ -50,18 +48,17 @@ export const linkDeviceToUser = async (userId, deviceCode) => {
   }
 };
 
-// New function to unlink device from user
 export const unlinkDeviceFromUser = async (userId) => {
   try {
     const userDoc = await getDoc(doc(db, 'users', userId));
     if (userDoc.exists() && userDoc.data().device_id) {
       const deviceId = userDoc.data().device_id;
 
-      // Remove device ID from user document
+      // Remove device ID from user document in Firestore
       await updateDoc(doc(db, 'users', userId), { device_id: null });
 
-      // Remove user ID from device data
-      await set(ref(db, `Devices/${deviceId}/user_id`), null);
+      // Remove user ID from device data in Realtime Database
+      await set(ref(rtdb, `Devices/${deviceId}/userId`), null);
 
       return true;
     } else {
@@ -153,6 +150,7 @@ export const doSignInWithGoogle = async () => {
     throw error;
   }
 };
+
 export const doSignOut = async () => {
   try {
     await signOut(auth);

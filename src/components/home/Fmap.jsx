@@ -1,22 +1,11 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, onValue } from 'firebase/database';
 import Coordinates from './Coordinates';
 import _ from 'lodash';
 import { getAuth } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase/firebase';
-const firebaseConfig = {
-  apiKey: `${process.env.REACT_APP_API_KEY}`,
-  authDomain: `${process.env.REACT_APP_AUTH_DOMAIN}`,
-  databaseURL: `${process.env.REACT_APP_DATABASE_URL}`,
-  projectId: `${process.env.REACT_APP_PROJECT_ID}`,
-  storageBucket: `${process.env.REACT_APP_STORAGE_BUCKET}`,
-  messagingSenderId: `${process.env.REACT_APP_MESSAGING_SENDER_ID}`,
-  appId: `${process.env.REACT_APP_APP_ID}`,
-};
-
-initializeApp(firebaseConfig);
+import { app } from '../../firebase/firebase';
 
 function KalmanFilter() {
   this.Q = 1;
@@ -42,14 +31,13 @@ const Fmap = React.memo(() => {
   const latitudeFilter = useMemo(() => new KalmanFilter(), []);
   const longitudeFilter = useMemo(() => new KalmanFilter(), []);
   const [dgpsCorrections, setDgpsCorrections] = useState({ lat: 0, lon: 0 });
-  const auth = getAuth();
+  const auth = getAuth(app);
   const user = auth.currentUser;
   const toRadians = useCallback((degrees) => (degrees * Math.PI) / 180, []);
   const [device_id, setDeviceId] = useState(null);
 
   useEffect(() => {
     if (user) {
-      // Fetch the device_id from Firestore
       const userDocRef = doc(db, 'users', user.uid);
       getDoc(userDocRef).then((docSnapshot) => {
         if (docSnapshot.exists()) {
@@ -77,18 +65,20 @@ const Fmap = React.memo(() => {
   );
 
   const getCompanionLocation = useCallback(() => {
-    if (!device_id) return; // Don't proceed if device_id is not set
+    if (!device_id) return () => {};
 
-    const database = getDatabase();
+    const database = getDatabase(app);
     const databaseRef = ref(database, `Devices/${device_id}`);
-    const handler = (snapshot) => {
+    const throttledHandler = _.throttle((snapshot) => {
       const location = snapshot.val();
       setCompanionLocation(location);
       localStorage.setItem('long_val', location.Longitude);
       localStorage.setItem('lat_val', location.Latitude);
-    };
-    const throttledHandler = _.throttle(handler, 1000);
-    onValue(databaseRef, throttledHandler);
+    }, 1000);
+
+    const unsubscribe = onValue(databaseRef, throttledHandler);
+
+    return unsubscribe;
   }, [device_id]);
 
   const getLocationWithRetry = useCallback((maxRetries = 3, delay = 2000) => {
@@ -175,7 +165,7 @@ const Fmap = React.memo(() => {
   }, [getHaversineDistance]);
 
   useEffect(() => {
-    const cleanupCompanion = getCompanionLocation();
+    const unsubscribeCompanion = getCompanionLocation();
 
     const throttledGetBestLocation = _.throttle(getBestLocation, 1000);
     const debouncedGetDistance = _.debounce(getDistance, 1000);
@@ -191,7 +181,7 @@ const Fmap = React.memo(() => {
     }, 30000);
 
     return () => {
-      cleanupCompanion();
+      unsubscribeCompanion();
       clearInterval(updateInterval);
       throttledGetBestLocation.cancel();
       debouncedGetDistance.cancel();

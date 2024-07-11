@@ -3,7 +3,7 @@ import { Fmap } from '.';
 import Map from './Map';
 import DeviceCodeEntry from '../DeviceEntry';
 import { useAuth } from '../../contexts/authContext';
-import { getUserDeviceId } from '../../firebase/auth'; // You'll need to create this function
+import { getUserDeviceId } from '../../firebase/auth';
 
 const Dashboard = () => {
   const { currentUser } = useAuth();
@@ -38,9 +38,13 @@ const Dashboard = () => {
           <Map />
         </>
       ) : (
-        <div className="max-w-md mx-auto mt-40 p-6 bg-white rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold mb-4">GPS Device Unavailable</h2>
-          <p className="mb-4">Link your GPS device to start tracking.</p>
+        <div className="max-w-md mx-auto mt-40 p-6 bg-[#0c2734] rounded-lg shadow-md">
+          <h2 className="text-2xl text-white font-bold mb-4">
+            GPS Device Unavailable
+          </h2>
+          <p className="mb-4 text-white">
+            Link your GPS device to start tracking.
+          </p>
           <DeviceCodeEntry onDeviceLinked={handleDeviceLinked} />
         </div>
       )}

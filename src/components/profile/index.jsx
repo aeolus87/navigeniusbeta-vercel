@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { FiInfo, FiLock, FiPhone, FiArrowLeft, FiEdit } from 'react-icons/fi';
+import {
+  FiInfo,
+  FiLock,
+  FiPhone,
+  FiArrowLeft,
+  FiEdit,
+  FiMinusSquare,
+} from 'react-icons/fi';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/database';
@@ -17,7 +24,8 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import Modal from './modal/Modal';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-
+import { getUserDeviceId, unlinkDeviceFromUser } from '../../firebase/auth';
+import DeviceCodeEntry from '../DeviceEntry';
 const ProfilePage = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [showImage, setShowImage] = useState(false);
@@ -42,8 +50,34 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const auth = getAuth();
   const user = auth.currentUser;
-  const device_id = user.device_id || 'DEFAULT_DEVICE_ID';
+  const device_id = user.device_id;
+  const [deviceLinked, setDeviceLinked] = useState(false);
 
+  useEffect(() => {
+    const checkDeviceLink = async () => {
+      if (user) {
+        const deviceId = await getUserDeviceId(user.uid);
+        setDeviceLinked(!!deviceId);
+      }
+    };
+
+    checkDeviceLink();
+  }, [user]);
+
+  const handleDeviceLinked = () => {
+    setDeviceLinked(true);
+  };
+
+  const handleUnlinkDevice = async () => {
+    try {
+      await unlinkDeviceFromUser(user.uid);
+      setDeviceLinked(false);
+      toast.success('Device unlinked successfully');
+    } catch (error) {
+      console.error('Error unlinking device:', error);
+      toast.error('Error unlinking device');
+    }
+  };
   useEffect(() => {
     const fetchLoginActivities = async () => {
       try {
@@ -167,7 +201,7 @@ const ProfilePage = () => {
         const userDocRef = doc(db, 'users', user.uid);
         updateDoc(userDocRef, {
           phone_number: phoneNumberToStore,
-          device_id: device_id, // Store the device_id in Firestore
+          deviceLinked: device_id, // Store the device_id in Firestore
         })
           .then(() => {
             console.log(
@@ -291,7 +325,7 @@ const ProfilePage = () => {
     if (user) {
       const userDocRef = doc(db, 'users', user.uid);
       await updateDoc(userDocRef, { childName });
-      console.log('Child name saved successfully');
+      toast('Child name saved successfully');
     }
   };
   return (
@@ -339,11 +373,20 @@ const ProfilePage = () => {
               Change Password
             </span>
           </button>
+          <button
+            className={`flex flex-col items-center text-white p-4 m-2 hover:bg-blue-700 rounded-lg ${
+              activeTab === 'GPS Device' ? 'bg-[#0c2734]' : ''
+            }`}
+            onClick={() => handleTabChange('GPS Device')}
+          >
+            <FiMinusSquare className="text-2xl" />
+            <span className="hidden md:block mt-2 text-xl">GPS Device</span>
+          </button>
         </div>
         <div className="lg:ml-1/4 flex flex-col items-center relative z-0 lg:w-full w-auto h-screen lg:mt-6 mt-20 ml-4">
           {activeTab === 'Information' && (
             <div className="flex flex-col items-center justify-center w-full h-full">
-              <div className="flex flex-col lg:flex-row items-center justify-center w-full h-full lg:ml-64 ml-[4.5rem] lg:mb-0 mb-28">
+              <div className="flex flex-col lg:flex-row items-center justify-center w-full h-full lg:ml-64 ml-[4.5rem] lg:mb-0 mb-20">
                 <div
                   className="relative size-24 lg:w-48 lg:h-48 rounded-full bg-white cursor-pointer flex items-center justify-center lg:mb-[30rem] lg:ml-20"
                   onClick={handleProfilePicClick}
@@ -379,44 +422,45 @@ const ProfilePage = () => {
                       )}
                     </>
                   </p>
-                  <p className="text-[#f4f4f4] text-md lg:text-xl mt-2">
+                  <p className="text-[#f4f4f4] text-md lg:text-xl mt-2 mb-2">
                     Child's First Name or Nickname
                   </p>
                   <div className="flex flex-col lg:flex-row">
                     {!isEditing ? (
-                      <div className="flex">
-                        <p className="lg:mt-2 lg:max-w-xs rounded-md bg-[#0c2734] text-white lg:text-xl font-semibold lg:ml-0 justify-start">
+                      <div className="flex mb-0">
+                        <p className="lg:max-w-xs h-1 rounded-md bg-[#0c2734] text-white lg:text-xl font-semibold lg:ml-0 justify-start">
                           {childName}
                         </p>
                         <button
                           onClick={() => setIsEditing(true)}
-                          className="ml-2 mb-2 [#0c2734] hover:bg-blue-700 text-white font-bold px-2 py-2 rounded"
+                          className=" ml-2 lg:mb-1 bg-[#0c2734] hover:bg-blue-700 text-white font-bold rounded"
                         >
                           <FiEdit className="lg:text-2xl" />
                         </button>
                       </div>
                     ) : (
-                      <>
+                      <div className="relative lg:max-w-xs mt-2">
                         <input
                           type="text"
                           placeholder="Enter here"
                           value={childName}
                           onChange={(e) => setChildName(e.target.value)}
-                          className="mt-2 px-4 py-2 lg:max-w-xs rounded-md bg-[#184e64] text-white focus:outline-none focus:ring-2 focus:ring-blue-500 lg:mr-2 lg:text-lg"
+                          className="px-4 py-2 rounded-md bg-[#184e64] text-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full pr-12"
                         />
                         <button
                           onClick={() => {
                             handleSaveChildName();
                             setIsEditing(false);
                           }}
-                          className="bg-[#0c2734] hover:bg-blue-700 text-white font-bold px-4 py-2 rounded mt-2 max-w-xs lg:mt-0"
+                          className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-[#0c2734] hover:bg-blue-700 text-white font-bold px-1 py-1 rounded"
                         >
                           Save
                         </button>
-                      </>
+                      </div>
                     )}
                   </div>
-                  <p className="text-[#f4f4f4] text-md lg:text-xl mt-2">
+
+                  <p className="text-[#f4f4f4] text-md lg:text-xl mt-4">
                     Account Login Activity
                   </p>
                   <div className="overflow-x-auto rounded-md lg:mt-3">
@@ -453,7 +497,7 @@ const ProfilePage = () => {
                       </tbody>
                     </table>
                     <button
-                      className="lg:hidden block bg-[#184e64] hover:bg-[#ffffff] text-white hover:!text-[#0c2734] font-bold py-1 px-4 rounded mt-2 w-full"
+                      className="lg:hidden block overflow-hidden max-h-16 bg-[#184e64] hover:bg-[#ffffff] text-white hover:!text-[#0c2734] font-bold py-1 px-4 rounded mt-2 w-full"
                       onClick={handleShowLoginActivities}
                     >
                       Where you're logged in
@@ -506,7 +550,7 @@ const ProfilePage = () => {
           )}
 
           {activeTab === 'Change Password' && (
-            <div className="lg:mx-auto py-2 lg:ml-[42%] mt-6 ml-[4.5rem] lg:h-[28rem] p-6 bg-[#0c2734] rounded-lg shadow-md">
+            <div className="lg:mx-auto py-2 lg:ml-[42%] lg:mt-6 ml-[4.5rem] lg:h-[28rem] p-6 bg-[#0c2734] rounded-lg shadow-md">
               <h2 className="text-2xl font-semibold text-white mb-4">
                 Change Password
               </h2>
@@ -566,7 +610,7 @@ const ProfilePage = () => {
             </div>
           )}
           {activeTab === 'Phone Number' && (
-            <div className="lg:mx-auto lg:ml-[48%] mt-4 ml-[4.5rem] h-[26rem] p-6 bg-[#0c2734] rounded-lg shadow-md">
+            <div className="lg:mx-auto lg:ml-[48%] lg:mt-4 ml-[4.5rem] h-[26rem] p-6 bg-[#0c2734] rounded-lg shadow-md">
               <h2 className="text-2xl font-semibold text-white mb-2">
                 Update Phone Number
               </h2>
@@ -613,6 +657,33 @@ const ProfilePage = () => {
                   Verify
                 </button>
               </div>
+            </div>
+          )}
+          {activeTab === 'GPS Device' && (
+            <div className="lg:mx-auto lg:ml-[50%] lg:mt-24 ml-[4.5rem] lg:h-[23rem] p-6 bg-[#0c2734] rounded-lg shadow-md">
+              <h2 className="text-2xl font-semibold text-white mb-4">
+                GPS Device Management
+              </h2>
+              {deviceLinked ? (
+                <>
+                  <p className="text-white mb-4">
+                    Your GPS device is currently linked.
+                  </p>
+                  <button
+                    onClick={handleUnlinkDevice}
+                    className="bg-red-500 hover:bg-red-700 text-white font-bold px-4 py-2 rounded"
+                  >
+                    Unlink Device
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="text-white mb-4">
+                    No GPS device is currently linked.
+                  </p>
+                  <DeviceCodeEntry onDeviceLinked={handleDeviceLinked} />
+                </>
+              )}
             </div>
           )}
         </div>

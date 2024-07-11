@@ -19,15 +19,16 @@ const DeviceCodeEntry = ({ onDeviceLinked }) => {
       notify('Device linked successfully');
       onDeviceLinked();
     } catch (error) {
-      setError(error.message);
+      console.error('Error linking device:', error);
+      setError(error.message || 'An error occurred while linking the device');
     } finally {
       setIsLinking(false);
     }
   };
 
   return (
-    <div className="mt-4 ">
-      <h3 className="text-lg font-semibold mb-2">GPS Device Code</h3>
+    <div className="mt-4">
+      <h3 className="text-lg text-white font-semibold mb-2">GPS Device Code</h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="text"
