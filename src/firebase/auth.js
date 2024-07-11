@@ -32,13 +32,22 @@ export const linkDeviceToUser = async (userId, deviceCode) => {
     const deviceSnapshot = await get(deviceRef);
 
     if (deviceSnapshot.exists()) {
+      // Check if the device is already linked to another user
+      const linkedUserId = deviceSnapshot.val()?.userId;
+      if (linkedUserId) {
+        // Log an error message indicating the device is already linked
+        console.error('Device is already linked to another user.');
+        return false; // Indicate failure to link due to the device being linked elsewhere
+      }
+
+      // Proceed with linking the device to the current user
       // Update user document in Firestore with device ID
       await updateDoc(doc(db, 'users', userId), { device_id: deviceCode });
 
       // Update device data in Realtime Database with user ID
       await set(ref(rtdb, `Devices/${deviceCode}/userId`), userId);
 
-      return true;
+      return true; // Indicate successful linkage
     } else {
       throw new Error('Invalid device code');
     }

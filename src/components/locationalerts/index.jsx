@@ -6,6 +6,7 @@ const DEFAULT_REFRESH_INTERVAL = 120000;
 
 function Emergency() {
   const { currentUser } = useAuth(); // Get the current user from auth context
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
   const [isDeviceLinked, setIsDeviceLinked] = useState(false);
   const [emergency, setEmergency] = useState(false);
   const [emergencyDetails, setEmergencyDetails] = useState(null);
@@ -25,6 +26,7 @@ function Emergency() {
 
   const checkDeviceLink = useCallback(async () => {
     if (currentUser) {
+      setIsLoading(true); // Set loading to true at the beginning of the request
       try {
         const response = await axios.get(
           `${API_BASE_URL2}/api/checkDeviceLink/${currentUser.uid}`,
@@ -33,6 +35,8 @@ function Emergency() {
       } catch (error) {
         console.error('Error checking device link:', error);
         setIsDeviceLinked(false);
+      } finally {
+        setIsLoading(false); // Set loading to false once the request is complete
       }
     }
   }, [API_BASE_URL2, currentUser]);
@@ -77,6 +81,7 @@ function Emergency() {
         fetchDataFromMongoDB();
       }, refreshInterval);
 
+      // Return a cleanup function that clears the interval
       return () => clearInterval(intervalId);
     }
   }, [refreshInterval, fetchDataFromMongoDB, isDeviceLinked]);
@@ -96,6 +101,10 @@ function Emergency() {
     localStorage.setItem('isEmergencyDismissed', 'true');
     // You might also want to update your backend or perform other actions here
   };
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   if (!isDeviceLinked) {
     return (
       <div className="container mx-auto p-4 mt-20 max-w-6xl">
@@ -155,7 +164,7 @@ function Emergency() {
             Location History
           </h2>
           <div className="flex items-center flex-wrap">
-            <label htmlFor="refreshInterval" className="lg:ml-8  mb-2 pr-1">
+            <label htmlFor="refreshInterval" className="lg:ml-8 mb-2 pr-1">
               Refresh Interval:
             </label>
             <select

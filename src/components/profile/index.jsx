@@ -199,37 +199,42 @@ const ProfilePage = () => {
           : `63${phoneNumber}`;
 
         const userDocRef = doc(db, 'users', user.uid);
-        updateDoc(userDocRef, {
-          phone_number: phoneNumberToStore,
-          deviceLinked: device_id, // Store the device_id in Firestore
-        })
-          .then(() => {
-            console.log(
-              'Phone number and device_id updated in Firestore database',
-            );
-
-            const realtimeDbRef = firebase
-              .database()
-              .ref(`Devices/${device_id}/Number`);
-            realtimeDbRef
-              .set(parseInt(phoneNumberToStore, 10)) // Convert to integer
-              .then(() => {
-                console.log('Phone number updated in Realtime Database');
-                toast.success(
-                  'Your number is verified and set as emergency contact!',
-                );
-                setVerifiedPhoneNumber(phoneNumberToStore);
-              })
-              .catch((error) => {
-                console.error(
-                  'Error updating phone number in Realtime Database:',
-                  error,
-                );
-              });
+        if (deviceLinked !== undefined) {
+          // Check if deviceLinked is defined
+          updateDoc(userDocRef, {
+            phone_number: phoneNumberToStore,
+            deviceLinked: device_id, // Store the device_id in Firestore
           })
-          .catch((error) => {
-            console.error('Error updating phone number in Firestore:', error);
-          });
+            .then(() => {
+              console.log(
+                'Phone number and device_id updated in Firestore database',
+              );
+
+              const realtimeDbRef = firebase
+                .database()
+                .ref(`Devices/${device_id}/Number`);
+              realtimeDbRef
+                .set(parseInt(phoneNumberToStore, 10))
+                .then(() => {
+                  console.log('Phone number updated in Realtime Database');
+                  toast.success(
+                    'Your number is verified and set as emergency contact!',
+                  );
+                  setVerifiedPhoneNumber(phoneNumberToStore);
+                })
+                .catch((error) => {
+                  console.error(
+                    'Error updating phone number in Realtime Database:',
+                    error,
+                  );
+                });
+            })
+            .catch((error) => {
+              console.error('Error updating phone number in Firestore:', error);
+            });
+        } else {
+          console.error('deviceLinked is undefined');
+        }
       })
       .catch((error) => {
         console.error('Error linking phone number to user:', error);
