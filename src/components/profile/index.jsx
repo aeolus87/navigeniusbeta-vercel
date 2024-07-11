@@ -200,10 +200,8 @@ const ProfilePage = () => {
 
         const userDocRef = doc(db, 'users', user.uid);
         if (deviceLinked !== undefined) {
-          // Check if deviceLinked is defined
           updateDoc(userDocRef, {
             phone_number: phoneNumberToStore,
-            deviceLinked: device_id, // Store the device_id in Firestore
           })
             .then(() => {
               console.log(
