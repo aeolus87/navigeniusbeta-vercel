@@ -17,6 +17,11 @@ const Header = () => {
     }
   };
 
+  const handleDashboardClick = () => {
+    setMenuOpen(false);
+    navigate('/dashboard');
+  };
+
   const handleProfileClick = () => {
     setMenuOpen(false);
     navigate('/profile');
@@ -68,6 +73,12 @@ const Header = () => {
                 className={`absolute top-16 right-0 lg:mt-4 lg:bg-[#31242400] bg-[#0c273400] lg:static lg:flex lg:flex-row lg:items-center ${menuOpen ? 'block' : 'hidden'} md:block transition duration-600 ease-in-out ${menuOpen ? 'backdrop-blur-[10px]' : ''}
 `}
               >
+                <button
+                  onClick={handleDashboardClick}
+                  className="w-full text-center text-white hover:bg-[#184e64] focus:outline-none font-medium rounded-lg lg:text-lg text-sm px-5 lg:py-[1rem] py-2.5 md:me-2 md:mb-0"
+                >
+                  Dashboard
+                </button>
                 <button
                   onClick={handleProfileClick}
                   className="w-full text-center text-white hover:bg-[#184e64] focus:outline-none font-medium rounded-lg lg:text-lg text-sm px-5 lg:py-[1rem] py-2.5 md:me-2 md:mb-0"

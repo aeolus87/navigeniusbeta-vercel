@@ -149,8 +149,7 @@ async function listenToFirebaseChanges(db) {
       const emergency = {
         deviceId,
         emergency: data.emergency,
-        timestamp: new Date(data.timestamp || Date.now()),
-      };
+       };
       await db.collection('emergencies').insertOne(emergency);
       console.log('Emergency status saved to MongoDB');
     }
