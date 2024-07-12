@@ -7,6 +7,7 @@ const helmet = require('helmet');
 const compression = require('compression');
 const admin = require('firebase-admin');
 const axios = require('axios');
+const moment = require('moment-timezone');
 
 const app = express();
 const port = process.env.PORT || 5001;
@@ -149,7 +150,9 @@ async function listenToFirebaseChanges(db) {
       const emergency = {
         deviceId,
         emergency: data.emergency,
-        timestamp: data.timestamp || new Date().toISOString(),
+        timestamp: moment(data.timestamp || Date.now())
+          .tz('Asia/Manila')
+          .format(),
       };
       await db.collection('emergencies').insertOne(emergency);
       console.log('Emergency status saved to MongoDB');
@@ -176,6 +179,7 @@ async function setupRoutes(db) {
       const latestEmergency = await db
         .collection('emergencies')
         .findOne({ deviceId }, { sort: { timestamp: -1 } });
+      console.log('Latest emergency from MongoDB:', latestEmergency);
 
       const locationHistory = await db
         .collection('locations')

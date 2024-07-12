@@ -23,6 +23,7 @@ function Emergency() {
         const response = await axios.get(
           `${API_BASE_URL2}/api/checkDeviceLink/${currentUser.uid}`,
         );
+        console.log('Device link check response:', response.data);
         setIsDeviceLinked(response.data.isLinked);
       } catch (error) {
         console.error('Error checking device link:', error);
@@ -37,24 +38,28 @@ function Emergency() {
     if (!isDeviceLinked) return;
 
     try {
+      console.log('Fetching data for user:', currentUser.uid);
       const response = await axios.get(
         `${API_BASE_URL2}/api/getData/${currentUser.uid}`,
       );
+      console.log('Raw response from server:', response.data);
+
       const { latestEmergency, locationHistory, emergencyHistory } =
         response.data;
 
-      console.log('Received data:', {
-        latestEmergency,
-        locationHistory,
-        emergencyHistory,
-      });
+      console.log('Latest emergency:', latestEmergency);
+      console.log('Emergency history:', emergencyHistory);
 
       if (latestEmergency && latestEmergency.emergency) {
+        console.log('Setting emergency to true');
         if (!isEmergencyDismissed) {
           setEmergency(true);
           setEmergencyDetails(latestEmergency);
+        } else {
+          console.log('Emergency dismissed, not setting state');
         }
       } else {
+        console.log('No active emergency or emergency data missing');
         setEmergency(false);
         setEmergencyDetails(null);
       }
@@ -83,6 +88,10 @@ function Emergency() {
       return () => clearInterval(intervalId);
     }
   }, [fetchDataFromMongoDB, isDeviceLinked]);
+
+  useEffect(() => {
+    console.log('isEmergencyDismissed:', isEmergencyDismissed);
+  }, [isEmergencyDismissed]);
 
   const handleCloseEmergency = () => {
     setEmergency(false);
