@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../contexts/authContext';
 import { debounce } from 'lodash'; // Import debounce from lodash
@@ -15,7 +15,6 @@ function Emergency() {
     useState(() => {
       return localStorage.getItem('lastDismissedEmergencyTimestamp') || 0;
     });
-  const THRESHOLD_TIME = 10000; // 10 seconds
 
   const API_BASE_URL2 = process.env.REACT_APP_API_BASE_URL2;
 
@@ -94,10 +93,10 @@ function Emergency() {
       currentTimestamp.toString(),
     );
   }, []);
-  // Debounce handleCloseEmergency to prevent rapid toggling
-  const debouncedHandleCloseEmergency = useCallback(
-    () => debounce(handleCloseEmergency, THRESHOLD_TIME),
-    [handleCloseEmergency, THRESHOLD_TIME],
+
+  const debouncedHandleCloseEmergency = useMemo(
+    () => debounce(handleCloseEmergency),
+    [handleCloseEmergency],
   );
 
   if (isLoading) {
@@ -125,7 +124,7 @@ function Emergency() {
       {emergency && (
         <div className="bg-red-600 text-white p-4 mb-4 rounded-lg relative">
           <button
-            onClick={debouncedHandleCloseEmergency}
+            onClick={() => debouncedHandleCloseEmergency()}
             className="absolute top-2 right-2 text-white hover:text-gray-200"
             aria-label="Close emergency alert"
           >
