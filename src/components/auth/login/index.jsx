@@ -10,7 +10,6 @@ import platform from 'platform';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase';
 
-const GEOLOCATION_API_KEY = process.env.REACT_APP_GEOLOCATION_API_KEY;
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const Login = () => {
@@ -28,21 +27,38 @@ const Login = () => {
     }
   }, [location, notify]);
 
-  const fetchLocation = async () => {
-    try {
-      const response = await axios.get(
-        `https://api.ipgeolocation.io/ipgeo?apiKey=${GEOLOCATION_API_KEY}`,
-      );
-      let city = response.data.city;
-      // Remove any text after a comma, which might be a more specific location
-      city = city.split(',')[0].trim();
-      return `${city}, ${response.data.country_name}`;
-    } catch (error) {
-      console.error('Error fetching location:', error);
-      return 'Unknown Location';
-    }
+  const fetchLocation = () => {
+    return new Promise((resolve, reject) => {
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            try {
+              const { latitude, longitude } = position.coords;
+              const response = await axios.get(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
+              );
+              const city =
+                response.data.address.city ||
+                response.data.address.town ||
+                'Unknown City';
+              const country =
+                response.data.address.country || 'Unknown Country';
+              resolve(`${city}, ${country}`);
+            } catch (error) {
+              console.error('Error fetching location details:', error);
+              reject('Error determining location');
+            }
+          },
+          (error) => {
+            console.error('Error getting geolocation:', error);
+            reject('Unable to retrieve your location');
+          },
+        );
+      } else {
+        reject('Geolocation is not supported by your browser');
+      }
+    });
   };
-
   const logLoginActivity = async (userId, device, location) => {
     const date = new Date().toLocaleDateString();
     const time = new Date().toLocaleTimeString();
