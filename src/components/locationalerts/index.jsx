@@ -1,23 +1,15 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
-import { useAuth } from '../../contexts/authContext'; // Import the auth context
-
-const DEFAULT_REFRESH_INTERVAL = 120000;
+import { useAuth } from '../../contexts/authContext';
 
 function Emergency() {
-  const { currentUser } = useAuth(); // Get the current user from auth context
-  const [isLoading, setIsLoading] = useState(true); // Add loading state
+  const { currentUser } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
   const [isDeviceLinked, setIsDeviceLinked] = useState(false);
   const [emergency, setEmergency] = useState(false);
   const [emergencyDetails, setEmergencyDetails] = useState(null);
   const [locationHistory, setLocationHistory] = useState([]);
   const [emergencyHistory, setEmergencyHistory] = useState([]);
-  const [refreshInterval, setRefreshInterval] = useState(() => {
-    const savedInterval = localStorage.getItem('refreshInterval');
-    return savedInterval ? parseInt(savedInterval) : DEFAULT_REFRESH_INTERVAL;
-  });
-  const [selectedInterval, setSelectedInterval] = useState(refreshInterval);
-  const [lastUpdateTime, setLastUpdateTime] = useState(new Date());
   const [isEmergencyDismissed, setIsEmergencyDismissed] = useState(() => {
     return localStorage.getItem('isEmergencyDismissed') === 'true';
   });
@@ -26,7 +18,7 @@ function Emergency() {
 
   const checkDeviceLink = useCallback(async () => {
     if (currentUser) {
-      setIsLoading(true); // Set loading to true at the beginning of the request
+      setIsLoading(true);
       try {
         const response = await axios.get(
           `${API_BASE_URL2}/api/checkDeviceLink/${currentUser.uid}`,
@@ -36,7 +28,7 @@ function Emergency() {
         console.error('Error checking device link:', error);
         setIsDeviceLinked(false);
       } finally {
-        setIsLoading(false); // Set loading to false once the request is complete
+        setIsLoading(false);
       }
     }
   }, [API_BASE_URL2, currentUser]);
@@ -51,6 +43,12 @@ function Emergency() {
       const { latestEmergency, locationHistory, emergencyHistory } =
         response.data;
 
+      console.log('Received data:', {
+        latestEmergency,
+        locationHistory,
+        emergencyHistory,
+      });
+
       if (latestEmergency && latestEmergency.emergency) {
         if (!isEmergencyDismissed) {
           setEmergency(true);
@@ -63,7 +61,6 @@ function Emergency() {
 
       setLocationHistory(locationHistory.slice(0, 10));
       setEmergencyHistory(emergencyHistory);
-      setLastUpdateTime(new Date());
     } catch (error) {
       console.error('Error fetching data from MongoDB:', error);
     }
@@ -77,30 +74,22 @@ function Emergency() {
     if (isDeviceLinked) {
       fetchDataFromMongoDB();
 
+      // Set up automatic fetching every 30 seconds
       const intervalId = setInterval(() => {
         fetchDataFromMongoDB();
-      }, refreshInterval);
+      }, 30000);
 
-      // Return a cleanup function that clears the interval
+      // Clean up the interval when the component unmounts
       return () => clearInterval(intervalId);
     }
-  }, [refreshInterval, fetchDataFromMongoDB, isDeviceLinked]);
-
-  const handleRefreshIntervalChange = (event) => {
-    setSelectedInterval(Number(event.target.value));
-  };
-
-  const applyRefreshInterval = () => {
-    setRefreshInterval(selectedInterval);
-    localStorage.setItem('refreshInterval', selectedInterval.toString());
-  };
+  }, [fetchDataFromMongoDB, isDeviceLinked]);
 
   const handleCloseEmergency = () => {
     setEmergency(false);
     setIsEmergencyDismissed(true);
     localStorage.setItem('isEmergencyDismissed', 'true');
-    // You might also want to update your backend or perform other actions here
   };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -120,6 +109,7 @@ function Emergency() {
       </div>
     );
   }
+
   return (
     <div className="container mx-auto p-4 mt-20 max-w-6xl">
       {emergency && (
@@ -163,31 +153,6 @@ function Emergency() {
           <h2 className="text-2xl font-bold mb-3 lg:ml-8 ml-10">
             Location History
           </h2>
-          <div className="flex items-center flex-wrap">
-            <label htmlFor="refreshInterval" className="lg:ml-8 mb-2 pr-1">
-              Refresh Interval:
-            </label>
-            <select
-              id="refreshInterval"
-              value={selectedInterval}
-              onChange={handleRefreshIntervalChange}
-              className="border p-1 rounded mr-1 mb-2"
-            >
-              <option value={30000}>30 seconds</option>
-              <option value={120000}>2 minutes</option>
-              <option value={300000}>5 minutes</option>
-              <option value={600000}>10 minutes</option>
-            </select>
-            <button
-              onClick={applyRefreshInterval}
-              className="bg-[#1f5b7a] hover:bg-blue-700 text-white font-bold py-1 px-2 rounded mb-2"
-            >
-              ✓
-            </button>
-          </div>
-          <p className="mb-2 lg:ml-8">
-            Last updated: {lastUpdateTime.toLocaleString()}
-          </p>
           <ul className="space-y-2 max-h-96 min-h-[24rem] overflow-y-auto pr-8">
             {locationHistory.map((location, index) => (
               <li key={index} className="bg-gray-100 p-2 rounded">
@@ -207,9 +172,6 @@ function Emergency() {
           <h2 className="text-2xl font-bold mb-2 lg:ml-8 ml-6">
             Emergency History
           </h2>
-          <p className="lg:ml-8">
-            Last updated: {lastUpdateTime.toLocaleString()}
-          </p>
           {emergencyHistory && emergencyHistory.length > 0 ? (
             <ul className="space-y-2 max-h-96 min-h-[24rem] overflow-y-auto pr-8">
               {emergencyHistory.map((emergency) => (

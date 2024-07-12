@@ -149,13 +149,13 @@ async function listenToFirebaseChanges(db) {
       const emergency = {
         deviceId,
         emergency: data.emergency,
-       };
+        timestamp: data.timestamp || new Date().toISOString(),
+      };
       await db.collection('emergencies').insertOne(emergency);
       console.log('Emergency status saved to MongoDB');
     }
   });
 }
-
 // Routes
 async function setupRoutes(db) {
   app.get('/api/getData/:userId', async (req, res) => {

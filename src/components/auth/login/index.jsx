@@ -33,8 +33,12 @@ const Login = () => {
       const response = await axios.get(
         `https://api.ipgeolocation.io/ipgeo?apiKey=${GEOLOCATION_API_KEY}`,
       );
-      return `${response.data.city}, ${response.data.country_name}`;
+      let city = response.data.city;
+      // Remove any text after a comma, which might be a more specific location
+      city = city.split(',')[0].trim();
+      return `${city}, ${response.data.country_name}`;
     } catch (error) {
+      console.error('Error fetching location:', error);
       return 'Unknown Location';
     }
   };
