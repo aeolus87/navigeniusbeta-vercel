@@ -38,17 +38,17 @@ function Emergency() {
     if (!isDeviceLinked) return;
 
     try {
-      console.log('Fetching data for user:', currentUser.uid);
       const response = await axios.get(
         `${API_BASE_URL2}/api/getData/${currentUser.uid}`,
       );
-      console.log('Raw response from server:', response.data);
-
       const { latestEmergency, locationHistory, emergencyHistory } =
         response.data;
 
-      console.log('Latest emergency:', latestEmergency);
-      console.log('Emergency history:', emergencyHistory);
+      console.log('Fetched data:', {
+        latestEmergency,
+        locationHistory,
+        emergencyHistory,
+      });
 
       if (latestEmergency && latestEmergency.emergency) {
         console.log('Setting emergency to true');
@@ -70,7 +70,6 @@ function Emergency() {
       console.error('Error fetching data from MongoDB:', error);
     }
   }, [API_BASE_URL2, isDeviceLinked, currentUser, isEmergencyDismissed]);
-
   useEffect(() => {
     checkDeviceLink();
   }, [checkDeviceLink]);
@@ -93,11 +92,12 @@ function Emergency() {
     console.log('isEmergencyDismissed:', isEmergencyDismissed);
   }, [isEmergencyDismissed]);
 
-  const handleCloseEmergency = () => {
+  const handleCloseEmergency = useCallback(() => {
+    console.log('Closing emergency');
     setEmergency(false);
     setIsEmergencyDismissed(true);
     localStorage.setItem('isEmergencyDismissed', 'true');
-  };
+  }, []);
 
   if (isLoading) {
     return <div>Loading...</div>;
