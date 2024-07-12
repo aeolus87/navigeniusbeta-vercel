@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../contexts/authContext';
+import { debounce } from 'lodash'; // Import debounce from lodash
 
 function Emergency() {
   const { currentUser } = useAuth();
@@ -10,9 +11,11 @@ function Emergency() {
   const [emergencyDetails, setEmergencyDetails] = useState(null);
   const [locationHistory, setLocationHistory] = useState([]);
   const [emergencyHistory, setEmergencyHistory] = useState([]);
-  const [isEmergencyDismissed, setIsEmergencyDismissed] = useState(() => {
-    return localStorage.getItem('isEmergencyDismissed') === 'true';
-  });
+  const [lastDismissedEmergencyTimestamp, setLastDismissedEmergencyTimestamp] =
+    useState(() => {
+      return localStorage.getItem('lastDismissedEmergencyTimestamp') || 0;
+    });
+  const THRESHOLD_TIME = 10000; // 10 seconds
 
   const API_BASE_URL2 = process.env.REACT_APP_API_BASE_URL2;
 
@@ -23,7 +26,6 @@ function Emergency() {
         const response = await axios.get(
           `${API_BASE_URL2}/api/checkDeviceLink/${currentUser.uid}`,
         );
-        console.log('Device link check response:', response.data);
         setIsDeviceLinked(response.data.isLinked);
       } catch (error) {
         console.error('Error checking device link:', error);
@@ -44,22 +46,15 @@ function Emergency() {
       const { latestEmergency, locationHistory, emergencyHistory } =
         response.data;
 
-      console.log('Fetched data:', {
-        latestEmergency,
-        locationHistory,
-        emergencyHistory,
-      });
-
       if (latestEmergency && latestEmergency.emergency) {
-        console.log('Setting emergency to true');
-        if (!isEmergencyDismissed) {
+        const emergencyTimestamp = new Date(
+          latestEmergency.timestamp,
+        ).getTime();
+        if (emergencyTimestamp > lastDismissedEmergencyTimestamp) {
           setEmergency(true);
           setEmergencyDetails(latestEmergency);
-        } else {
-          console.log('Emergency dismissed, not setting state');
         }
       } else {
-        console.log('No active emergency or emergency data missing');
         setEmergency(false);
         setEmergencyDetails(null);
       }
@@ -69,7 +64,13 @@ function Emergency() {
     } catch (error) {
       console.error('Error fetching data from MongoDB:', error);
     }
-  }, [API_BASE_URL2, isDeviceLinked, currentUser, isEmergencyDismissed]);
+  }, [
+    API_BASE_URL2,
+    isDeviceLinked,
+    currentUser,
+    lastDismissedEmergencyTimestamp,
+  ]);
+
   useEffect(() => {
     checkDeviceLink();
   }, [checkDeviceLink]);
@@ -77,27 +78,27 @@ function Emergency() {
   useEffect(() => {
     if (isDeviceLinked) {
       fetchDataFromMongoDB();
-
-      // Set up automatic fetching every 30 seconds
       const intervalId = setInterval(() => {
         fetchDataFromMongoDB();
       }, 30000);
-
-      // Clean up the interval when the component unmounts
       return () => clearInterval(intervalId);
     }
   }, [fetchDataFromMongoDB, isDeviceLinked]);
 
-  useEffect(() => {
-    console.log('isEmergencyDismissed:', isEmergencyDismissed);
-  }, [isEmergencyDismissed]);
-
   const handleCloseEmergency = useCallback(() => {
-    console.log('Closing emergency');
     setEmergency(false);
-    setIsEmergencyDismissed(true);
-    localStorage.setItem('isEmergencyDismissed', 'true');
+    const currentTimestamp = Date.now();
+    setLastDismissedEmergencyTimestamp(currentTimestamp);
+    localStorage.setItem(
+      'lastDismissedEmergencyTimestamp',
+      currentTimestamp.toString(),
+    );
   }, []);
+  // Debounce handleCloseEmergency to prevent rapid toggling
+  const debouncedHandleCloseEmergency = useCallback(
+    () => debounce(handleCloseEmergency, THRESHOLD_TIME),
+    [handleCloseEmergency, THRESHOLD_TIME],
+  );
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -124,7 +125,7 @@ function Emergency() {
       {emergency && (
         <div className="bg-red-600 text-white p-4 mb-4 rounded-lg relative">
           <button
-            onClick={handleCloseEmergency}
+            onClick={debouncedHandleCloseEmergency}
             className="absolute top-2 right-2 text-white hover:text-gray-200"
             aria-label="Close emergency alert"
           >
