@@ -114,6 +114,9 @@ function Emergency() {
           <p>
             Please link a device to access the emergency and location history.
           </p>
+          <p className="font-bold">
+            Go to Dashboard page to link your GPS device.
+          </p>
         </div>
       </div>
     );
