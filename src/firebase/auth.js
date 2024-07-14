@@ -10,7 +10,7 @@ import {
   signOut,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { ref, get, set, onValue, off } from 'firebase/database';
+import { ref, get, set, onValue, off, update } from 'firebase/database';
 
 export const getUserDeviceId = async (userId) => {
   try {
@@ -65,16 +65,41 @@ export const linkDeviceToUser = async (userId, deviceCode) => {
 
     // Check if the user already has a linked device
     const userDoc = await getDoc(doc(db, 'users', userId));
-    if (userDoc.exists() && userDoc.data().device_id) {
+    if (!userDoc.exists()) {
+      console.error('User document not found.');
+      return false;
+    }
+
+    const userData = userDoc.data();
+    if (userData.device_id) {
       console.error('User already has a linked device.');
+      return false;
+    }
+
+    // Fetch the phone number from Firestore
+    let phoneNumber = userData.phone_number;
+    if (!phoneNumber) {
+      console.error('Phone number not found in user document.');
+      return false;
+    }
+
+    // Convert phoneNumber to a number type
+    phoneNumber = parseInt(phoneNumber.replace(/\D/g, ''), 10);
+
+    if (isNaN(phoneNumber)) {
+      console.error('Invalid phone number format.');
       return false;
     }
 
     // Update user document in Firestore with device ID
     await updateDoc(doc(db, 'users', userId), { device_id: deviceCode });
 
-    // Update device data in Realtime Database with user ID
-    await set(ref(rtdb, `Devices/${deviceCode}/userId`), userId);
+    // Update device data in Realtime Database
+    const updates = {
+      [`Devices/${deviceCode}/userId`]: userId,
+      [`Devices/${deviceCode}/Number`]: phoneNumber, // This will be stored as a number
+    };
+    await update(ref(rtdb), updates);
 
     // Set up the device listener
     setupDeviceListener(userId);
