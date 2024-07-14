@@ -1,0 +1,96 @@
+Date : 2024-07-12 15:59:51
+Directory : c:\Users\jcall\navigeniusbeta
+Total : 42 files,  45980 codes, 62 comments, 407 blanks, all 46449 lines
+
+Languages
++----------------+------------+------------+------------+------------+------------+
+| language       | files      | code       | comment    | blank      | total      |
++----------------+------------+------------+------------+------------+------------+
+| JSON           |          8 |     42,531 |          0 |          7 |     42,538 |
+| JavaScript JSX |         19 |      2,665 |          9 |        254 |      2,928 |
+| JavaScript     |         11 |        719 |         30 |        111 |        860 |
+| Markdown       |          1 |         38 |          0 |         33 |         71 |
+| HTML           |          1 |         20 |         23 |          1 |         44 |
+| YAML           |          1 |          4 |          0 |          1 |          5 |
+| CSS            |          1 |          3 |          0 |          0 |          3 |
++----------------+------------+------------+------------+------------+------------+
+
+Directories
++-----------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                        | files      | code       | comment    | blank      | total      |
++-----------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                           |         42 |     45,980 |         62 |        407 |     46,449 |
+| . (Files)                                                                   |          7 |     36,628 |          1 |         42 |     36,671 |
+| backend                                                                     |          4 |      1,246 |          1 |         18 |      1,265 |
+| emergency-backend                                                           |          3 |      5,094 |         18 |         38 |      5,150 |
+| public                                                                      |          2 |         45 |         23 |          2 |         70 |
+| src                                                                         |         26 |      2,967 |         19 |        307 |      3,293 |
+| src (Files)                                                                 |          3 |         92 |          0 |         11 |        103 |
+| src\components                                                              |         19 |      2,537 |          9 |        247 |      2,793 |
+| src\components\DeviceEntry                                                  |          1 |         48 |          1 |          6 |         55 |
+| src\components\auth                                                         |          7 |        901 |          4 |         87 |        992 |
+| src\components\auth\forgot                                                  |          1 |         53 |          1 |          7 |         61 |
+| src\components\auth\login                                                   |          1 |        253 |          3 |         19 |        275 |
+| src\components\auth\register                                                |          3 |        410 |          0 |         41 |        451 |
+| src\components\auth\terms                                                   |          1 |        162 |          0 |         17 |        179 |
+| src\components\auth\verify                                                  |          1 |         23 |          0 |          3 |         26 |
+| src\components\header                                                       |          1 |        102 |          0 |          8 |        110 |
+| src\components\home                                                         |          5 |        463 |          0 |         65 |        528 |
+| src\components\locationalerts                                               |          1 |        190 |          0 |         18 |        208 |
+| src\components\main                                                         |          2 |         73 |          0 |         13 |         86 |
+| src\components\profile                                                      |          2 |        760 |          4 |         50 |        814 |
+| src\components\profile (Files)                                              |          1 |        661 |          3 |         43 |        707 |
+| src\components\profile\modal                                                |          1 |         99 |          1 |          7 |        107 |
+| src\contexts                                                                |          2 |        141 |          0 |         15 |        156 |
+| src\contexts\authContext                                                    |          2 |        141 |          0 |         15 |        156 |
+| src\firebase                                                                |          2 |        197 |         10 |         34 |        241 |
++-----------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++-----------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| filename                                                                    | language       | code       | comment    | blank      | total      |
++-----------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| c:\Users\jcall\navigeniusbeta\.prettierrc                                   | JSON           |          7 |          0 |          0 |          7 |
+| c:\Users\jcall\navigeniusbeta\README.md                                     | Markdown       |         38 |          0 |         33 |         71 |
+| c:\Users\jcall\navigeniusbeta\backend\package-lock.json                     | JSON           |      1,137 |          0 |          1 |      1,138 |
+| c:\Users\jcall\navigeniusbeta\backend\package.json                          | JSON           |         21 |          0 |          1 |         22 |
+| c:\Users\jcall\navigeniusbeta\backend\render.yaml                           | YAML           |          4 |          0 |          1 |          5 |
+| c:\Users\jcall\navigeniusbeta\backend\server.js                             | JavaScript     |         84 |          1 |         15 |        100 |
+| c:\Users\jcall\navigeniusbeta\emergency-backend\package-lock.json           | JSON           |      4,800 |          0 |          1 |      4,801 |
+| c:\Users\jcall\navigeniusbeta\emergency-backend\package.json                | JSON           |         27 |          0 |          1 |         28 |
+| c:\Users\jcall\navigeniusbeta\emergency-backend\server.js                   | JavaScript     |        267 |         18 |         36 |        321 |
+| c:\Users\jcall\navigeniusbeta\package-lock.json                             | JSON           |     36,424 |          0 |          1 |     36,425 |
+| c:\Users\jcall\navigeniusbeta\package.json                                  | JSON           |         90 |          0 |          1 |         91 |
+| c:\Users\jcall\navigeniusbeta\postcss.config.js                             | JavaScript     |          6 |          0 |          1 |          7 |
+| c:\Users\jcall\navigeniusbeta\public\index.html                             | HTML           |         20 |         23 |          1 |         44 |
+| c:\Users\jcall\navigeniusbeta\public\manifest.json                          | JSON           |         25 |          0 |          1 |         26 |
+| c:\Users\jcall\navigeniusbeta\src\App.js                                    | JavaScript     |         77 |          0 |          9 |         86 |
+| c:\Users\jcall\navigeniusbeta\src\components\DeviceEntry\index.jsx          | JavaScript JSX |         48 |          1 |          6 |         55 |
+| c:\Users\jcall\navigeniusbeta\src\components\auth\forgot\index.jsx          | JavaScript JSX |         53 |          1 |          7 |         61 |
+| c:\Users\jcall\navigeniusbeta\src\components\auth\login\index.jsx           | JavaScript JSX |        253 |          3 |         19 |        275 |
+| c:\Users\jcall\navigeniusbeta\src\components\auth\register\complete.jsx     | JavaScript JSX |        135 |          0 |         17 |        152 |
+| c:\Users\jcall\navigeniusbeta\src\components\auth\register\index.jsx        | JavaScript JSX |        245 |          0 |         21 |        266 |
+| c:\Users\jcall\navigeniusbeta\src\components\auth\register\verifyemail.jsx  | JavaScript JSX |         30 |          0 |          3 |         33 |
+| c:\Users\jcall\navigeniusbeta\src\components\auth\terms\TermsConditions.jsx | JavaScript JSX |        162 |          0 |         17 |        179 |
+| c:\Users\jcall\navigeniusbeta\src\components\auth\verify\verified.jsx       | JavaScript JSX |         23 |          0 |          3 |         26 |
+| c:\Users\jcall\navigeniusbeta\src\components\header\index.jsx               | JavaScript JSX |        102 |          0 |          8 |        110 |
+| c:\Users\jcall\navigeniusbeta\src\components\home\Coordinates.jsx           | JavaScript JSX |         71 |          0 |          7 |         78 |
+| c:\Users\jcall\navigeniusbeta\src\components\home\Dashboard.jsx             | JavaScript JSX |         48 |          0 |          8 |         56 |
+| c:\Users\jcall\navigeniusbeta\src\components\home\Fmap.jsx                  | JavaScript JSX |        185 |          0 |         29 |        214 |
+| c:\Users\jcall\navigeniusbeta\src\components\home\Map.jsx                   | JavaScript JSX |        157 |          0 |         18 |        175 |
+| c:\Users\jcall\navigeniusbeta\src\components\home\index.js                  | JavaScript     |          2 |          0 |          3 |          5 |
+| c:\Users\jcall\navigeniusbeta\src\components\locationalerts\index.jsx       | JavaScript JSX |        190 |          0 |         18 |        208 |
+| c:\Users\jcall\navigeniusbeta\src\components\main\main.jsx                  | JavaScript JSX |         52 |          0 |          8 |         60 |
+| c:\Users\jcall\navigeniusbeta\src\components\main\notfound.jsx              | JavaScript JSX |         21 |          0 |          5 |         26 |
+| c:\Users\jcall\navigeniusbeta\src\components\profile\index.jsx              | JavaScript JSX |        661 |          3 |         43 |        707 |
+| c:\Users\jcall\navigeniusbeta\src\components\profile\modal\Modal.jsx        | JavaScript JSX |         99 |          1 |          7 |        107 |
+| c:\Users\jcall\navigeniusbeta\src\contexts\authContext\PrivateRoute.js      | JavaScript     |         11 |          0 |          5 |         16 |
+| c:\Users\jcall\navigeniusbeta\src\contexts\authContext\index.jsx            | JavaScript JSX |        130 |          0 |         10 |        140 |
+| c:\Users\jcall\navigeniusbeta\src\firebase\auth.js                          | JavaScript     |        176 |         10 |         30 |        216 |
+| c:\Users\jcall\navigeniusbeta\src\firebase\firebase.js                      | JavaScript     |         21 |          0 |          4 |         25 |
+| c:\Users\jcall\navigeniusbeta\src\index.css                                 | CSS            |          3 |          0 |          0 |          3 |
+| c:\Users\jcall\navigeniusbeta\src\index.js                                  | JavaScript     |         12 |          0 |          2 |         14 |
+| c:\Users\jcall\navigeniusbeta\tailwind.config.js                            | JavaScript     |         29 |          1 |          2 |         32 |
+| c:\Users\jcall\navigeniusbeta\webpack.config.js                             | JavaScript     |         34 |          0 |          4 |         38 |
+| Total                                                                       |                |     45,980 |         62 |        407 |     46,449 |
++-----------------------------------------------------------------------------+----------------+------------+------------+------------+------------+

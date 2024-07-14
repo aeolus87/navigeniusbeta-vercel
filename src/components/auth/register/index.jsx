@@ -56,7 +56,7 @@ const Register = () => {
         clearSessionData(sessionId);
         sessionStorage.setItem('registrationTimeout', 'true');
         navigate('/');
-      }, 10000);
+      }, 300000);
       sessionStorage.setItem('sessionTimeoutId', sessionTimeout);
     };
 

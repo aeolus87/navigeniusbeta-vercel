@@ -10,7 +10,7 @@ import {
   signOut,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { ref, get, set } from 'firebase/database';
+import { ref, get, set, onValue, off } from 'firebase/database';
 
 export const getUserDeviceId = async (userId) => {
   try {
@@ -25,32 +25,62 @@ export const getUserDeviceId = async (userId) => {
   }
 };
 
+export const setupDeviceListener = (userId) => {
+  const userRef = doc(db, 'users', userId);
+
+  getDoc(userRef).then((userDoc) => {
+    if (userDoc.exists() && userDoc.data().device_id) {
+      const deviceId = userDoc.data().device_id;
+      const deviceRef = ref(rtdb, `Devices/${deviceId}`);
+
+      onValue(deviceRef, async (snapshot) => {
+        if (!snapshot.exists() || !snapshot.val().userId) {
+          console.log('Device unlinked in RTDB, updating Firestore...');
+          await updateDoc(userRef, { device_id: null });
+          console.log('Firestore updated: device unlinked');
+
+          // Reload the page
+          window.location.reload();
+        }
+      });
+    }
+  });
+};
+
+export const removeDeviceListener = (userId, deviceId) => {
+  const deviceRef = ref(rtdb, `Devices/${deviceId}`);
+  off(deviceRef);
+};
+
 export const linkDeviceToUser = async (userId, deviceCode) => {
   try {
     // Check if the device code exists in the Realtime Database
     const deviceRef = ref(rtdb, `Devices/${deviceCode}`);
     const deviceSnapshot = await get(deviceRef);
 
-    if (deviceSnapshot.exists()) {
-      // Check if the device is already linked to another user
-      const linkedUserId = deviceSnapshot.val()?.userId;
-      if (linkedUserId) {
-        // Log an error message indicating the device is already linked
-        console.error('Device is already linked to another user.');
-        return false; // Indicate failure to link due to the device being linked elsewhere
-      }
-
-      // Proceed with linking the device to the current user
-      // Update user document in Firestore with device ID
-      await updateDoc(doc(db, 'users', userId), { device_id: deviceCode });
-
-      // Update device data in Realtime Database with user ID
-      await set(ref(rtdb, `Devices/${deviceCode}/userId`), userId);
-
-      return true; // Indicate successful linkage
-    } else {
-      throw new Error('Invalid device code');
+    if (!deviceSnapshot.exists()) {
+      console.error('Invalid device code');
+      return false;
     }
+
+    // Check if the user already has a linked device
+    const userDoc = await getDoc(doc(db, 'users', userId));
+    if (userDoc.exists() && userDoc.data().device_id) {
+      console.error('User already has a linked device.');
+      return false;
+    }
+
+    // Update user document in Firestore with device ID
+    await updateDoc(doc(db, 'users', userId), { device_id: deviceCode });
+
+    // Update device data in Realtime Database with user ID
+    await set(ref(rtdb, `Devices/${deviceCode}/userId`), userId);
+
+    // Set up the device listener
+    setupDeviceListener(userId);
+
+    console.log('Device successfully linked to user and listener set up.');
+    return true;
   } catch (error) {
     console.error('Error linking device to user:', error);
     throw error;
@@ -60,19 +90,32 @@ export const linkDeviceToUser = async (userId, deviceCode) => {
 export const unlinkDeviceFromUser = async (userId) => {
   try {
     const userDoc = await getDoc(doc(db, 'users', userId));
-    if (userDoc.exists() && userDoc.data().device_id) {
-      const deviceId = userDoc.data().device_id;
+    if (!userDoc.exists() || !userDoc.data().device_id) {
+      console.warn('User has no linked device.');
+      return false;
+    }
 
-      // Remove device ID from user document in Firestore
-      await updateDoc(doc(db, 'users', userId), { device_id: null });
+    const deviceId = userDoc.data().device_id;
 
+    // Remove device ID from user document in Firestore
+    await updateDoc(doc(db, 'users', userId), { device_id: null });
+
+    // Check if the device exists in Realtime Database
+    const deviceRef = ref(rtdb, `Devices/${deviceId}`);
+    const deviceSnapshot = await get(deviceRef);
+
+    if (deviceSnapshot.exists()) {
       // Remove user ID from device data in Realtime Database
       await set(ref(rtdb, `Devices/${deviceId}/userId`), null);
-
-      return true;
     } else {
-      throw new Error('User has no linked device');
+      console.warn('Device not found in Realtime Database.');
     }
+
+    // Remove the device listener
+    removeDeviceListener(userId, deviceId);
+
+    console.log('Device successfully unlinked from user and listener removed.');
+    return true;
   } catch (error) {
     console.error('Error unlinking device from user:', error);
     throw error;
