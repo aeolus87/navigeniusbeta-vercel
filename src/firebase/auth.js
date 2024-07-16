@@ -60,27 +60,49 @@ export const linkDeviceToUser = async (userId, deviceCode) => {
 
     if (!deviceSnapshot.exists()) {
       console.error('Invalid device code');
-      return false;
+      return {
+        success: false,
+        message: 'Invalid device code',
+        shouldReload: false,
+      };
+    }
+
+    // Check if the device is already linked to another user
+    if (deviceSnapshot.val().userId && deviceSnapshot.val().userId !== userId) {
+      console.error('Device is already linked to another account');
+      return {
+        success: false,
+        message: 'Device is already linked to another account',
+        shouldReload: true,
+      };
     }
 
     // Check if the user already has a linked device
     const userDoc = await getDoc(doc(db, 'users', userId));
     if (!userDoc.exists()) {
       console.error('User document not found.');
-      return false;
+      return { success: false, message: 'User not found', shouldReload: false };
     }
 
     const userData = userDoc.data();
     if (userData.device_id) {
       console.error('User already has a linked device.');
-      return false;
+      return {
+        success: false,
+        message: 'User already has a linked device',
+        shouldReload: false,
+      };
     }
 
     // Fetch the phone number from Firestore
     let phoneNumber = userData.phone_number;
     if (!phoneNumber) {
       console.error('Phone number not found in user document.');
-      return false;
+      return {
+        success: false,
+        message: 'Phone number not found',
+        shouldReload: false,
+      };
     }
 
     // Convert phoneNumber to a number type
@@ -88,7 +110,11 @@ export const linkDeviceToUser = async (userId, deviceCode) => {
 
     if (isNaN(phoneNumber)) {
       console.error('Invalid phone number format.');
-      return false;
+      return {
+        success: false,
+        message: 'Invalid phone number format',
+        shouldReload: false,
+      };
     }
 
     // Update user document in Firestore with device ID
@@ -97,7 +123,7 @@ export const linkDeviceToUser = async (userId, deviceCode) => {
     // Update device data in Realtime Database
     const updates = {
       [`Devices/${deviceCode}/userId`]: userId,
-      [`Devices/${deviceCode}/Number`]: phoneNumber, // This will be stored as a number
+      [`Devices/${deviceCode}/Number`]: phoneNumber,
     };
     await update(ref(rtdb), updates);
 
@@ -105,13 +131,20 @@ export const linkDeviceToUser = async (userId, deviceCode) => {
     setupDeviceListener(userId);
 
     console.log('Device successfully linked to user and listener set up.');
-    return true;
+    return {
+      success: true,
+      message: 'Device successfully linked',
+      shouldReload: false,
+    };
   } catch (error) {
     console.error('Error linking device to user:', error);
-    throw error;
+    return {
+      success: false,
+      message: 'An error occurred while linking the device',
+      shouldReload: false,
+    };
   }
 };
-
 export const unlinkDeviceFromUser = async (userId) => {
   try {
     const userDoc = await getDoc(doc(db, 'users', userId));

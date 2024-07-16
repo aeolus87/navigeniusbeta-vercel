@@ -15,9 +15,19 @@ const DeviceCodeEntry = ({ onDeviceLinked }) => {
     setError('');
 
     try {
-      await linkDeviceToUser(currentUser.uid, deviceCode);
-      notify('Device linked successfully');
-      onDeviceLinked();
+      const result = await linkDeviceToUser(currentUser.uid, deviceCode);
+      if (result.success) {
+        notify('Device linked successfully');
+        onDeviceLinked();
+      } else {
+        setError(result.message);
+        if (result.shouldReload) {
+          // If the device is linked to another account, force a reload after a short delay
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000); // 3 seconds delay to allow the user to read the error message
+        }
+      }
     } catch (error) {
       console.error('Error linking device:', error);
       setError(error.message || 'An error occurred while linking the device');
