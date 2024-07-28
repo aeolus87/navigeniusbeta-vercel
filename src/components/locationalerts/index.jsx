@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../contexts/authContext';
-import { debounce } from 'lodash'; // Import debounce from lodash
+import { debounce } from 'lodash';
 import Loader from '../Loader';
 
 function Emergency() {
@@ -16,6 +16,8 @@ function Emergency() {
     useState(() => {
       return localStorage.getItem('lastDismissedEmergencyTimestamp') || 0;
     });
+  const [isLocationHistoryLoading, setIsLocationHistoryLoading] = useState(true);
+  const [isEmergencyHistoryLoading, setIsEmergencyHistoryLoading] = useState(true);
 
   const API_BASE_URL2 = process.env.REACT_APP_API_BASE_URL2;
 
@@ -36,8 +38,23 @@ function Emergency() {
     }
   }, [API_BASE_URL2, currentUser]);
 
+  const reverseGeocode = async (latitude, longitude) => {
+    try {
+      const response = await axios.get(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`
+      );
+      return response.data.display_name;
+    } catch (error) {
+      console.error('Error reverse geocoding:', error);
+      return 'Address not available';
+    }
+  };
+
   const fetchDataFromMongoDB = useCallback(async () => {
     if (!isDeviceLinked) return;
+
+    setIsLocationHistoryLoading(true);
+    setIsEmergencyHistoryLoading(true);
 
     try {
       const response = await axios.get(
@@ -59,10 +76,21 @@ function Emergency() {
         setEmergencyDetails(null);
       }
 
-      setLocationHistory(locationHistory.slice(0, 10));
+      // Reverse geocode locations
+      const updatedLocationHistory = await Promise.all(
+        locationHistory.slice(0, 10).map(async (location) => {
+          const address = await reverseGeocode(location.latitude, location.longitude);
+          return { ...location, address };
+        })
+      );
+
+      setLocationHistory(updatedLocationHistory);
       setEmergencyHistory(emergencyHistory);
     } catch (error) {
       console.error('Error fetching data from MongoDB:', error);
+    } finally {
+      setIsLocationHistoryLoading(false);
+      setIsEmergencyHistoryLoading(false);
     }
   }, [
     API_BASE_URL2,
@@ -166,26 +194,36 @@ function Emergency() {
           <h2 className="text-2xl font-bold mb-3 lg:ml-8 ml-10">
             Location History
           </h2>
-          <ul className="space-y-2 max-h-96 min-h-[24rem] overflow-y-auto pr-8">
-            {locationHistory.map((location, index) => (
-              <li key={index} className="bg-gray-100 p-2 rounded">
-                <p className="break-words">
-                  Latitude: {location.latitude}, Longitude: {location.longitude}
-                </p>
-                <p className="break-words">Address: {location.address}</p>
-                <p className="text-sm text-gray-600">
-                  {new Date(location.timestamp).toLocaleString()}
-                </p>
-              </li>
-            ))}
-          </ul>
+          {isLocationHistoryLoading ? (
+            <div className="flex justify-center items-center h-full">
+              <Loader />
+            </div>
+          ) : (
+            <ul className="space-y-2 max-h-96 min-h-[24rem] overflow-y-auto pr-8">
+              {locationHistory.map((location, index) => (
+                <li key={index} className="bg-gray-100 p-2 rounded">
+                  <p className="break-words">
+                    Latitude: {location.latitude}, Longitude: {location.longitude}
+                  </p>
+                  <p className="break-words">Address: {location.address}</p>
+                  <p className="text-sm text-gray-600">
+                    {new Date(location.timestamp).toLocaleString()}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         <div className="bg-white shadow-md rounded-lg p-4 overflow-hidden">
           <h2 className="text-2xl font-bold mb-2 lg:ml-8 ml-6">
             Emergency History
           </h2>
-          {emergencyHistory && emergencyHistory.length > 0 ? (
+          {isEmergencyHistoryLoading ? (
+            <div className="flex justify-center items-center h-full">
+              <Loader />
+            </div>
+          ) : emergencyHistory && emergencyHistory.length > 0 ? (
             <ul className="space-y-2 max-h-96 min-h-[24rem] overflow-y-auto pr-8">
               {emergencyHistory.map((emergency) => (
                 <li key={emergency._id} className="bg-red-100 p-2 rounded">
