@@ -4,7 +4,7 @@ import Map from './Map';
 import DeviceCodeEntry from '../DeviceEntry';
 import { useAuth } from '../../contexts/authContext';
 import { getUserDeviceId } from '../../firebase/auth';
-
+import Loader from '../Loader';
 const Dashboard = () => {
   const { currentUser } = useAuth();
   const [deviceLinked, setDeviceLinked] = useState(false);
@@ -27,7 +27,7 @@ const Dashboard = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div><Loader /></div>;
   }
 
   return (

@@ -22,10 +22,9 @@ const DeviceCodeEntry = ({ onDeviceLinked }) => {
       } else {
         setError(result.message);
         if (result.shouldReload) {
-          // If the device is linked to another account, force a reload after a short delay
           setTimeout(() => {
             window.location.reload();
-          }, 2000); // 3 seconds delay to allow the user to read the error message
+          }, 2000);
         }
       }
     } catch (error) {

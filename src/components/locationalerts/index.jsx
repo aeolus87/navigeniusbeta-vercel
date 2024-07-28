@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../contexts/authContext';
 import { debounce } from 'lodash'; // Import debounce from lodash
+import Loader from '../Loader';
 
 function Emergency() {
   const { currentUser } = useAuth();
@@ -100,7 +101,7 @@ function Emergency() {
   );
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div><Loader /></div>;
   }
 
   if (!isDeviceLinked) {
