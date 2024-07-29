@@ -182,12 +182,12 @@ const ProfilePage = () => {
       console.error('Verification ID or code is missing.');
       return;
     }
-
+  
     const credential = firebase.auth.PhoneAuthProvider.credential(
       verificationId,
-      verificationCode,
+      verificationCode
     );
-
+  
     firebase
       .auth()
       .currentUser.linkWithCredential(credential)
@@ -196,36 +196,32 @@ const ProfilePage = () => {
         const phoneNumberToStore = phoneNumber.startsWith('63')
           ? phoneNumber
           : `63${phoneNumber}`;
-
+  
         try {
+          // Update Firestore
+          const userDocRef = doc(db, 'users', user.uid);
+          await updateDoc(userDocRef, {
+            phone_number: phoneNumberToStore,
+          });
+  
+          console.log('Phone number updated in Firestore database');
+          toast.success('Your number is verified and stored!');
+          setVerifiedPhoneNumber(phoneNumberToStore);
+  
           // Get the actual device ID
           const deviceId = await getUserDeviceId(user.uid);
-
+  
           if (deviceId) {
-            // Update Firestore
-            const userDocRef = doc(db, 'users', user.uid);
-            await updateDoc(userDocRef, {
-              phone_number: phoneNumberToStore,
-            });
-
-            console.log('Phone number updated in Firestore database');
-
-            // Update Realtime Database
+            // If a device is linked, update Realtime Database
             const realtimeDbRef = firebase
               .database()
               .ref(`Devices/${deviceId}/Number`);
             await realtimeDbRef.set(parseInt(phoneNumberToStore, 10));
-
+  
             console.log('Phone number updated in Realtime Database');
-            toast.success(
-              'Your number is verified and set as emergency contact!',
-            );
-            setVerifiedPhoneNumber(phoneNumberToStore);
+            toast.success('Your number is set as emergency contact on the device!');
           } else {
-            console.error('No device ID found for the user');
-            toast.error(
-              'No device linked to your account. Please link a device first.',
-            );
+            console.log('No device linked. Phone number stored only in Firestore.');
           }
         } catch (error) {
           console.error('Error updating phone number:', error);
@@ -237,6 +233,7 @@ const ProfilePage = () => {
         toast.error('Failed to verify phone number. Please try again.');
       });
   };
+  
   const handleShowLoginActivities = () => {
     setShowLoginActivities(true);
   };
