@@ -159,7 +159,7 @@ const Login = () => {
           <div className="text-center">
             <div className="mt-2">
               <h3 className="text-black-800 text-xl font-semibold sm:text-2xl">
-                Welcome!
+                Welcome! Stay Informed, Stay Secure!
               </h3>
             </div>
           </div>
