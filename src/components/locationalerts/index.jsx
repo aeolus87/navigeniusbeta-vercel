@@ -64,9 +64,7 @@ function Emergency() {
         response.data;
 
       if (latestEmergency && latestEmergency.emergency) {
-        const emergencyTimestamp = new Date(
-          latestEmergency.timestamp,
-        ).getTime();
+        const emergencyTimestamp = new Date(latestEmergency.timestamp).getTime();
         if (emergencyTimestamp > lastDismissedEmergencyTimestamp) {
           setEmergency(true);
           setEmergencyDetails(latestEmergency);
@@ -80,10 +78,13 @@ function Emergency() {
       const updatedLocationHistory = await Promise.all(
         locationHistory.slice(0, 10).map(async (location) => {
           const address = await reverseGeocode(location.latitude, location.longitude);
-          return { ...location, address };
+          return { 
+            ...location, 
+            address,
+            storedAt: location.storedAt || location.timestamp // fallback to timestamp if storedAt is not available
+          };
         })
       );
-
       setLocationHistory(updatedLocationHistory);
       setEmergencyHistory(emergencyHistory);
     } catch (error) {
@@ -185,35 +186,42 @@ function Emergency() {
         </div>
       )}
 
-      <div
-        className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${
-          emergency ? 'h-[30rem] lg:h-[25rem]' : 'h-[40rem] lg:h-[35rem]'
-        }`}
-      >
+<div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${
+        emergency ? 'h-[30rem] lg:h-[25rem]' : 'h-[40rem] lg:h-[35rem]'
+      }`}>
         <div className="bg-white shadow-md rounded-lg p-4 overflow-hidden">
-          <h2 className="text-2xl font-bold mb-3 lg:ml-8 ml-10">
-            Location History
-          </h2>
-          {isLocationHistoryLoading ? (
-            <div className="flex justify-center items-center h-full">
-              <Loader />
-            </div>
-          ) : (
-            <ul className="space-y-2 max-h-96 min-h-[24rem] overflow-y-auto pr-8">
-              {locationHistory.map((location, index) => (
-                <li key={index} className="bg-gray-100 p-2 rounded">
-                  <p className="break-words">
-                    Latitude: {location.latitude}, Longitude: {location.longitude}
-                  </p>
-                  <p className="break-words">Address: {location.address}</p>
-                  <p className="text-sm text-gray-600">
-                    {new Date(location.timestamp).toLocaleString()}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+  <h2 className="text-2xl font-bold mb-3 lg:ml-8 ml-10">
+    Location History
+  </h2>
+  {isLocationHistoryLoading ? (
+    <div className="flex justify-center items-center h-full">
+      <Loader />
+    </div>
+  ) : (
+    <ul className="space-y-2 max-h-96 min-h-[24rem] overflow-y-auto pr-8">
+      {locationHistory.map((location, index) => (
+        <li key={index} className="bg-gray-100 p-2 rounded">
+          <p className="break-words">
+            Latitude: {location.latitude}, Longitude: {location.longitude}
+          </p>
+          <p className="break-words">Address: {location.address}</p>
+          <p className="text-sm text-gray-600">
+  Stored at: {new Date(location.timestamp).toLocaleString('en-PH', {
+    timeZone: 'Asia/Manila',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true // This will use AM/PM format
+  })}
+</p>
+        </li>
+      ))}
+    </ul>
+  )}
+</div>
 
         <div className="bg-white shadow-md rounded-lg p-4 overflow-hidden">
           <h2 className="text-2xl font-bold mb-2 lg:ml-8 ml-6">
